@@ -12,9 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('savings_goals', function (Blueprint $table) {
-            $table->decimal('saved_amount', 10, 2)->default(0)->change();
-            $table->string('status')->default('active')->after('deadline');
-            $table->text('description')->nullable()->after('title');
+            if (!Schema::hasColumn('savings_goals', 'saved_amount')) {
+                $table->decimal('saved_amount', 10, 2)->default(0);
+            }
+
+            if (!Schema::hasColumn('savings_goals', 'status')) {
+                $table->string('status')->default('active');
+            }
+
+            if (!Schema::hasColumn('savings_goals', 'description')) {
+                $table->text('description')->nullable();
+            }
         });
     }
 
@@ -24,7 +32,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('savings_goals', function (Blueprint $table) {
-            $table->dropColumn(['status', 'description']);
+            $columns = array_filter(
+                ['saved_amount', 'status', 'description'],
+                fn ($column) => Schema::hasColumn('savings_goals', $column)
+            );
+
+            if ($columns) {
+                $table->dropColumn($columns);
+            }
         });
     }
 };

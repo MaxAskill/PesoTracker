@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+html,
+body,
+#app {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+* {
+  min-width: 0;
+}
+
+/* Autofill Dark Mode Fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #020617 inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 9999s ease-in-out 0s;
+  caret-color: white;
+}
+
+/* Date Input Icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Select Styling */
+select {
+  color-scheme: dark;
+}

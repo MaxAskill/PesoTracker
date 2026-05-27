@@ -45,9 +45,14 @@
 
         <button
           type="submit"
-          class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition"
+          :disabled="verifyLoading"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Verify OTP
+          <span
+            v-if="verifyLoading"
+            class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+          ></span>
+          {{ verifyLoading ? 'Verifying...' : 'Verify OTP' }}
         </button>
       </form>
 
@@ -64,6 +69,10 @@
         @click="handleResendOtp"
         class="mt-4 w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-3 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
+        <span
+          v-if="resendLoading"
+          class="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-300/30 border-t-emerald-300 align-[-2px]"
+        ></span>
         {{ resendLoading ? 'Sending...' : 'Resend OTP' }}
       </button>
     </section>
@@ -81,6 +90,7 @@ const email = ref('')
 const otp = ref('')
 const error = ref('')
 const success = ref('')
+const verifyLoading = ref(false)
 const resendLoading = ref(false)
 
 onMounted(() => {
@@ -92,6 +102,8 @@ onMounted(() => {
 })
 
 const handleVerifyOtp = async () => {
+  if (verifyLoading.value) return
+
   error.value = ''
   success.value = ''
 
@@ -99,6 +111,8 @@ const handleVerifyOtp = async () => {
     error.value = 'Please enter a valid 6-digit OTP.'
     return
   }
+
+  verifyLoading.value = true
 
   try {
     const response = await api.post('/verify-otp', {
@@ -117,10 +131,14 @@ const handleVerifyOtp = async () => {
     error.value =
       err.response?.data?.message ||
       'Invalid or expired OTP.'
+  } finally {
+    verifyLoading.value = false
   }
 }
 
 const handleResendOtp = async () => {
+  if (resendLoading.value) return
+
   error.value = ''
   success.value = ''
 

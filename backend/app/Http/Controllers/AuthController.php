@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\OtpVerificationMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -31,7 +32,19 @@ class AuthController extends Controller
            'otp_expires_at' => Carbon::now()->addMinutes(10),
        ]);
    
-       Mail::to($user->email)->send(new OtpVerificationMail($otp));
+       try {
+           Mail::to($user->email)->send(new OtpVerificationMail($otp));
+       } catch (\Throwable $error) {
+           Log::error('Failed to send OTP email.', [
+               'email' => $user->email,
+               'message' => $error->getMessage(),
+           ]);
+
+           return response()->json([
+               'message' => 'Account created, but the OTP email could not be sent. Please try resending the OTP.',
+               'email' => $user->email,
+           ], 500);
+       }
    
        return response()->json([
            'message' => 'OTP sent successfully.',
@@ -124,7 +137,18 @@ class AuthController extends Controller
             'otp_expires_at' => Carbon::now()->addMinutes(10),
         ]);
 
-        Mail::to($user->email)->send(new OtpVerificationMail($otp));
+        try {
+            Mail::to($user->email)->send(new OtpVerificationMail($otp));
+        } catch (\Throwable $error) {
+            Log::error('Failed to resend OTP email.', [
+                'email' => $user->email,
+                'message' => $error->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'The OTP email could not be sent. Please check the mail settings.',
+            ], 500);
+        }
 
         return response()->json([
             'message' => 'OTP sent successfully.',

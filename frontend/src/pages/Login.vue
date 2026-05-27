@@ -96,8 +96,16 @@
 
             <p v-if="error" class="text-sm font-medium text-red-400">{{ error }}</p>
 
-            <button type="submit" class="magic-button w-full">
-              Login
+            <button
+              type="submit"
+              :disabled="loading"
+              class="magic-button inline-flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <span
+                v-if="loading"
+                class="h-4 w-4 animate-spin rounded-full border-2 border-slate-950/30 border-t-slate-950"
+              ></span>
+              {{ loading ? 'Logging in...' : 'Login' }}
             </button>
           </form>
 
@@ -121,6 +129,7 @@ import api from '../services/api'
 
 const router = useRouter()
 const error = ref('')
+const loading = ref(false)
 
 const form = reactive({
   email: '',
@@ -128,7 +137,10 @@ const form = reactive({
 })
 
 const handleLogin = async () => {
+  if (loading.value) return
+
   error.value = ''
+  loading.value = true
 
   try {
     const response = await api.post('/login', form)
@@ -147,6 +159,8 @@ const handleLogin = async () => {
     error.value =
       err.response?.data?.message ||
       'Invalid email or password.'
+  } finally {
+    loading.value = false
   }
 }
 </script>

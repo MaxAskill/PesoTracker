@@ -128,8 +128,16 @@
 
             <p v-if="error" class="text-sm font-medium text-red-400">{{ error }}</p>
 
-            <button type="submit" class="magic-button w-full">
-              Create Account
+            <button
+              type="submit"
+              :disabled="loading"
+              class="magic-button inline-flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <span
+                v-if="loading"
+                class="h-4 w-4 animate-spin rounded-full border-2 border-slate-950/30 border-t-slate-950"
+              ></span>
+              {{ loading ? 'Creating account...' : 'Create Account' }}
             </button>
           </form>
 
@@ -153,6 +161,7 @@ import api from '../services/api'
 
 const router = useRouter()
 const error = ref('')
+const loading = ref(false)
 
 const form = reactive({
   first_name: '',
@@ -163,12 +172,16 @@ const form = reactive({
 })
 
 const handleRegister = async () => {
+  if (loading.value) return
+
   error.value = ''
 
   if (form.password !== form.password_confirmation) {
     error.value = 'Passwords do not match.'
     return
   }
+
+  loading.value = true
 
   try {
     const payload = {
@@ -189,6 +202,8 @@ const handleRegister = async () => {
     error.value =
       err.response?.data?.message ||
       'Registration failed. Please try again.'
+  } finally {
+    loading.value = false
   }
 }
 </script>

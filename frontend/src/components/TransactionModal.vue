@@ -48,19 +48,25 @@
               <button
                 v-if="!cameraActive"
                 type="button"
+                :disabled="cameraLoading || ocrLoading"
                 @click="startCamera"
-                class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500 hover:text-white"
+                class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Use Camera
+                {{ cameraLoading ? 'Opening camera...' : 'Use Camera' }}
               </button>
 
               <button
                 v-if="cameraActive"
                 type="button"
+                :disabled="ocrLoading"
                 @click="captureReceipt"
-                class="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600"
+                class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Capture Receipt
+                <span
+                  v-if="ocrLoading"
+                  class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+                ></span>
+                {{ ocrLoading ? 'Scanning...' : 'Capture Receipt' }}
               </button>
 
               <button
@@ -182,9 +188,14 @@
 
         <button
           type="submit"
-          class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition"
+          :disabled="saving"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Save Transaction
+          <span
+            v-if="saving"
+            class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+          ></span>
+          {{ saving ? 'Saving...' : 'Save Transaction' }}
         </button>
       </form>
     </div>
@@ -197,6 +208,8 @@ import api from '../services/api'
 const ocrLoading = ref(false)
 const cameraActive = ref(false)
 const cameraError = ref('')
+const cameraLoading = ref(false)
+const saving = ref(false)
 const cameraVideo = ref(null)
 const cameraCanvas = ref(null)
 let cameraStream = null
@@ -252,7 +265,10 @@ const currentType = computed(() => {
 })
 
 const submitTransaction = async () => {
+  if (saving.value) return
+
   error.value = ''
+  saving.value = true
 
   try {
 
@@ -284,6 +300,8 @@ const submitTransaction = async () => {
     error.value =
       err.response?.data?.message ||
       'Failed to save transaction.'
+  } finally {
+    saving.value = false
   }
 }
 
@@ -303,10 +321,14 @@ const handleReceiptUpload = async (event) => {
 }
 
 const startCamera = async () => {
+  if (cameraLoading.value || ocrLoading.value) return
+
   cameraError.value = ''
+  cameraLoading.value = true
 
   if (!navigator.mediaDevices?.getUserMedia) {
     cameraError.value = 'Camera access is not supported in this browser.'
+    cameraLoading.value = false
     return
   }
 
@@ -326,6 +348,8 @@ const startCamera = async () => {
     }
   } catch (err) {
     cameraError.value = 'Could not open the camera. Please allow camera access and try again.'
+  } finally {
+    cameraLoading.value = false
   }
 }
 
@@ -343,6 +367,8 @@ const stopCamera = () => {
 }
 
 const captureReceipt = async () => {
+  if (ocrLoading.value) return
+
   cameraError.value = ''
 
   const video = cameraVideo.value
@@ -380,6 +406,8 @@ const captureReceipt = async () => {
 }
 
 const scanReceipt = async (file) => {
+  if (ocrLoading.value) return
+
   const formData = new FormData()
 
   formData.append('receipt', file)

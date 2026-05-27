@@ -41,6 +41,7 @@ LOG_LEVEL=info
 
 DB_CONNECTION=pgsql
 DB_URL=postgresql://user:password@host:5432/database
+DB_SSLMODE=require
 
 SESSION_DRIVER=database
 QUEUE_CONNECTION=database
@@ -68,6 +69,14 @@ Use PostgreSQL if possible:
 DB_CONNECTION=pgsql
 DB_URL=postgresql://...
 ```
+
+Do not paste the connection string into `DB_DATABASE`. If Laravel shows an error like this:
+
+```text
+Host: 127.0.0.1, Port: 5432, Database: your-postgres-connection-string
+```
+
+it means the connection string is in the wrong variable. Put the full connection string in `DB_URL`, then remove any incorrect `DB_DATABASE`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`, or `DB_PASSWORD` values unless your database provider specifically tells you to use separate fields.
 
 ## 5. Update Cloudflare Pages
 

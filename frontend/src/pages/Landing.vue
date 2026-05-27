@@ -1,22 +1,22 @@
 <template>
   <main class="magic-bg min-h-screen overflow-hidden text-white">
-    <header class="relative z-50 px-6 py-6">
-      <div class="mx-auto flex max-w-7xl items-center justify-between">
-        <RouterLink to="/" class="flex items-center gap-3">
-          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400 text-2xl font-black text-slate-950 shadow-lg shadow-emerald-500/25">
+    <header class="relative z-50 px-4 py-5 sm:px-6">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-3">
+        <RouterLink to="/" class="flex min-w-0 items-center gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-400 text-xl font-black text-slate-950 shadow-lg shadow-emerald-500/25 sm:h-11 sm:w-11 sm:text-2xl">
             ₱
           </div>
-          <div>
-            <h1 class="text-xl font-black">Peso<span class="text-emerald-300">Tracker</span></h1>
-            <p class="text-xs text-slate-400">Finance Assistant</p>
+          <div class="min-w-0">
+            <h1 class="truncate text-lg font-black sm:text-xl">Peso<span class="text-emerald-300">Tracker</span></h1>
+            <p class="hidden text-xs text-slate-400 sm:block">Finance Assistant</p>
           </div>
         </RouterLink>
 
-        <div class="flex items-center gap-2">
-          <RouterLink to="/login" class="rounded-full bg-white/[0.06] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-emerald-400/10 hover:text-emerald-100">
+        <div class="flex shrink-0 items-center gap-2">
+          <RouterLink to="/login" class="rounded-full bg-white/[0.06] px-3 py-2 text-xs font-semibold text-slate-200 transition hover:bg-emerald-400/10 hover:text-emerald-100 sm:px-4 sm:text-sm">
             Login
           </RouterLink>
-          <RouterLink to="/register" class="magic-button px-5 py-2.5 text-sm">
+          <RouterLink to="/register" class="rounded-full bg-emerald-400 px-3 py-2 text-xs font-semibold text-slate-950 shadow-md shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:bg-emerald-300 sm:px-4 sm:text-sm">
             Get Started
           </RouterLink>
         </div>

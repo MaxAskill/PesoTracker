@@ -15,7 +15,7 @@ Use Cloudflare Pages for the Vue frontend only. The Laravel API should be deploy
 Add this in Cloudflare Pages under Settings > Environment variables:
 
 ```env
-VITE_API_BASE_URL=https://your-backend-domain.com/api
+VITE_API_BASE_URL=https://pesotracker.onrender.com/api
 ```
 
 Replace the value with the deployed Laravel API URL. Do not use `127.0.0.1`, `localhost`, or a LAN IP such as `192.168.x.x` for production because visitors' browsers cannot reach your local machine.

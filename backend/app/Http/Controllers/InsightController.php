@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use App\Models\Budget;
 use App\Models\SavingsGoal;
+use App\Support\DateExpressions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -59,7 +60,7 @@ class InsightController extends Controller
             $spent = Transaction::where('user_id', $userId)
                 ->where('type', 'expense')
                 ->where('category', $budget->category)
-                ->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$budget->month])
+                ->whereRaw(DateExpressions::yearMonth('transaction_date').' = ?', [$budget->month])
                 ->sum('amount');
 
             if ($budget->amount > 0) {

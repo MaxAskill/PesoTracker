@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use App\Support\DateExpressions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -11,6 +12,7 @@ class AnalyticsController extends Controller
     public function summary(Request $request)
     {
         $userId = $request->user()->id;
+        $monthExpression = DateExpressions::yearMonth('transaction_date');
 
         $expenseByCategory = Transaction::where('user_id', $userId)
             ->where('type', 'expense')
@@ -21,11 +23,12 @@ class AnalyticsController extends Controller
 
         $monthlySummary = Transaction::where('user_id', $userId)
             ->select(
-                DB::raw("DATE_FORMAT(transaction_date, '%Y-%m') as month"),
+                DB::raw("{$monthExpression} as month"),
                 'type',
                 DB::raw('SUM(amount) as total')
             )
-            ->groupBy('month', 'type')
+            ->groupByRaw($monthExpression)
+            ->groupBy('type')
             ->orderBy('month')
             ->get();
 

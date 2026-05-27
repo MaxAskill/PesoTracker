@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use App\Support\DateExpressions;
 use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\Models\Budget;
@@ -53,7 +54,7 @@ class TransactionController extends Controller
                 $spent = Transaction::where('user_id', $request->user()->id)
                     ->where('type', 'expense')
                     ->where('category', $transaction->category)
-                    ->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$month])
+                    ->whereRaw(DateExpressions::yearMonth('transaction_date').' = ?', [$month])
                     ->sum('amount');
         
                 $usage = round(($spent / $budget->amount) * 100);

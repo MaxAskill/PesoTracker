@@ -29,6 +29,8 @@ case "${DB_DATABASE:-}" in
 esac
 
 if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
+  echo "Running migrations on DB_CONNECTION=${DB_CONNECTION:-unset}"
+  php artisan tinker --execute="dump(config('database.default'), config('database.connections.'.config('database.default').'.host'), config('database.connections.'.config('database.default').'.database'));" || true
   php artisan migrate --force
 fi
 

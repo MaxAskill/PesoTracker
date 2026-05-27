@@ -13,6 +13,21 @@ php artisan config:clear
 php artisan route:clear
 php artisan view:clear
 
+if [ "${DB_CONNECTION:-}" = "pgsql" ] && [ -z "${DB_URL:-}" ]; then
+  echo "ERROR: DB_CONNECTION is pgsql, but DB_URL is empty."
+  echo "Add your full PostgreSQL connection string to the Render environment variable named DB_URL."
+  echo "Do not put the connection string in DB_DATABASE."
+  exit 1
+fi
+
+case "${DB_DATABASE:-}" in
+  postgres://*|postgresql://*)
+    echo "ERROR: DB_DATABASE contains a PostgreSQL connection string."
+    echo "Move that value to DB_URL and remove DB_DATABASE from Render environment variables."
+    exit 1
+    ;;
+esac
+
 if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
   php artisan migrate --force
 fi

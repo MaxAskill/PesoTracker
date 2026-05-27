@@ -48,7 +48,7 @@
           <div class="mb-4">
             <div class="flex justify-between text-sm mb-2">
               <span class="text-slate-400">Budget Limit</span>
-              <span>₱{{ budget.amount }}</span>
+              <span>{{ formatPeso(budget.amount) }}</span>
             </div>
 
             <div class="h-3 bg-slate-800 rounded-full overflow-hidden">
@@ -62,7 +62,7 @@
           <div class="flex justify-between text-sm mt-4">
             <span class="text-slate-400">Remaining</span>
             <span class="text-emerald-400 font-semibold">
-              ₱{{ budget.amount }}
+              {{ formatPeso(budget.amount) }}
             </span>
           </div>
         </div>
@@ -175,6 +175,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
 import Sidebar from '../components/Sidebar.vue'
+import { formatPeso } from '../utils/currency'
 
 const router = useRouter()
 

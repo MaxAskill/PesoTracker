@@ -1,10 +1,10 @@
 <template>
-  <main class="min-h-screen bg-slate-950 text-white flex">
+  <main class="flex min-h-screen bg-[#020617] text-white">
     <!-- Sidebar -->
     <Sidebar />
 
     <!-- Main Content -->
-    <section class="flex-1 p-6 pt-24 lg:pt-6 overflow-y-auto">
+    <section class="magic-bg flex-1 overflow-y-auto p-6 pt-24 lg:pt-6">
       <!-- Top Bar -->
       <header class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5 mb-8">
         <div>
@@ -17,13 +17,13 @@
             <input
               type="text"
               placeholder="Search transaction..."
-              class="min-w-0 flex-1 xl:w-80 bg-slate-900 border border-slate-800 rounded-2xl px-5 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              class="min-w-0 flex-1 rounded-2xl border border-white/10 bg-slate-950/70 px-5 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 xl:w-80"
             />
 
             <div class="relative">
               <button
                 @click="showNotifications = !showNotifications"
-                class="relative bg-slate-900 border border-slate-800 w-12 h-12 rounded-2xl"
+                class="relative h-12 w-12 rounded-2xl border border-white/10 bg-slate-950/70 transition hover:border-emerald-400/40"
               >
                 🔔
             
@@ -37,7 +37,7 @@
             
               <div
                 v-if="showNotifications"
-                class="absolute right-0 mt-3 w-96 max-w-[90vw] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl z-50 overflow-hidden"
+                class="finance-panel absolute right-0 z-50 mt-3 w-96 max-w-[90vw] overflow-hidden"
               >
                 <div class="p-5 border-b border-slate-800 flex items-center justify-between">
                   <h3 class="font-bold text-white">Notifications</h3>
@@ -116,29 +116,29 @@
       <!-- Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
         
-        <div class="min-h-40 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+        <div class="finance-panel flex min-h-40 flex-col justify-between p-6">
           <p class="text-slate-400 text-sm">Current Balance</p>
-          <h3 class="text-3xl font-bold mt-3">₱{{ dashboard.balance }}</h3>
+          <h3 class="text-3xl font-bold mt-3">{{ formatPeso(dashboard.balance) }}</h3>
           <p class="text-emerald-400 text-sm mt-3">Available funds</p>
         </div>
 
-        <div class="min-h-40 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+        <div class="finance-panel flex min-h-40 flex-col justify-between p-6">
           <p class="text-slate-400 text-sm">Total Income</p>
           <h3 class="text-3xl font-bold mt-3 text-emerald-400">
-            ₱{{ dashboard.total_income }}
+            {{ formatPeso(dashboard.total_income) }}
           </h3>
           <p class="text-slate-500 text-sm mt-3">All income recorded</p>
         </div>
 
-        <div class="min-h-40 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+        <div class="finance-panel flex min-h-40 flex-col justify-between p-6">
           <p class="text-slate-400 text-sm">Total Expenses</p>
           <h3 class="text-3xl font-bold mt-3 text-red-400">
-            ₱{{ dashboard.total_expenses }}
+            {{ formatPeso(dashboard.total_expenses) }}
           </h3>
           <p class="text-slate-500 text-sm mt-3">All expenses recorded</p>
         </div>
 
-        <div class="min-h-40 bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+        <div class="finance-panel flex min-h-40 flex-col justify-between p-6">
           <p class="text-slate-400 text-sm">Savings Score</p>
           <h3 class="text-3xl font-bold mt-3 text-amber-400">85%</h3>
           <p class="text-slate-500 text-sm mt-3">Healthy spending</p>
@@ -149,7 +149,7 @@
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
 
         <!-- Expense by Category -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 min-h-[380px]">
+        <div class="finance-panel min-h-[380px] p-6">
           <h3 class="text-xl font-bold mb-6">Expenses by Category</h3>
         
             <div
@@ -167,7 +167,7 @@
         </div>
 
         <!-- Monthly Income vs Expenses -->
-        <div class="xl:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 min-h-[380px]">
+        <div class="finance-panel min-h-[380px] p-6 xl:col-span-2">
           <h3 class="text-xl font-bold mb-6">Monthly Income vs Expenses</h3>
         
           <div v-if="analytics.monthly_summary.length">
@@ -182,7 +182,7 @@
 
       <!-- AI Insights and Health -->
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6 items-stretch">
-        <div class="xl:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        <div class="finance-panel p-6 xl:col-span-2">
           <div class="flex items-center justify-between mb-6">
             <div>
               <p class="text-emerald-400 font-semibold text-sm">AI Assistant</p>
@@ -198,7 +198,7 @@
             <div
               v-for="insight in insights"
               :key="insight.title"
-              class="min-h-44 bg-slate-950 border border-slate-800 rounded-2xl p-5"
+              class="finance-surface min-h-44 p-5"
             >
               <div
                 class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
@@ -222,7 +222,7 @@
             </div>
           </div>
         </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        <div class="finance-panel p-6">
           <div class="flex items-center justify-between mb-6">
             <div>
               <p class="text-emerald-400 font-semibold text-sm">
@@ -274,7 +274,7 @@
             </div>
           </div>
         
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5">
+          <div class="finance-surface p-5">
             <p class="text-slate-400 text-sm leading-relaxed">
               {{ financialHealth.recommendation }}
             </p>
@@ -284,7 +284,7 @@
       </div>
 
       <!-- Recent Transactions -->
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+      <div class="finance-panel overflow-hidden">
         <div class="p-6 border-b border-slate-800 flex justify-between items-center">
           <h3 class="text-xl font-bold">Recent Transactions</h3>
           <router-link to="/transactions" class="text-emerald-400 text-sm font-semibold">
@@ -309,7 +309,7 @@
               class="font-bold"
               :class="transaction.type === 'income' ? 'text-emerald-400' : 'text-red-400'"
             >
-              {{ transaction.type === 'income' ? '+' : '-' }}₱{{ transaction.amount }}
+              {{ transaction.type === 'income' ? '+' : '-' }}{{ formatPeso(transaction.amount) }}
             </p>
 
             <span
@@ -353,7 +353,7 @@
   <!-- Chatbot -->
   <div
     v-if="showAssistant"
-    class="fixed bottom-24 left-4 right-4 h-[min(600px,calc(100vh-8rem))] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden z-50 flex flex-col sm:bottom-28 sm:left-auto sm:right-6 sm:w-[380px]"
+    class="finance-panel fixed bottom-24 left-4 right-4 z-50 flex h-[min(600px,calc(100vh-8rem))] flex-col overflow-hidden sm:bottom-28 sm:left-auto sm:right-6 sm:w-[380px]"
   >
   
     <!-- Header -->
@@ -380,7 +380,7 @@
     <div ref="chatBody" class="flex-1 overflow-y-auto p-5">
     
       <!-- Greeting -->
-      <div class="bg-slate-800 rounded-2xl p-4 mb-4">
+      <div class="finance-surface mb-4 p-4">
         <p class="text-sm text-slate-300 leading-relaxed">
           Hi! I am your PesoTracker finance assistant.
           Ask me about your spending, savings,
@@ -459,6 +459,7 @@ import TransactionModal from '../components/TransactionModal.vue'
 import ExpenseCategoryChart from '../components/ExpenseCategoryChart.vue'
 import MonthlySummaryChart from '../components/MonthlySummaryChart.vue'
 import Sidebar from '../components/Sidebar.vue'
+import { formatPeso } from '../utils/currency'
 
 const insights = ref([])
 

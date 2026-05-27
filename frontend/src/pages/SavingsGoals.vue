@@ -61,14 +61,14 @@
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
               <p class="text-slate-500 text-sm">Saved</p>
               <p class="text-emerald-400 font-bold mt-1">
-                ₱{{ goal.saved_amount }}
+                {{ formatPeso(goal.saved_amount) }}
               </p>
             </div>
 
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
               <p class="text-slate-500 text-sm">Target</p>
               <p class="font-bold mt-1">
-                ₱{{ goal.target_amount }}
+                {{ formatPeso(goal.target_amount) }}
               </p>
             </div>
           </div>
@@ -190,6 +190,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
 import Sidebar from '../components/Sidebar.vue'
+import { formatPeso } from '../utils/currency'
 
 const router = useRouter()
 

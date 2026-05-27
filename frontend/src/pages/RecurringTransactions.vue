@@ -71,7 +71,7 @@
             <p class="text-slate-500 text-sm">Amount</p>
 
             <p class="text-3xl font-bold mt-2">
-              ₱{{ transaction.amount }}
+              {{ formatPeso(transaction.amount) }}
             </p>
           </div>
 
@@ -219,6 +219,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import Sidebar from '../components/Sidebar.vue'
 import api from '../services/api'
+import { formatPeso } from '../utils/currency'
 
 const recurringTransactions = ref([])
 const showModal = ref(false)

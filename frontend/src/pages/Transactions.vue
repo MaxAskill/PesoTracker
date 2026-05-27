@@ -110,8 +110,7 @@
                   : 'text-red-400'
               "
             >
-              {{ transaction.type === 'income' ? '+' : '-' }}
-              ₱{{ transaction.amount }}
+              {{ transaction.type === 'income' ? '+' : '-' }}{{ formatPeso(transaction.amount) }}
             </span>
 
             <span class="text-slate-400">
@@ -200,7 +199,7 @@
                     : 'text-red-400'
                 "
               >
-                ₱{{ Number(transaction.amount).toLocaleString() }}
+                {{ formatPeso(transaction.amount) }}
               </h4>
             </div>
       
@@ -244,6 +243,7 @@ import { useRouter } from 'vue-router'
 import api from '../services/api'
 import TransactionModal from '../components/TransactionModal.vue'
 import Sidebar from '../components/Sidebar.vue'
+import { formatPeso } from '../utils/currency'
 
 const showEditModal = ref(false)
 const selectedTransaction = ref(null)

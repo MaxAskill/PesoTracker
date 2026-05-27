@@ -22,7 +22,15 @@ Replace the value with the deployed Laravel API URL. Do not use `127.0.0.1`, `lo
 
 ## Vue Router Fallback
 
-`public/_redirects` is included so direct visits to routes like `/login`, `/register`, and `/dashboard` load the Vue app instead of returning a 404.
+This project uses `wrangler.jsonc` with:
+
+```json
+"assets": {
+  "not_found_handling": "single-page-application"
+}
+```
+
+That setting makes direct visits to routes like `/login`, `/register`, and `/dashboard` load the Vue app instead of returning a 404.
 
 ## Direct Upload Option
 

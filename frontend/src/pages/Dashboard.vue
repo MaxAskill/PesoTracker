@@ -10,6 +10,12 @@
         <div>
           <p class="text-slate-400">Welcome back,</p>
           <h2 class="text-3xl font-bold">{{ displayName }}</h2>
+          <p v-if="isPrimingDashboard" class="mt-2 text-sm text-emerald-300">
+            Waking up your dashboard...
+          </p>
+          <p v-else-if="isRefreshingDashboard" class="mt-2 text-sm text-slate-500">
+            Refreshing latest data...
+          </p>
         </div>
 
         <div class="flex w-full flex-col gap-3 xl:w-auto xl:items-end">
@@ -116,13 +122,13 @@
       <!-- Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
         
-        <div class="finance-panel flex min-h-40 flex-col justify-between p-6">
+        <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
           <p class="text-slate-400 text-sm">Current Balance</p>
           <h3 class="text-3xl font-bold mt-3">{{ formatPeso(dashboard.balance) }}</h3>
           <p class="text-emerald-400 text-sm mt-3">Available funds</p>
         </div>
 
-        <div class="finance-panel flex min-h-40 flex-col justify-between p-6">
+        <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
           <p class="text-slate-400 text-sm">Total Income</p>
           <h3 class="text-3xl font-bold mt-3 text-emerald-400">
             {{ formatPeso(dashboard.total_income) }}
@@ -130,7 +136,7 @@
           <p class="text-slate-500 text-sm mt-3">All income recorded</p>
         </div>
 
-        <div class="finance-panel flex min-h-40 flex-col justify-between p-6">
+        <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
           <p class="text-slate-400 text-sm">Total Expenses</p>
           <h3 class="text-3xl font-bold mt-3 text-red-400">
             {{ formatPeso(dashboard.total_expenses) }}
@@ -138,7 +144,7 @@
           <p class="text-slate-500 text-sm mt-3">All expenses recorded</p>
         </div>
 
-        <div class="finance-panel flex min-h-40 flex-col justify-between p-6">
+        <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
           <p class="text-slate-400 text-sm">Savings Score</p>
           <h3 class="text-3xl font-bold mt-3 text-amber-400">85%</h3>
           <p class="text-slate-500 text-sm mt-3">Healthy spending</p>
@@ -149,7 +155,7 @@
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
 
         <!-- Expense by Category -->
-        <div class="finance-panel min-h-[380px] p-6">
+        <div class="finance-panel min-h-[380px] p-6" :class="loadingClass">
           <h3 class="text-xl font-bold mb-6">Expenses by Category</h3>
         
             <div
@@ -167,7 +173,7 @@
         </div>
 
         <!-- Monthly Income vs Expenses -->
-        <div class="finance-panel min-h-[380px] p-6 xl:col-span-2">
+        <div class="finance-panel min-h-[380px] p-6 xl:col-span-2" :class="loadingClass">
           <h3 class="text-xl font-bold mb-6">Monthly Income vs Expenses</h3>
         
           <div v-if="analytics.monthly_summary.length">
@@ -182,7 +188,7 @@
 
       <!-- AI Insights and Health -->
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6 items-stretch">
-        <div class="finance-panel p-6 xl:col-span-2">
+        <div class="finance-panel p-6 xl:col-span-2" :class="loadingClass">
           <div class="flex items-center justify-between mb-6">
             <div>
               <p class="text-emerald-400 font-semibold text-sm">AI Assistant</p>
@@ -222,7 +228,7 @@
             </div>
           </div>
         </div>
-        <div class="finance-panel p-6">
+        <div class="finance-panel p-6" :class="loadingClass">
           <div class="flex items-center justify-between mb-6">
             <div>
               <p class="text-emerald-400 font-semibold text-sm">
@@ -284,7 +290,7 @@
       </div>
 
       <!-- Recent Transactions -->
-      <div class="finance-panel overflow-hidden">
+      <div class="finance-panel overflow-hidden" :class="loadingClass">
         <div class="p-6 border-b border-slate-800 flex justify-between items-center">
           <h3 class="text-xl font-bold">Recent Transactions</h3>
           <router-link to="/transactions" class="text-emerald-400 text-sm font-semibold">
@@ -460,6 +466,11 @@ import ExpenseCategoryChart from '../components/ExpenseCategoryChart.vue'
 import MonthlySummaryChart from '../components/MonthlySummaryChart.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
+import {
+  loadDashboardSnapshot,
+  preloadAuthenticatedData,
+  saveDashboardSnapshot
+} from '../services/preload'
 
 const insights = ref([])
 
@@ -555,6 +566,47 @@ const dashboard = reactive({
   balance: 0,
   recent_transactions: []
 })
+
+const dashboardLoaded = ref(false)
+const hasCachedDashboard = ref(false)
+const isRefreshingDashboard = ref(false)
+const isPrimingDashboard = computed(() => !dashboardLoaded.value && !hasCachedDashboard.value)
+const loadingClass = computed(() => {
+  return isRefreshingDashboard.value ? 'opacity-80 transition-opacity' : ''
+})
+
+const applyDashboardSnapshot = (snapshot) => {
+  if (!snapshot) return
+
+  if (snapshot.dashboard) {
+    dashboard.total_income = snapshot.dashboard.total_income ?? 0
+    dashboard.total_expenses = snapshot.dashboard.total_expenses ?? 0
+    dashboard.balance = snapshot.dashboard.balance ?? 0
+    dashboard.recent_transactions = snapshot.dashboard.recent_transactions ?? []
+  }
+
+  if (snapshot.analytics) {
+    analytics.expense_by_category = snapshot.analytics.expense_by_category ?? []
+    analytics.monthly_summary = snapshot.analytics.monthly_summary ?? []
+    analytics.highest_expense_category = snapshot.analytics.highest_expense_category ?? null
+  }
+
+  if (snapshot.insights) {
+    insights.value = snapshot.insights
+  }
+
+  if (snapshot.financialHealth) {
+    financialHealth.value = snapshot.financialHealth
+  }
+
+  if (snapshot.notifications) {
+    notifications.value = snapshot.notifications
+  }
+
+  if (snapshot.unreadCount !== null && snapshot.unreadCount !== undefined) {
+    unreadCount.value = snapshot.unreadCount
+  }
+}
 
 const getDashboard = async () => {
   try {
@@ -685,15 +737,30 @@ const sendAssistantMessage = async () => {
 }
 
 const refreshDashboard = () => {
-  getDashboard()
-  getAnalytics()
-  getInsights()
-  getNotifications()
-  getUnreadCount()
-  getFinancialHealth()
+  isRefreshingDashboard.value = true
+
+  preloadAuthenticatedData()
+    .then((snapshot) => {
+      if (snapshot) {
+        applyDashboardSnapshot(snapshot)
+        saveDashboardSnapshot(snapshot)
+      }
+    })
+    .finally(() => {
+      dashboardLoaded.value = true
+      isRefreshingDashboard.value = false
+    })
 }
 
 onMounted(() => {
+  const snapshot = loadDashboardSnapshot()
+
+  if (snapshot) {
+    hasCachedDashboard.value = true
+    dashboardLoaded.value = true
+    applyDashboardSnapshot(snapshot)
+  }
+
   refreshDashboard()
 
   refreshInterval = setInterval(() => {

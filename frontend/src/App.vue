@@ -1,5 +1,11 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { onMounted } from 'vue'
+import { preloadAuthenticatedData, warmBackend } from './services/preload'
+
+onMounted(() => {
+  warmBackend()
+  preloadAuthenticatedData()
+})
 </script>
 
 <template>

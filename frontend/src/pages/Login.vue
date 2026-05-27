@@ -126,6 +126,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
+import { preloadAuthenticatedData } from '../services/preload'
 
 const router = useRouter()
 const error = ref('')
@@ -148,6 +149,7 @@ const handleLogin = async () => {
     localStorage.setItem('token', response.data.token)
     localStorage.setItem('user', JSON.stringify(response.data.user))
 
+    preloadAuthenticatedData()
     router.push('/dashboard')
   } catch (err) {
     if (err.response?.data?.code === 'email_not_verified') {

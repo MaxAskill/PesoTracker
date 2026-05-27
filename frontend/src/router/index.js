@@ -13,66 +13,66 @@ import Landing from '../pages/Landing.vue'
 import Profile from '../pages/Profile.vue'
 
 const routes = [
- { path: '/', component: Landing },
+ { path: '/', component: Landing, meta: { keepAlive: false } },
 
   {
     path: '/login',
     component: Login,
-    meta: { guest: true }
+    meta: { guest: true, keepAlive: false }
   },
 
   {
     path: '/register',
     component: Register,
-    meta: { guest: true }
+    meta: { guest: true, keepAlive: false }
   },
 
   {
     path: '/verify-otp',
     component: VerifyOtp,
-    meta: { guest: true }
+    meta: { guest: true, keepAlive: false }
   },
 
   {
     path: '/dashboard',
     component: Dashboard,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, keepAlive: true }
   },
 
   {
     path: '/transactions',
     component: Transactions,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, keepAlive: true }
   },
 
   {
     path: '/budgets',
     component: Budgets,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, keepAlive: true }
   },
 
   {
     path: '/savings-goals',
     component: SavingsGoals,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, keepAlive: true }
   },
 
   {
     path: '/reports',
     component: Reports,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, keepAlive: true }
   },
 
   {
     path: "/recurring-transactions",
     component: RecurringTransactions,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, keepAlive: false }
   },
   
   {
     path: '/profile',
     component: Profile,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, keepAlive: false }
   }
 ]
 

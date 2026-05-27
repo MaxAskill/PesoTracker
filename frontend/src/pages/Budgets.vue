@@ -176,6 +176,7 @@ import { useRouter } from 'vue-router'
 import api from '../services/api'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
+import { loadDisplayCache, saveDisplayCache } from '../services/preload'
 
 const router = useRouter()
 
@@ -206,6 +207,7 @@ const getBudgets = async () => {
     const response = await api.get('/budgets')
 
     budgets.value = response.data
+    saveDisplayCache('budgets', response.data)
   } catch (error) {
     console.error(error)
   }
@@ -236,12 +238,19 @@ const deleteBudget = async (id) => {
     budgets.value = budgets.value.filter(
       budget => budget.id !== id
     )
+    saveDisplayCache('budgets', budgets.value)
   } catch (error) {
     console.error(error)
   }
 }
 
 onMounted(() => {
+  const cachedBudgets = loadDisplayCache('budgets')
+
+  if (cachedBudgets) {
+    budgets.value = cachedBudgets
+  }
+
   getBudgets()
 })
 </script>

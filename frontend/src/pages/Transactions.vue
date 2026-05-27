@@ -244,6 +244,7 @@ import api from '../services/api'
 import TransactionModal from '../components/TransactionModal.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
+import { loadDisplayCache, saveDisplayCache } from '../services/preload'
 
 const showEditModal = ref(false)
 const selectedTransaction = ref(null)
@@ -265,6 +266,7 @@ const getTransactions = async () => {
     const response = await api.get('/transactions')
 
     transactions.value = response.data
+    saveDisplayCache('transactions', response.data)
   } catch (error) {
     console.error(error)
   }
@@ -279,6 +281,7 @@ const deleteTransaction = async (id) => {
     transactions.value = transactions.value.filter(
       transaction => transaction.id !== id
     )
+    saveDisplayCache('transactions', transactions.value)
   } catch (error) {
     console.error(error)
   }
@@ -373,6 +376,12 @@ const filteredTransactions = computed(() => {
 })
 
 onMounted(() => {
+  const cachedTransactions = loadDisplayCache('transactions')
+
+  if (cachedTransactions) {
+    transactions.value = cachedTransactions
+  }
+
   getTransactions()
 })
 </script>

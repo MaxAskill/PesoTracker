@@ -191,6 +191,7 @@ import { useRouter } from 'vue-router'
 import api from '../services/api'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
+import { loadDisplayCache, saveDisplayCache } from '../services/preload'
 
 const router = useRouter()
 
@@ -218,6 +219,7 @@ const getGoals = async () => {
   try {
     const response = await api.get('/savings-goals')
     goals.value = response.data
+    saveDisplayCache('savings-goals', response.data)
   } catch (error) {
     console.error(error)
   }
@@ -263,12 +265,19 @@ const deleteGoal = async (id) => {
   try {
     await api.delete(`/savings-goals/${id}`)
     goals.value = goals.value.filter(goal => goal.id !== id)
+    saveDisplayCache('savings-goals', goals.value)
   } catch (error) {
     console.error(error)
   }
 }
 
 onMounted(() => {
+  const cachedGoals = loadDisplayCache('savings-goals')
+
+  if (cachedGoals) {
+    goals.value = cachedGoals
+  }
+
   getGoals()
 })
 </script>

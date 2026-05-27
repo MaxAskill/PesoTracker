@@ -81,6 +81,8 @@ class AuthController extends Controller
             'otp_code' => null,
             'otp_expires_at' => null,
         ]);
+
+        $user->refresh();
     
         $token = $user->createToken('auth_token')->plainTextToken;
     

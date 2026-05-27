@@ -57,6 +57,15 @@
           Register again
         </router-link>
       </p>
+
+      <button
+        type="button"
+        :disabled="resendLoading"
+        @click="handleResendOtp"
+        class="mt-4 w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-3 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {{ resendLoading ? 'Sending...' : 'Resend OTP' }}
+      </button>
     </section>
   </main>
 </template>
@@ -72,6 +81,7 @@ const email = ref('')
 const otp = ref('')
 const error = ref('')
 const success = ref('')
+const resendLoading = ref(false)
 
 onMounted(() => {
   email.value = localStorage.getItem('pending_email')
@@ -107,6 +117,32 @@ const handleVerifyOtp = async () => {
     error.value =
       err.response?.data?.message ||
       'Invalid or expired OTP.'
+  }
+}
+
+const handleResendOtp = async () => {
+  error.value = ''
+  success.value = ''
+
+  if (!email.value) {
+    error.value = 'Email is missing. Please register again.'
+    return
+  }
+
+  resendLoading.value = true
+
+  try {
+    await api.post('/resend-otp', {
+      email: email.value
+    })
+
+    success.value = 'A new OTP has been sent.'
+  } catch (err) {
+    error.value =
+      err.response?.data?.message ||
+      'Failed to resend OTP.'
+  } finally {
+    resendLoading.value = false
   }
 }
 </script>

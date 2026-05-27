@@ -85,11 +85,50 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if (!$user->email_verified_at) {
+            return response()->json([
+                'message' => 'Please verify your email before logging in.',
+                'code' => 'email_not_verified',
+                'email' => $user->email,
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'token' => $token,
             'user' => $user
+        ]);
+    }
+
+    public function resendOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        if ($user->email_verified_at) {
+            return response()->json(['message' => 'Email is already verified.'], 422);
+        }
+
+        $otp = rand(100000, 999999);
+
+        $user->update([
+            'otp_code' => $otp,
+            'otp_expires_at' => Carbon::now()->addMinutes(10),
+        ]);
+
+        Mail::to($user->email)->send(new OtpVerificationMail($otp));
+
+        return response()->json([
+            'message' => 'OTP sent successfully.',
+            'email' => $user->email,
         ]);
     }
 

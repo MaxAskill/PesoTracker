@@ -138,7 +138,15 @@ const handleLogin = async () => {
 
     router.push('/dashboard')
   } catch (err) {
-    error.value = 'Invalid email or password.'
+    if (err.response?.data?.code === 'email_not_verified') {
+      localStorage.setItem('pending_email', err.response.data.email || form.email)
+      router.push('/verify-otp')
+      return
+    }
+
+    error.value =
+      err.response?.data?.message ||
+      'Invalid email or password.'
   }
 }
 </script>

@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\OtpEmailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Mail\OtpVerificationMail;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AuthController extends Controller
 {
+   public function __construct(private OtpEmailService $otpEmailService)
+   {
+   }
+
    public function register(Request $request)
    {
        $request->validate([
@@ -33,7 +36,7 @@ class AuthController extends Controller
        ]);
    
        try {
-           Mail::to($user->email)->send(new OtpVerificationMail($otp));
+           $this->otpEmailService->send($user->email, (string) $otp);
        } catch (\Throwable $error) {
            Log::error('Failed to send OTP email.', [
                'email' => $user->email,
@@ -138,7 +141,7 @@ class AuthController extends Controller
         ]);
 
         try {
-            Mail::to($user->email)->send(new OtpVerificationMail($otp));
+            $this->otpEmailService->send($user->email, (string) $otp);
         } catch (\Throwable $error) {
             Log::error('Failed to resend OTP email.', [
                 'email' => $user->email,

@@ -50,6 +50,12 @@ FILESYSTEM_DISK=public
 
 RUN_MIGRATIONS=true
 TESSERACT_PATH=/usr/bin/tesseract
+
+BREVO_API_KEY=your-brevo-api-key
+BREVO_SENDER_EMAIL=your-verified-brevo-sender@example.com
+BREVO_SENDER_NAME=PesoTracker
+MAIL_FROM_ADDRESS=your-verified-brevo-sender@example.com
+MAIL_FROM_NAME=PesoTracker
 ```
 
 Generate `APP_KEY` locally:
@@ -88,7 +94,13 @@ VITE_API_BASE_URL=https://your-render-service.onrender.com/api
 
 Redeploy the frontend after changing this value.
 
-## 6. Health Check
+## 6. Email OTP
+
+Render Free blocks outbound SMTP ports, so OTP email uses the Brevo HTTP API instead of Gmail SMTP.
+
+In Brevo, make sure your sender email is verified, then add the `BREVO_API_KEY` and `BREVO_SENDER_EMAIL` values above in Render. Do not use Gmail SMTP variables on Render Free for OTP sending.
+
+## 7. Health Check
 
 After deployment, test these URLs:
 

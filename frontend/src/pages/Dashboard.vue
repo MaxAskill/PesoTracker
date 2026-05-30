@@ -6,10 +6,10 @@
     <!-- Main Content -->
     <section class="magic-bg min-w-0 flex-1 overflow-y-auto p-4 pt-24 sm:p-6 lg:h-screen lg:pt-6">
       <!-- Top Bar -->
-      <header class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5 mb-8">
+      <header class="mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/55 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p class="text-slate-400">Welcome back,</p>
-          <h2 class="text-3xl font-bold">{{ displayName }}</h2>
+          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">PesoTracker Overview</p>
+          <h2 class="mt-2 text-3xl font-bold text-white md:text-4xl">{{ displayName }}</h2>
           <p v-if="isDashboardLoading" class="mt-2 text-sm text-emerald-300">
             Loading your financial overview...
           </p>
@@ -23,13 +23,13 @@
             <input
               type="text"
               placeholder="Search transaction..."
-              class="min-w-0 flex-1 rounded-2xl border border-white/10 bg-slate-950/70 px-5 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 xl:w-80"
+              class="min-w-0 flex-1 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400 xl:w-80"
             />
 
             <div class="relative">
               <button
                 @click="showNotifications = !showNotifications"
-                class="relative h-12 w-12 rounded-2xl border border-white/10 bg-slate-950/70 transition hover:border-emerald-400/40"
+                class="relative h-12 w-12 rounded-2xl border border-white/10 bg-slate-950/80 transition hover:border-emerald-400/40"
               >
                 🔔
             
@@ -109,7 +109,7 @@
 
             <button
               @click="showIncomeModal = true"
-              class="h-12 inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-500 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-600 xl:min-w-40"
+              class="h-12 inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-300/50 bg-gradient-to-r from-emerald-400 to-teal-300 px-5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:from-emerald-300 hover:to-teal-200 xl:min-w-40"
             >
               <span class="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-base leading-none">
                 +
@@ -141,41 +141,59 @@
           <div
             v-for="index in 4"
             :key="`summary-skeleton-${index}`"
-            class="finance-panel flex min-h-40 flex-col justify-between p-6"
+            class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20"
           >
+            <div class="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-emerald-500/10 blur-2xl"></div>
             <div class="h-4 w-28 rounded-full bg-slate-800/80 animate-pulse"></div>
-            <div class="mt-6 h-9 w-40 rounded-2xl bg-slate-800/70 animate-pulse"></div>
-            <div class="mt-5 h-4 w-24 rounded-full bg-emerald-500/10 animate-pulse"></div>
+            <div class="mt-7 h-11 w-44 rounded-2xl bg-slate-800/70 animate-pulse"></div>
+            <div class="mt-6 flex items-center justify-between">
+              <div class="h-4 w-24 rounded-full bg-emerald-500/10 animate-pulse"></div>
+              <div class="h-9 w-9 rounded-2xl bg-slate-800/80 animate-pulse"></div>
+            </div>
           </div>
         </template>
 
         <template v-else>
-        <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
-          <p class="text-slate-400 text-sm">Current Balance</p>
-          <h3 class="text-3xl font-bold mt-3">{{ formatPeso(dashboard.balance) }}</h3>
-          <p class="text-emerald-400 text-sm mt-3">Available funds</p>
+        <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-slate-950/80 to-slate-950 p-6 shadow-2xl shadow-emerald-950/20" :class="loadingClass">
+          <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/20 blur-2xl"></div>
+          <div class="relative flex h-full flex-col justify-between">
+            <div class="flex items-start justify-between gap-4">
+              <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Current Balance</p>
+              <span class="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-200">Live</span>
+            </div>
+            <h3 class="mt-5 text-4xl font-black tracking-tight text-white md:text-5xl">{{ formatPeso(dashboard.balance) }}</h3>
+            <div class="mt-5 flex items-center justify-between">
+              <p class="text-sm text-emerald-200">Available funds</p>
+              <div class="h-2 w-24 overflow-hidden rounded-full bg-slate-800">
+                <div class="h-full w-2/3 rounded-full bg-emerald-400"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
-          <p class="text-slate-400 text-sm">Total Income</p>
-          <h3 class="text-3xl font-bold mt-3 text-emerald-400">
+        <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+          <div class="absolute right-6 top-6 h-14 w-14 rounded-2xl bg-emerald-400/10"></div>
+          <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Total Income</p>
+          <h3 class="mt-6 text-4xl font-black tracking-tight text-emerald-300">
             {{ formatPeso(dashboard.total_income) }}
           </h3>
-          <p class="text-slate-500 text-sm mt-3">All income recorded</p>
+          <p class="mt-5 text-sm text-slate-500">All income recorded</p>
         </div>
 
-        <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
-          <p class="text-slate-400 text-sm">Total Expenses</p>
-          <h3 class="text-3xl font-bold mt-3 text-red-400">
+        <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+          <div class="absolute right-6 top-6 h-14 w-14 rounded-2xl bg-red-400/10"></div>
+          <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Total Expenses</p>
+          <h3 class="mt-6 text-4xl font-black tracking-tight text-red-300">
             {{ formatPeso(dashboard.total_expenses) }}
           </h3>
-          <p class="text-slate-500 text-sm mt-3">All expenses recorded</p>
+          <p class="mt-5 text-sm text-slate-500">All expenses recorded</p>
         </div>
 
-        <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
-          <p class="text-slate-400 text-sm">Savings Score</p>
-          <h3 class="text-3xl font-bold mt-3 text-amber-400">85%</h3>
-          <p class="text-slate-500 text-sm mt-3">Healthy spending</p>
+        <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+          <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-full border border-amber-300/20 bg-amber-300/10 text-xs font-black text-amber-200">%</div>
+          <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Savings Score</p>
+          <h3 class="mt-6 text-4xl font-black tracking-tight text-amber-300">85%</h3>
+          <p class="mt-5 text-sm text-slate-500">Healthy spending</p>
         </div>
         </template>
       </div>
@@ -184,12 +202,19 @@
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
 
         <!-- Expense by Category -->
-        <div class="finance-panel min-h-[380px] p-6" :class="loadingClass">
-          <h3 class="text-xl font-bold mb-6">Expenses by Category</h3>
+        <div class="relative min-h-[410px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+          <div class="mb-6 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Expense Mix</p>
+              <h3 class="mt-1 text-2xl font-black">Expenses by Category</h3>
+            </div>
+            <span class="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-slate-400">This month</span>
+          </div>
 
           <div v-if="isDashboardLoading" class="h-72 flex items-center justify-center">
-            <div class="relative h-44 w-44 rounded-full border-[26px] border-slate-800/80 animate-pulse">
-              <div class="absolute inset-8 rounded-full bg-slate-900"></div>
+            <div class="relative h-48 w-48 rounded-full border-[28px] border-slate-800/80 animate-pulse">
+              <div class="absolute inset-8 rounded-full bg-slate-950"></div>
+              <div class="absolute -right-3 top-8 h-10 w-10 rounded-full bg-emerald-400/20 blur-xl"></div>
             </div>
           </div>
 
@@ -202,16 +227,28 @@
             </div>
             </div>
         
-          <div v-else class="h-64 flex items-center justify-center text-slate-500">
-            No expense data yet.
+          <div v-else class="flex h-72 items-center justify-center rounded-3xl border border-dashed border-slate-800 bg-slate-950/50 p-6 text-center text-slate-500">
+            <div>
+              <div class="mx-auto mb-4 h-14 w-14 rounded-2xl bg-emerald-400/10"></div>
+              <p>No expense data yet.</p>
+            </div>
           </div>
         </div>
 
         <!-- Monthly Income vs Expenses -->
-        <div class="finance-panel min-h-[380px] p-6 xl:col-span-2" :class="loadingClass">
-          <h3 class="text-xl font-bold mb-6">Monthly Income vs Expenses</h3>
+        <div class="relative min-h-[410px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20 xl:col-span-2" :class="loadingClass">
+          <div class="mb-6 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Cash Flow</p>
+              <h3 class="mt-1 text-2xl font-black">Monthly Income vs Expenses</h3>
+            </div>
+            <div class="hidden gap-2 text-xs font-bold sm:flex">
+              <span class="rounded-full bg-emerald-400/10 px-3 py-1 text-emerald-300">Income</span>
+              <span class="rounded-full bg-red-400/10 px-3 py-1 text-red-300">Expenses</span>
+            </div>
+          </div>
 
-          <div v-if="isDashboardLoading" class="flex h-72 items-end justify-center gap-4 px-4">
+          <div v-if="isDashboardLoading" class="flex h-72 items-end justify-center gap-4 rounded-3xl bg-slate-950/40 px-4 pb-6">
             <div
               v-for="height in [42, 66, 54, 80, 48, 72]"
               :key="height"
@@ -224,19 +261,22 @@
             <MonthlySummaryChart :monthly-summary="analytics.monthly_summary" />
           </div>
         
-          <div v-else class="h-72 flex items-center justify-center text-slate-500">
-            No monthly data yet.
+          <div v-else class="flex h-72 items-center justify-center rounded-3xl border border-dashed border-slate-800 bg-slate-950/50 p-6 text-center text-slate-500">
+            <div>
+              <div class="mx-auto mb-4 h-14 w-20 rounded-2xl bg-emerald-400/10"></div>
+              <p>No monthly data yet.</p>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- AI Insights and Health -->
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6 items-stretch">
-        <div class="finance-panel p-6 xl:col-span-2" :class="loadingClass">
+        <div class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20 xl:col-span-2" :class="loadingClass">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <p class="text-emerald-400 font-semibold text-sm">AI Assistant</p>
-              <h3 class="text-xl font-bold">Financial Insights</h3>
+              <p class="text-emerald-400 font-semibold text-sm uppercase tracking-wide">Smart Signals</p>
+              <h3 class="mt-1 text-2xl font-black">Financial Insights</h3>
             </div>
         
             <span class="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-xl text-sm font-semibold">
@@ -248,7 +288,7 @@
             <div
               v-for="index in 2"
               :key="`insight-skeleton-${index}`"
-              class="finance-surface min-h-44 p-5"
+              class="min-h-44 rounded-3xl border border-white/10 bg-slate-950/80 p-5"
             >
               <div class="mb-4 h-10 w-10 rounded-xl bg-slate-800/80 animate-pulse"></div>
               <div class="mb-3 h-5 w-36 rounded-full bg-slate-800/80 animate-pulse"></div>
@@ -264,7 +304,7 @@
             <div
               v-for="insight in insights"
               :key="insight.title"
-              class="finance-surface min-h-44 p-5"
+              class="min-h-44 rounded-3xl border border-white/10 bg-slate-950/80 p-5 transition hover:border-emerald-400/20"
             >
               <div
                 class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
@@ -288,18 +328,22 @@
             </div>
           </div>
 
-          <div v-else class="finance-surface flex min-h-44 items-center justify-center p-6 text-center text-slate-500">
-            Add transactions to unlock financial insights.
+          <div v-else class="flex min-h-44 items-center justify-center rounded-3xl border border-dashed border-slate-800 bg-slate-950/50 p-6 text-center text-slate-500">
+            <div>
+              <div class="mx-auto mb-4 h-14 w-14 rounded-2xl bg-emerald-400/10"></div>
+              <p>Add transactions to unlock financial insights.</p>
+            </div>
           </div>
         </div>
-        <div class="finance-panel p-6" :class="loadingClass">
+        <div class="relative overflow-hidden rounded-[2rem] border border-emerald-400/15 bg-gradient-to-br from-slate-950/80 via-slate-950/70 to-emerald-950/20 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+          <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/10 blur-2xl"></div>
           <div class="flex items-center justify-between mb-6">
             <div>
-              <p class="text-emerald-400 font-semibold text-sm">
+              <p class="text-emerald-400 font-semibold text-sm uppercase tracking-wide">
                 AI Financial Health
               </p>
         
-              <h3 class="text-xl font-bold">
+              <h3 class="mt-1 text-2xl font-black">
                 Finance Score
               </h3>
             </div>
@@ -311,7 +355,7 @@
 
             <div
               v-else
-              class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold"
+              class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black"
               :class="{
                 'bg-emerald-500/10 text-emerald-400': financialHealth.score >= 80,
                 'bg-amber-500/10 text-amber-400':
@@ -360,7 +404,7 @@
             </div>
           </div>
         
-          <div v-if="isDashboardLoading" class="finance-surface p-5">
+          <div v-if="isDashboardLoading" class="rounded-3xl border border-white/10 bg-slate-950/80 p-5">
             <div class="space-y-2">
               <div class="h-3 w-full rounded-full bg-slate-800/70 animate-pulse"></div>
               <div class="h-3 w-5/6 rounded-full bg-slate-800/70 animate-pulse"></div>
@@ -368,7 +412,7 @@
             </div>
           </div>
 
-          <div v-else class="finance-surface p-5">
+          <div v-else class="rounded-3xl border border-white/10 bg-slate-950/80 p-5">
             <p class="text-slate-400 text-sm leading-relaxed">
               {{ financialHealth.recommendation }}
             </p>
@@ -378,9 +422,12 @@
       </div>
 
       <!-- Recent Transactions -->
-      <div class="finance-panel overflow-hidden" :class="loadingClass">
-        <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-          <h3 class="text-xl font-bold">Recent Transactions</h3>
+      <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+        <div class="flex items-center justify-between border-b border-slate-800 p-6">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Activity</p>
+            <h3 class="mt-1 text-2xl font-black">Recent Transactions</h3>
+          </div>
           <router-link to="/transactions" class="text-emerald-400 text-sm font-semibold">
             View All
           </router-link>
@@ -390,7 +437,7 @@
           <div
             v-for="index in 4"
             :key="`transaction-skeleton-${index}`"
-            class="grid grid-cols-1 gap-3 px-6 py-5 border-b border-slate-800 md:grid-cols-[minmax(0,1.5fr)_minmax(8rem,0.8fr)_minmax(8rem,0.8fr)_7rem] md:items-center"
+            class="grid grid-cols-1 gap-3 border-b border-slate-800 px-6 py-5 md:grid-cols-[minmax(0,1.5fr)_minmax(8rem,0.8fr)_minmax(8rem,0.8fr)_7rem] md:items-center"
           >
             <div class="space-y-2">
               <div class="h-4 w-40 rounded-full bg-slate-800/80 animate-pulse"></div>
@@ -407,7 +454,7 @@
           <div
             v-for="transaction in dashboard.recent_transactions"
             :key="transaction.id"
-            class="grid grid-cols-1 gap-3 px-6 py-5 border-b border-slate-800 md:grid-cols-[minmax(0,1.5fr)_minmax(8rem,0.8fr)_minmax(8rem,0.8fr)_7rem] md:items-center"
+            class="grid grid-cols-1 gap-3 border-b border-slate-800 px-6 py-5 transition hover:bg-slate-900/60 md:grid-cols-[minmax(0,1.5fr)_minmax(8rem,0.8fr)_minmax(8rem,0.8fr)_7rem] md:items-center"
           >
             <div>
               <p class="font-semibold">{{ transaction.title }}</p>
@@ -432,8 +479,11 @@
           </div>
         </div>
 
-        <div v-else class="p-10 text-center text-slate-500">
-          No transactions yet.
+        <div v-else class="flex min-h-56 items-center justify-center p-10 text-center text-slate-500">
+          <div>
+            <div class="mx-auto mb-4 h-14 w-14 rounded-2xl bg-emerald-400/10"></div>
+            <p>No transactions yet.</p>
+          </div>
         </div>
       </div>
     </section>

@@ -44,7 +44,7 @@
             
               <div
                 v-if="showNotifications"
-                class="absolute right-0 z-[120] mt-3 w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-slate-700/70 bg-[#020617] shadow-2xl shadow-black/70"
+                class="notification-panel fixed right-4 top-24 z-[9999] w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 sm:right-6 lg:right-8"
               >
                 <div class="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-5 py-4">
                   <div>
@@ -1006,5 +1006,20 @@ onBeforeUnmount(() => {
   background: rgb(51 65 85);
   border-radius: 999px;
   border: 2px solid rgb(2 6 23);
+}
+
+.notification-panel {
+  isolation: isolate;
+  opacity: 1;
+  background: #020617 !important;
+  backdrop-filter: none;
+}
+
+.notification-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #020617;
 }
 </style>

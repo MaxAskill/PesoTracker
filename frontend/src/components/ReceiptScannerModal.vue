@@ -43,11 +43,10 @@
 
           <button
             type="button"
-            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950/70 text-sm font-bold text-white backdrop-blur transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
-            :disabled="!canSwitchCamera || capturedPreviewUrl"
-            @click="switchCamera"
+            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950/70 text-sm font-bold text-white backdrop-blur transition hover:bg-slate-800"
+            @click="openGallery"
           >
-            Flip
+            Upload
           </button>
         </header>
 
@@ -153,7 +152,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import api from '../services/api'
 
 const props = defineProps({
@@ -171,13 +170,9 @@ const error = ref('')
 const statusMessage = ref('')
 const capturedPreviewUrl = ref('')
 const capturedFile = ref(null)
-const videoDevices = ref([])
-const activeDeviceId = ref('')
 const canUseTorch = ref(false)
 const torchOn = ref(false)
 let stream = null
-
-const canSwitchCamera = computed(() => videoDevices.value.length > 1)
 
 watch(
   () => props.show,
@@ -190,7 +185,7 @@ watch(
   }
 )
 
-const startCamera = async (deviceId = '') => {
+const startCamera = async () => {
   error.value = ''
   statusMessage.value = 'Opening camera...'
   cameraReady.value = false
@@ -212,9 +207,7 @@ const startCamera = async (deviceId = '') => {
 
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: deviceId
-        ? { deviceId: { exact: deviceId } }
-        : { facingMode: { ideal: 'environment' } },
+      video: { facingMode: { ideal: 'environment' } },
       audio: false
     })
 
@@ -224,7 +217,6 @@ const startCamera = async (deviceId = '') => {
       video.value.srcObject = stream
     }
 
-    await loadDevices()
     updateTrackCapabilities()
 
     cameraReady.value = true
@@ -235,29 +227,12 @@ const startCamera = async (deviceId = '') => {
   }
 }
 
-const loadDevices = async () => {
-  const devices = await navigator.mediaDevices.enumerateDevices()
-  videoDevices.value = devices.filter(device => device.kind === 'videoinput')
-  activeDeviceId.value = stream?.getVideoTracks()[0]?.getSettings()?.deviceId || ''
-}
-
 const updateTrackCapabilities = () => {
   const track = stream?.getVideoTracks()[0]
   const capabilities = track?.getCapabilities?.()
 
   canUseTorch.value = Boolean(capabilities?.torch)
   torchOn.value = false
-}
-
-const switchCamera = async () => {
-  if (!canSwitchCamera.value) return
-
-  const currentIndex = videoDevices.value.findIndex(device => device.deviceId === activeDeviceId.value)
-  const nextDevice = videoDevices.value[(currentIndex + 1) % videoDevices.value.length]
-
-  if (nextDevice) {
-    await startCamera(nextDevice.deviceId)
-  }
 }
 
 const toggleTorch = async () => {
@@ -326,7 +301,7 @@ const openGallery = () => {
 const retake = async () => {
   capturedFile.value = null
   releasePreview()
-  await startCamera(activeDeviceId.value)
+  await startCamera()
 }
 
 const usePhoto = async () => {

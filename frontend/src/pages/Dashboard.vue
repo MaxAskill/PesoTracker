@@ -345,7 +345,7 @@
       @close="showIncomeModal = false"
       @saved="refreshDashboard"
     />
-    <SmartAssistantWidget />
+    <SmartAssistantWidget v-if="!showExpenseModal && !showIncomeModal" />
   </main>
   <!-- Floating Button -->
   <div v-if="false" class="fixed bottom-6 right-6 z-50">

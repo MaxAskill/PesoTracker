@@ -1,22 +1,51 @@
 <template>
-  <div class="fixed bottom-6 right-6 z-50">
+  <div
+    v-if="!isOpen"
+    class="pointer-events-none fixed bottom-24 right-5 z-50 hidden max-w-64 rounded-2xl border border-emerald-400/20 bg-slate-950/90 px-4 py-3 text-sm text-slate-200 shadow-2xl shadow-slate-950/30 backdrop-blur md:block"
+  >
+    Need help understanding your spending?
+  </div>
+
+  <div class="fixed bottom-5 right-5 z-50 sm:bottom-6 sm:right-6">
     <button
       type="button"
       aria-label="Open PesoTracker Assistant"
-      class="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500 text-sm font-black text-slate-950 shadow-2xl shadow-emerald-500/30 transition hover:bg-emerald-400"
+      class="group relative flex h-16 w-16 items-center justify-center overflow-visible rounded-full bg-emerald-500 text-slate-950 shadow-2xl shadow-emerald-500/30 transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:bg-emerald-400 sm:h-14 sm:w-auto sm:gap-3 sm:rounded-full sm:bg-gradient-to-r sm:from-emerald-400 sm:to-teal-300 sm:px-5"
       @click="toggleAssistant"
     >
-      AI
+      <span class="absolute inset-0 -z-10 rounded-full bg-emerald-400/30 blur-xl transition group-hover:bg-emerald-300/40"></span>
+      <span class="absolute inset-0 rounded-full border border-white/30"></span>
+      <span class="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/90 text-lg font-black text-emerald-300 shadow-inner">
+        ✦
+      </span>
+      <span class="hidden whitespace-nowrap text-sm font-black sm:inline">
+        AI Assistant
+      </span>
+      <span class="hidden items-center gap-1 text-xs font-bold text-slate-900 sm:flex">
+        <span class="h-2 w-2 rounded-full bg-emerald-800 shadow-[0_0_10px_rgba(6,95,70,0.9)]"></span>
+        Online
+      </span>
     </button>
   </div>
 
+  <Transition
+    enter-active-class="transition duration-200 ease-out"
+    enter-from-class="translate-y-4 opacity-0 scale-95"
+    enter-to-class="translate-y-0 opacity-100 scale-100"
+    leave-active-class="transition duration-150 ease-in"
+    leave-from-class="translate-y-0 opacity-100 scale-100"
+    leave-to-class="translate-y-4 opacity-0 scale-95"
+  >
   <div
     v-if="isOpen"
-    class="finance-panel fixed bottom-24 left-4 right-4 z-50 flex h-[min(640px,calc(100vh-8rem))] flex-col overflow-hidden sm:bottom-28 sm:left-auto sm:right-6 sm:w-[400px]"
+    class="finance-panel fixed bottom-5 left-4 right-4 z-50 flex h-[min(680px,calc(100vh-2.5rem))] flex-col overflow-hidden sm:bottom-6 sm:left-auto sm:right-6 sm:w-[410px]"
   >
     <div class="flex items-center justify-between border-b border-slate-800 p-5">
       <div>
-        <p class="text-sm font-semibold text-emerald-400">Smart Assistant</p>
+        <div class="flex items-center gap-2 text-sm font-semibold text-emerald-400">
+          <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
+          Online
+        </div>
         <h3 class="font-bold text-white">PesoTracker Assistant</h3>
       </div>
 
@@ -26,7 +55,7 @@
         class="h-10 w-10 rounded-xl bg-slate-800 text-slate-300 transition hover:bg-slate-700"
         @click="isOpen = false"
       >
-        x
+        X
       </button>
     </div>
 
@@ -115,9 +144,9 @@
         </div>
       </div>
 
-      <div v-if="suggestedQuestions.length" class="flex flex-wrap gap-2 pt-1">
+      <div v-if="questionChips.length" class="flex flex-wrap gap-2 pt-1">
         <button
-          v-for="question in suggestedQuestions"
+          v-for="question in questionChips"
           :key="question"
           type="button"
           class="rounded-xl bg-slate-800 px-3 py-2 text-left text-xs font-semibold text-slate-300 transition hover:bg-emerald-500 hover:text-slate-950"
@@ -146,6 +175,7 @@
       </button>
     </form>
   </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -175,6 +205,11 @@ const assistantData = ref({
 const summary = computed(() => assistantData.value.summary)
 const insights = computed(() => assistantData.value.insights)
 const suggestedQuestions = computed(() => assistantData.value.suggested_questions)
+const questionChips = computed(() => {
+  return suggestedQuestions.value.length
+    ? suggestedQuestions.value
+    : ['Spending summary', 'Budget warning', 'Savings progress', 'Smart tips']
+})
 
 const toggleAssistant = async () => {
   isOpen.value = !isOpen.value

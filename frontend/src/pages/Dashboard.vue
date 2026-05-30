@@ -1,10 +1,10 @@
 <template>
-  <main class="flex min-h-screen bg-[#020617] text-white">
+  <main class="flex min-h-screen bg-[#020617] text-white lg:h-screen lg:overflow-hidden">
     <!-- Sidebar -->
     <Sidebar />
 
     <!-- Main Content -->
-    <section class="magic-bg flex-1 overflow-y-auto p-6 pt-24 lg:pt-6">
+    <section class="magic-bg min-w-0 flex-1 overflow-y-auto p-4 pt-24 sm:p-6 lg:h-screen lg:pt-6">
       <!-- Top Bar -->
       <header class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5 mb-8">
         <div>

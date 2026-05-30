@@ -27,7 +27,7 @@
       <!-- Form -->
       <form class="space-y-5" @submit.prevent="submitTransaction">
         <div
-          v-if="currentType === 'expense' && !transaction"
+          v-if="canScanReceipt"
           class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4"
         >
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -43,7 +43,7 @@
             <button
               type="button"
               class="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-400"
-              @click="showReceiptScanner = true"
+              @click="openReceiptScanner"
             >
               Scan Receipt
             </button>
@@ -150,12 +150,14 @@
     </div>
 
     <ReceiptScannerModal
+      v-if="canScanReceipt"
       :show="showReceiptScanner"
       @close="showReceiptScanner = false"
       @draft="openReceiptDraft"
     />
 
     <ReceiptDraftForm
+      v-if="canScanReceipt"
       :show="showReceiptDraft"
       :draft="receiptDraft"
       @close="showReceiptDraft = false"
@@ -223,6 +225,16 @@ const currentType = computed(() => {
   return props.transaction ? props.transaction.type : props.type
 })
 
+const canScanReceipt = computed(() => {
+  return currentType.value === 'expense' && !props.transaction
+})
+
+watch(canScanReceipt, (value) => {
+  if (!value) {
+    closeReceiptScanner()
+  }
+})
+
 const submitTransaction = async () => {
   if (saving.value) return
 
@@ -269,7 +281,15 @@ const closeModal = () => {
   emit('close')
 }
 
+const openReceiptScanner = () => {
+  if (!canScanReceipt.value) return
+
+  showReceiptScanner.value = true
+}
+
 const openReceiptDraft = (draft) => {
+  if (!canScanReceipt.value) return
+
   receiptDraft.value = draft
   showReceiptScanner.value = false
   showReceiptDraft.value = true

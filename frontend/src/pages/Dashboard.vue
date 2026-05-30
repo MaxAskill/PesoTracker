@@ -10,8 +10,8 @@
         <div>
           <p class="text-slate-400">Welcome back,</p>
           <h2 class="text-3xl font-bold">{{ displayName }}</h2>
-          <p v-if="isPrimingDashboard" class="mt-2 text-sm text-emerald-300">
-            Waking up your dashboard...
+          <p v-if="isDashboardLoading" class="mt-2 text-sm text-emerald-300">
+            Loading your financial overview...
           </p>
           <p v-else-if="isRefreshingDashboard" class="mt-2 text-sm text-slate-500">
             Refreshing latest data...
@@ -119,9 +119,37 @@
           </div>
         </div>
       </header>
+
+      <div
+        v-if="dashboardError"
+        class="mb-6 flex flex-col gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-red-100 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p class="text-sm">{{ dashboardError }}</p>
+        <button
+          type="button"
+          class="rounded-xl bg-red-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-400"
+          @click="refreshDashboard"
+        >
+          Retry
+        </button>
+      </div>
+
       <!-- Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-        
+
+        <template v-if="isDashboardLoading">
+          <div
+            v-for="index in 4"
+            :key="`summary-skeleton-${index}`"
+            class="finance-panel flex min-h-40 flex-col justify-between p-6"
+          >
+            <div class="h-4 w-28 rounded-full bg-slate-800/80 animate-pulse"></div>
+            <div class="mt-6 h-9 w-40 rounded-2xl bg-slate-800/70 animate-pulse"></div>
+            <div class="mt-5 h-4 w-24 rounded-full bg-emerald-500/10 animate-pulse"></div>
+          </div>
+        </template>
+
+        <template v-else>
         <div class="finance-panel flex min-h-40 flex-col justify-between p-6" :class="loadingClass">
           <p class="text-slate-400 text-sm">Current Balance</p>
           <h3 class="text-3xl font-bold mt-3">{{ formatPeso(dashboard.balance) }}</h3>
@@ -149,6 +177,7 @@
           <h3 class="text-3xl font-bold mt-3 text-amber-400">85%</h3>
           <p class="text-slate-500 text-sm mt-3">Healthy spending</p>
         </div>
+        </template>
       </div>
 
       <!-- Charts -->
@@ -157,9 +186,15 @@
         <!-- Expense by Category -->
         <div class="finance-panel min-h-[380px] p-6" :class="loadingClass">
           <h3 class="text-xl font-bold mb-6">Expenses by Category</h3>
-        
+
+          <div v-if="isDashboardLoading" class="h-72 flex items-center justify-center">
+            <div class="relative h-44 w-44 rounded-full border-[26px] border-slate-800/80 animate-pulse">
+              <div class="absolute inset-8 rounded-full bg-slate-900"></div>
+            </div>
+          </div>
+
             <div
-            v-if="analytics.expense_by_category.length"
+            v-else-if="analytics.expense_by_category.length"
             class="h-72 flex items-center justify-center"
             >
             <div class="w-full max-w-[280px]">
@@ -175,8 +210,17 @@
         <!-- Monthly Income vs Expenses -->
         <div class="finance-panel min-h-[380px] p-6 xl:col-span-2" :class="loadingClass">
           <h3 class="text-xl font-bold mb-6">Monthly Income vs Expenses</h3>
-        
-          <div v-if="analytics.monthly_summary.length">
+
+          <div v-if="isDashboardLoading" class="flex h-72 items-end justify-center gap-4 px-4">
+            <div
+              v-for="height in [42, 66, 54, 80, 48, 72]"
+              :key="height"
+              class="w-10 rounded-t-2xl bg-slate-800/80 animate-pulse"
+              :style="{ height: height + '%' }"
+            ></div>
+          </div>
+
+          <div v-else-if="analytics.monthly_summary.length">
             <MonthlySummaryChart :monthly-summary="analytics.monthly_summary" />
           </div>
         
@@ -200,7 +244,23 @@
             </span>
           </div>
         
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-if="isDashboardLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              v-for="index in 2"
+              :key="`insight-skeleton-${index}`"
+              class="finance-surface min-h-44 p-5"
+            >
+              <div class="mb-4 h-10 w-10 rounded-xl bg-slate-800/80 animate-pulse"></div>
+              <div class="mb-3 h-5 w-36 rounded-full bg-slate-800/80 animate-pulse"></div>
+              <div class="space-y-2">
+                <div class="h-3 w-full rounded-full bg-slate-800/70 animate-pulse"></div>
+                <div class="h-3 w-4/5 rounded-full bg-slate-800/70 animate-pulse"></div>
+                <div class="h-3 w-2/3 rounded-full bg-slate-800/70 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="insights.length" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div
               v-for="insight in insights"
               :key="insight.title"
@@ -227,6 +287,10 @@
               </p>
             </div>
           </div>
+
+          <div v-else class="finance-surface flex min-h-44 items-center justify-center p-6 text-center text-slate-500">
+            Add transactions to unlock financial insights.
+          </div>
         </div>
         <div class="finance-panel p-6" :class="loadingClass">
           <div class="flex items-center justify-between mb-6">
@@ -241,6 +305,12 @@
             </div>
         
             <div
+              v-if="isDashboardLoading"
+              class="w-16 h-16 rounded-2xl bg-slate-800/80 animate-pulse"
+            ></div>
+
+            <div
+              v-else
               class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold"
               :class="{
                 'bg-emerald-500/10 text-emerald-400': financialHealth.score >= 80,
@@ -254,7 +324,17 @@
             </div>
           </div>
         
-          <div class="mb-5">
+          <div v-if="isDashboardLoading" class="mb-5">
+            <div class="mb-3 flex justify-between">
+              <div class="h-4 w-16 rounded-full bg-slate-800/80 animate-pulse"></div>
+              <div class="h-4 w-20 rounded-full bg-slate-800/80 animate-pulse"></div>
+            </div>
+            <div class="h-3 overflow-hidden rounded-full bg-slate-800">
+              <div class="h-3 w-2/3 rounded-full bg-emerald-500/20 animate-pulse"></div>
+            </div>
+          </div>
+
+          <div v-else class="mb-5">
             <div class="flex justify-between text-sm mb-2">
               <span class="text-slate-400">
                 Status
@@ -280,7 +360,15 @@
             </div>
           </div>
         
-          <div class="finance-surface p-5">
+          <div v-if="isDashboardLoading" class="finance-surface p-5">
+            <div class="space-y-2">
+              <div class="h-3 w-full rounded-full bg-slate-800/70 animate-pulse"></div>
+              <div class="h-3 w-5/6 rounded-full bg-slate-800/70 animate-pulse"></div>
+              <div class="h-3 w-2/3 rounded-full bg-slate-800/70 animate-pulse"></div>
+            </div>
+          </div>
+
+          <div v-else class="finance-surface p-5">
             <p class="text-slate-400 text-sm leading-relaxed">
               {{ financialHealth.recommendation }}
             </p>
@@ -298,7 +386,24 @@
           </router-link>
         </div>
 
-        <div v-if="dashboard.recent_transactions?.length">
+        <div v-if="isDashboardLoading">
+          <div
+            v-for="index in 4"
+            :key="`transaction-skeleton-${index}`"
+            class="grid grid-cols-1 gap-3 px-6 py-5 border-b border-slate-800 md:grid-cols-[minmax(0,1.5fr)_minmax(8rem,0.8fr)_minmax(8rem,0.8fr)_7rem] md:items-center"
+          >
+            <div class="space-y-2">
+              <div class="h-4 w-40 rounded-full bg-slate-800/80 animate-pulse"></div>
+              <div class="h-3 w-24 rounded-full bg-slate-800/60 animate-pulse"></div>
+            </div>
+
+            <div class="h-4 w-28 rounded-full bg-slate-800/70 animate-pulse"></div>
+            <div class="h-5 w-24 rounded-full bg-slate-800/80 animate-pulse"></div>
+            <div class="h-7 w-20 rounded-full bg-slate-800/70 animate-pulse"></div>
+          </div>
+        </div>
+
+        <div v-else-if="dashboard.recent_transactions?.length">
           <div
             v-for="transaction in dashboard.recent_transactions"
             :key="transaction.id"
@@ -479,6 +584,7 @@ const insights = ref([])
 const notifications = ref([])
 const unreadCount = ref(0)
 const showNotifications = ref(false)
+const dashboardError = ref('')
 
 let refreshInterval = null
 
@@ -572,7 +678,7 @@ const dashboard = reactive({
 const dashboardLoaded = ref(false)
 const hasCachedDashboard = ref(false)
 const isRefreshingDashboard = ref(false)
-const isPrimingDashboard = computed(() => !dashboardLoaded.value && !hasCachedDashboard.value)
+const isDashboardLoading = computed(() => !dashboardLoaded.value && !hasCachedDashboard.value)
 const loadingClass = computed(() => {
   return isRefreshingDashboard.value ? 'opacity-80 transition-opacity' : ''
 })
@@ -739,14 +845,26 @@ const sendAssistantMessage = async () => {
 }
 
 const refreshDashboard = () => {
+  dashboardError.value = ''
   isRefreshingDashboard.value = true
 
   preloadAuthenticatedData()
     .then((snapshot) => {
-      if (snapshot) {
+      const hasDashboardData = snapshot?.dashboard ||
+        snapshot?.analytics ||
+        snapshot?.insights ||
+        snapshot?.financialHealth
+
+      if (hasDashboardData) {
         applyDashboardSnapshot(snapshot)
         saveDashboardSnapshot(snapshot)
+      } else {
+        dashboardError.value = 'We could not load your dashboard right now. Please try again.'
       }
+    })
+    .catch((error) => {
+      console.error(error)
+      dashboardError.value = 'We could not load your dashboard right now. Please try again.'
     })
     .finally(() => {
       dashboardLoaded.value = true

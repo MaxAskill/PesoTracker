@@ -5,8 +5,15 @@ namespace App\Http\Controllers;
 use App\Services\AssistantInsightService;
 use Illuminate\Http\Request;
 
-class FinanceAssistantController extends Controller
+class AssistantController extends Controller
 {
+    public function insights(Request $request, AssistantInsightService $assistant)
+    {
+        return response()->json(
+            $assistant->insights($request->user()->id)
+        );
+    }
+
     public function ask(Request $request, AssistantInsightService $assistant)
     {
         $validated = $request->validate([

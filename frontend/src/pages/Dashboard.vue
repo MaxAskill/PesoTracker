@@ -345,9 +345,10 @@
       @close="showIncomeModal = false"
       @saved="refreshDashboard"
     />
+    <SmartAssistantWidget />
   </main>
   <!-- Floating Button -->
-  <div class="fixed bottom-6 right-6 z-50">
+  <div v-if="false" class="fixed bottom-6 right-6 z-50">
     <button
       @click="showAssistant = !showAssistant"
       class="w-16 h-16 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-2xl shadow-2xl shadow-emerald-500/30 transition"
@@ -465,6 +466,7 @@ import TransactionModal from '../components/TransactionModal.vue'
 import ExpenseCategoryChart from '../components/ExpenseCategoryChart.vue'
 import MonthlySummaryChart from '../components/MonthlySummaryChart.vue'
 import Sidebar from '../components/Sidebar.vue'
+import SmartAssistantWidget from '../components/SmartAssistantWidget.vue'
 import { formatPeso } from '../utils/currency'
 import {
   loadDashboardSnapshot,

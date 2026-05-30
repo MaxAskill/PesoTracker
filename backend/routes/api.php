@@ -14,6 +14,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\FinancialHealthController;
 use App\Http\Controllers\FinanceAssistantController;
+use App\Http\Controllers\AssistantController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -41,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
     );
     Route::get('/financial-health', [FinancialHealthController::class, 'score']);
     Route::post('/finance-assistant', [FinanceAssistantController::class, 'ask']);
+    Route::get('/assistant/insights', [AssistantController::class, 'insights']);
+    Route::post('/assistant/insights', [AssistantController::class, 'insights']);
+    Route::post('/assistant/ask', [AssistantController::class, 'ask']);
 });
 
 Route::post('/register', [AuthController::class, 'register']);

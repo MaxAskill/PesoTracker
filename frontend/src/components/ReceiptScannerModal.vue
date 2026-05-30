@@ -4,8 +4,8 @@
     class="fixed inset-0 z-[70] bg-slate-950 text-white md:flex md:items-center md:justify-center md:bg-slate-950/80 md:p-6 md:backdrop-blur-md"
   >
     <div class="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-slate-950 md:h-auto md:max-h-[calc(100vh-3rem)] md:max-w-[860px] md:rounded-3xl md:border md:border-slate-700/60 md:bg-slate-900 md:shadow-2xl">
-      <header class="relative z-20 flex items-center justify-between gap-3 px-4 py-4 sm:px-6 md:border-b md:border-slate-800">
-        <div class="order-2 min-w-0 flex-1 text-center md:order-1 md:text-left">
+      <header class="relative z-20 flex items-center justify-between gap-4 px-4 py-4 sm:px-6 md:border-b md:border-slate-700/50 md:px-7 md:py-5">
+        <div class="min-w-0 flex-1 text-left">
           <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">
             Expense Receipt
           </p>
@@ -14,25 +14,14 @@
           </h2>
         </div>
 
-        <div class="order-1 md:order-3">
-          <button
-            type="button"
-            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950/70 text-lg font-bold text-white backdrop-blur transition hover:bg-slate-800"
-            @click="closeScanner"
-          >
-            x
-          </button>
-        </div>
-
-        <div class="order-3 md:order-2">
-          <button
-            type="button"
-            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950/70 text-sm font-bold text-white backdrop-blur transition hover:bg-slate-800"
-            @click="openGallery"
-          >
-            Upload
-          </button>
-        </div>
+        <button
+          type="button"
+          aria-label="Close scanner"
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-950/70 text-lg font-bold text-white backdrop-blur transition hover:bg-slate-800 hover:text-emerald-200"
+          @click="closeScanner"
+        >
+          X
+        </button>
       </header>
 
       <main class="relative z-10 flex min-h-0 flex-1 items-center justify-center px-5 md:block md:flex-none md:p-6">
@@ -94,7 +83,7 @@
         </div>
       </main>
 
-      <footer class="relative z-20 border-t border-white/10 bg-slate-950/80 px-4 py-5 backdrop-blur sm:px-6 md:bg-slate-900">
+      <footer class="relative z-20 border-t border-white/10 bg-slate-950/80 px-4 py-5 backdrop-blur sm:px-6 md:border-slate-700/50 md:bg-slate-900 md:px-7">
         <div v-if="capturedPreviewUrl" class="mx-auto grid max-w-xl grid-cols-2 gap-3">
           <button
             type="button"
@@ -115,10 +104,10 @@
           </button>
         </div>
 
-        <div v-else class="mx-auto grid max-w-xl grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <div v-else class="mx-auto flex w-fit items-center justify-center gap-3 rounded-full border border-white/10 bg-slate-950/70 px-3 py-3 shadow-xl shadow-slate-950/30 backdrop-blur md:gap-4 md:px-5">
           <button
             type="button"
-            class="rounded-2xl bg-slate-800 px-4 py-3 text-sm font-bold text-slate-100 transition hover:bg-slate-700"
+            class="h-11 rounded-full border border-white/10 bg-slate-800 px-4 text-sm font-bold text-slate-100 transition hover:bg-slate-700 md:min-w-24"
             @click="openGallery"
           >
             Upload
@@ -127,14 +116,14 @@
           <button
             type="button"
             aria-label="Capture receipt"
-            class="h-20 w-20 rounded-full border-4 border-white bg-emerald-400 shadow-2xl shadow-emerald-500/30 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50 md:h-16 md:w-16"
+            class="h-20 w-20 rounded-full border-4 border-white bg-emerald-400 shadow-2xl shadow-emerald-500/30 ring-4 ring-emerald-400/15 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50 md:h-[72px] md:w-[72px]"
             :disabled="!cameraReady || processing"
             @click="capture"
           ></button>
 
           <button
             type="button"
-            class="rounded-2xl bg-slate-800 px-4 py-3 text-sm font-bold text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            class="h-11 rounded-full border border-white/10 bg-slate-800 px-4 text-sm font-bold text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-500 disabled:opacity-60 md:min-w-24"
             :disabled="!canUseTorch"
             @click="toggleTorch"
           >

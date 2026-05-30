@@ -1,29 +1,20 @@
 <template>
   <div
     v-if="show"
-    class="fixed inset-0 z-[70] bg-slate-950 text-white"
+    class="fixed inset-0 z-[70] bg-slate-950 text-white md:flex md:items-center md:justify-center md:bg-slate-950/80 md:p-6 md:backdrop-blur-md"
   >
-    <div class="relative flex h-full min-h-0 flex-col overflow-hidden">
-      <video
-        v-show="cameraReady && !capturedPreviewUrl"
-        ref="video"
-        autoplay
-        muted
-        playsinline
-        class="absolute inset-0 h-full w-full object-cover"
-      ></video>
+    <div class="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-slate-950 md:h-auto md:max-h-[calc(100vh-3rem)] md:max-w-[860px] md:rounded-3xl md:border md:border-slate-700/60 md:bg-slate-900 md:shadow-2xl">
+      <header class="relative z-20 flex items-center justify-between gap-3 px-4 py-4 sm:px-6 md:border-b md:border-slate-800">
+        <div class="order-2 min-w-0 flex-1 text-center md:order-1 md:text-left">
+          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">
+            Expense Receipt
+          </p>
+          <h2 class="truncate text-base font-bold text-white sm:text-lg">
+            {{ capturedPreviewUrl ? 'Review Photo' : 'Scan Receipt' }}
+          </h2>
+        </div>
 
-      <img
-        v-if="capturedPreviewUrl"
-        :src="capturedPreviewUrl"
-        alt="Captured receipt preview"
-        class="absolute inset-0 h-full w-full object-contain bg-slate-950"
-      />
-
-      <div class="absolute inset-0 bg-black/35"></div>
-
-      <div class="relative z-10 flex h-full flex-col">
-        <header class="flex items-center justify-between px-4 py-4 sm:px-6">
+        <div class="order-1 md:order-3">
           <button
             type="button"
             class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950/70 text-lg font-bold text-white backdrop-blur transition hover:bg-slate-800"
@@ -31,16 +22,9 @@
           >
             x
           </button>
+        </div>
 
-          <div class="text-center">
-            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">
-              Expense Receipt
-            </p>
-            <h2 class="text-base font-bold text-white sm:text-lg">
-              {{ capturedPreviewUrl ? 'Review Photo' : 'Scan Receipt' }}
-            </h2>
-          </div>
-
+        <div class="order-3 md:order-2">
           <button
             type="button"
             class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950/70 text-sm font-bold text-white backdrop-blur transition hover:bg-slate-800"
@@ -48,12 +32,32 @@
           >
             Upload
           </button>
-        </header>
+        </div>
+      </header>
 
-        <main class="flex min-h-0 flex-1 items-center justify-center px-5">
+      <main class="relative z-10 flex min-h-0 flex-1 items-center justify-center px-5 md:block md:flex-none md:p-6">
+        <div class="absolute inset-0 overflow-hidden bg-black md:relative md:aspect-[4/3] md:max-h-[620px] md:rounded-2xl md:border md:border-slate-800">
+          <video
+            v-show="cameraReady && !capturedPreviewUrl"
+            ref="video"
+            autoplay
+            muted
+            playsinline
+            class="absolute inset-0 h-full w-full object-cover"
+          ></video>
+
+          <img
+            v-if="capturedPreviewUrl"
+            :src="capturedPreviewUrl"
+            alt="Captured receipt preview"
+            class="absolute inset-0 h-full w-full bg-slate-950 object-contain"
+          />
+
+          <div class="absolute inset-0 bg-black/35"></div>
+
           <div
             v-if="!capturedPreviewUrl"
-            class="relative flex aspect-[3/4] w-full max-w-sm items-center justify-center rounded-[2rem] border-2 border-emerald-300/80 shadow-[0_0_40px_rgba(16,185,129,0.28)]"
+            class="absolute left-1/2 top-1/2 flex aspect-[3/4] h-[58vh] max-h-[520px] max-w-[82vw] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[2rem] border-2 border-emerald-300/80 shadow-[0_0_40px_rgba(16,185,129,0.28)] md:h-[72%] md:max-h-[440px]"
           >
             <span class="absolute -top-12 text-center text-sm font-semibold text-white">
               Align your receipt inside the frame
@@ -69,14 +73,14 @@
 
           <div
             v-if="statusMessage"
-            class="absolute left-4 right-4 top-24 rounded-2xl border border-slate-700 bg-slate-950/85 p-4 text-center text-sm text-slate-200 backdrop-blur sm:left-1/2 sm:w-96 sm:-translate-x-1/2"
+            class="absolute left-4 right-4 top-6 rounded-2xl border border-slate-700 bg-slate-950/85 p-4 text-center text-sm text-slate-200 backdrop-blur sm:left-1/2 sm:w-96 sm:-translate-x-1/2"
           >
             {{ statusMessage }}
           </div>
 
           <div
             v-if="error"
-            class="absolute left-4 right-4 top-24 rounded-2xl border border-red-500/30 bg-red-500/15 p-4 text-center text-sm text-red-100 backdrop-blur sm:left-1/2 sm:w-96 sm:-translate-x-1/2"
+            class="absolute left-4 right-4 top-6 rounded-2xl border border-red-500/30 bg-red-500/15 p-4 text-center text-sm text-red-100 backdrop-blur sm:left-1/2 sm:w-96 sm:-translate-x-1/2"
           >
             <p>{{ error }}</p>
             <button
@@ -87,66 +91,66 @@
               Upload instead
             </button>
           </div>
-        </main>
+        </div>
+      </main>
 
-        <footer class="relative z-10 border-t border-white/10 bg-slate-950/80 px-4 py-5 backdrop-blur sm:px-6">
-          <div v-if="capturedPreviewUrl" class="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              class="rounded-2xl bg-slate-800 px-4 py-4 font-bold text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
-              :disabled="processing"
-              @click="retake"
-            >
-              Retake
-            </button>
+      <footer class="relative z-20 border-t border-white/10 bg-slate-950/80 px-4 py-5 backdrop-blur sm:px-6 md:bg-slate-900">
+        <div v-if="capturedPreviewUrl" class="mx-auto grid max-w-xl grid-cols-2 gap-3">
+          <button
+            type="button"
+            class="rounded-2xl bg-slate-800 px-4 py-4 font-bold text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            :disabled="processing"
+            @click="retake"
+          >
+            Retake
+          </button>
 
-            <button
-              type="button"
-              class="rounded-2xl bg-emerald-500 px-4 py-4 font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-              :disabled="processing"
-              @click="usePhoto"
-            >
-              {{ processing ? 'Processing...' : 'Use Photo' }}
-            </button>
-          </div>
+          <button
+            type="button"
+            class="rounded-2xl bg-emerald-500 px-4 py-4 font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+            :disabled="processing"
+            @click="usePhoto"
+          >
+            {{ processing ? 'Processing...' : 'Use Photo' }}
+          </button>
+        </div>
 
-          <div v-else class="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-            <button
-              type="button"
-              class="rounded-2xl bg-slate-800 px-4 py-3 text-sm font-bold text-slate-100 transition hover:bg-slate-700"
-              @click="openGallery"
-            >
-              Upload
-            </button>
+        <div v-else class="mx-auto grid max-w-xl grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <button
+            type="button"
+            class="rounded-2xl bg-slate-800 px-4 py-3 text-sm font-bold text-slate-100 transition hover:bg-slate-700"
+            @click="openGallery"
+          >
+            Upload
+          </button>
 
-            <button
-              type="button"
-              aria-label="Capture receipt"
-              class="h-20 w-20 rounded-full border-4 border-white bg-emerald-400 shadow-2xl shadow-emerald-500/30 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="!cameraReady || processing"
-              @click="capture"
-            ></button>
+          <button
+            type="button"
+            aria-label="Capture receipt"
+            class="h-20 w-20 rounded-full border-4 border-white bg-emerald-400 shadow-2xl shadow-emerald-500/30 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-50 md:h-16 md:w-16"
+            :disabled="!cameraReady || processing"
+            @click="capture"
+          ></button>
 
-            <button
-              type="button"
-              class="rounded-2xl bg-slate-800 px-4 py-3 text-sm font-bold text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
-              :disabled="!canUseTorch"
-              @click="toggleTorch"
-            >
-              {{ torchOn ? 'Flash Off' : 'Flash' }}
-            </button>
-          </div>
-        </footer>
+          <button
+            type="button"
+            class="rounded-2xl bg-slate-800 px-4 py-3 text-sm font-bold text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            :disabled="!canUseTorch"
+            @click="toggleTorch"
+          >
+            {{ torchOn ? 'Flash Off' : 'Flash' }}
+          </button>
+        </div>
+      </footer>
 
-        <canvas ref="canvas" class="hidden"></canvas>
-        <input
-          ref="fileInput"
-          type="file"
-          accept="image/jpeg,image/jpg,image/png,image/webp"
-          class="hidden"
-          @change="handleUpload"
-        />
-      </div>
+      <canvas ref="canvas" class="hidden"></canvas>
+      <input
+        ref="fileInput"
+        type="file"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
+        class="hidden"
+        @change="handleUpload"
+      />
     </div>
   </div>
 </template>

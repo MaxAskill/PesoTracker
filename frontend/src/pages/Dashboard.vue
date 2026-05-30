@@ -1,10 +1,10 @@
 <template>
-  <main class="flex min-h-screen bg-[#020617] text-white lg:h-screen lg:overflow-hidden">
+  <main class="flex min-h-screen overflow-x-hidden bg-[#020617] text-white lg:h-screen lg:overflow-hidden">
     <!-- Sidebar -->
     <Sidebar />
 
     <!-- Main Content -->
-    <section class="magic-bg min-w-0 flex-1 overflow-y-auto p-4 pt-24 sm:p-6 lg:h-screen lg:pt-6">
+    <section class="magic-bg min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pt-24 sm:p-6 lg:h-screen lg:pt-6">
       <!-- Top Bar -->
       <header class="relative z-[90] mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur xl:flex-row xl:items-start xl:justify-between">
         <div>
@@ -28,7 +28,8 @@
 
             <div class="relative">
               <button
-                @click="showNotifications = !showNotifications"
+                ref="notificationTrigger"
+                @click.stop="toggleNotifications"
                 class="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/90 text-amber-300 transition hover:border-emerald-400/40"
                 aria-label="Open notifications"
               >
@@ -41,26 +42,44 @@
                   {{ unreadCount }}
                 </span>
               </button>
+
+              <div
+                v-if="showNotifications"
+                class="fixed inset-0 z-[60] bg-slate-950/70 backdrop-blur-sm md:hidden"
+                @click="closeNotifications"
+              ></div>
             
               <div
                 v-if="showNotifications"
-                class="notification-panel fixed right-4 top-24 z-[9999] w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 sm:right-6 lg:right-8"
+                ref="notificationPanel"
+                class="notification-panel fixed inset-x-4 bottom-4 z-[70] max-h-[78vh] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 md:inset-x-auto md:bottom-auto md:right-6 md:top-24 md:z-[120] md:w-[min(420px,calc(100vw-2rem))] lg:right-8"
+                @click.stop
               >
-                <div class="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-5 py-4">
+                <div class="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950 px-5 py-4">
                   <div>
                     <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">Updates</p>
                     <h3 class="font-black text-white">Notifications</h3>
                   </div>
             
-                  <button
-                    @click="markAllNotificationsRead"
-                    class="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-300 transition hover:bg-emerald-500 hover:text-slate-950"
-                  >
-                    Mark all read
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <button
+                      @click="markAllNotificationsRead"
+                      class="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-300 transition hover:bg-emerald-500 hover:text-slate-950"
+                    >
+                      Mark all read
+                    </button>
+                    <button
+                      type="button"
+                      class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-slate-300 transition hover:bg-slate-800 hover:text-white md:hidden"
+                      aria-label="Close notifications"
+                      @click="closeNotifications"
+                    >
+                      X
+                    </button>
+                  </div>
                 </div>
             
-                <div v-if="notifications.length" class="notification-scroll max-h-[460px] overflow-y-auto bg-[#020617] py-2">
+                <div v-if="notifications.length" class="notification-scroll max-h-[calc(78vh-88px)] overflow-y-auto bg-[#020617] py-2 md:max-h-[460px]">
                   <div
                     v-for="notification in notifications"
                     :key="notification.id"
@@ -542,7 +561,7 @@
       @close="showIncomeModal = false"
       @saved="refreshDashboard"
     />
-    <SmartAssistantWidget v-if="!showExpenseModal && !showIncomeModal" />
+    <SmartAssistantWidget v-if="!showExpenseModal && !showIncomeModal && !showNotifications && !isMobileSidebarOpen" />
   </main>
   <!-- Floating Button -->
   <div v-if="false" class="fixed bottom-6 right-6 z-50">
@@ -656,7 +675,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, onBeforeUnmount,nextTick } from 'vue'
+import { computed, onMounted, reactive, ref, onBeforeUnmount, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
 import TransactionModal from '../components/TransactionModal.vue'
@@ -676,6 +695,9 @@ const insights = ref([])
 const notifications = ref([])
 const unreadCount = ref(0)
 const showNotifications = ref(false)
+const isMobileSidebarOpen = ref(false)
+const notificationPanel = ref(null)
+const notificationTrigger = ref(null)
 const dashboardError = ref('')
 
 let refreshInterval = null
@@ -862,10 +884,23 @@ const getUnreadCount = async () => {
   unreadCount.value = response.data.count
 }
 
+const closeNotifications = () => {
+  showNotifications.value = false
+}
+
+const toggleNotifications = () => {
+  showNotifications.value = !showNotifications.value
+
+  if (showNotifications.value) {
+    window.dispatchEvent(new CustomEvent('pesotracker-close-sidebar'))
+  }
+}
+
 const markAllNotificationsRead = async () => {
   await api.post('/notifications/read-all')
   unreadCount.value = 0
-  getNotifications()
+  await getNotifications()
+  closeNotifications()
 }
 
 const financialHealth = ref({
@@ -964,7 +999,42 @@ const refreshDashboard = () => {
     })
 }
 
+const handleDocumentClick = (event) => {
+  if (!showNotifications.value) return
+
+  const panel = notificationPanel.value
+  const trigger = notificationTrigger.value
+
+  if (panel?.contains(event.target) || trigger?.contains(event.target)) {
+    return
+  }
+
+  closeNotifications()
+}
+
+const handleEscape = (event) => {
+  if (event.key === 'Escape') {
+    closeNotifications()
+  }
+}
+
+const handleSidebarState = (event) => {
+  isMobileSidebarOpen.value = Boolean(event.detail?.isOpen)
+
+  if (isMobileSidebarOpen.value) {
+    closeNotifications()
+  }
+}
+
+watch(showNotifications, (value) => {
+  document.body.classList.toggle('overflow-hidden', value)
+})
+
 onMounted(() => {
+  document.addEventListener('click', handleDocumentClick)
+  window.addEventListener('keydown', handleEscape)
+  window.addEventListener('pesotracker-sidebar-state', handleSidebarState)
+
   const snapshot = loadDashboardSnapshot()
 
   if (snapshot) {
@@ -984,6 +1054,10 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  document.body.classList.remove('overflow-hidden')
+  document.removeEventListener('click', handleDocumentClick)
+  window.removeEventListener('keydown', handleEscape)
+  window.removeEventListener('pesotracker-sidebar-state', handleSidebarState)
   clearInterval(refreshInterval)
 })
 </script>

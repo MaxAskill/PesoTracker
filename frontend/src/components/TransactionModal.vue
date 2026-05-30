@@ -1,153 +1,134 @@
 <template>
-  <div
-    v-if="show"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+  <AppModal
+    :show="show"
+    :title="transaction ? 'Edit Transaction' : currentType === 'income' ? 'Add Income' : 'Add Expense'"
+    :subtitle="currentType === 'expense' ? 'Record spending and optionally scan a receipt.' : 'Record income manually.'"
+    size="md"
+    @close="closeModal"
   >
-    <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto bg-slate-900 border border-slate-800 rounded-3xl p-8">
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <p class="text-emerald-400 font-semibold text-sm">
-            PesoTracker
-          </p>
+    <form class="space-y-5" @submit.prevent="submitTransaction">
+      <div
+        v-if="canScanReceipt"
+        class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm font-semibold text-emerald-300">
+              Expense Receipt Scanner
+            </p>
+            <p class="mt-1 text-sm text-slate-300">
+              Open a full-screen camera scanner, then review the draft before saving.
+            </p>
+          </div>
 
-         <h2 class="text-3xl font-bold text-white">
-           {{ transaction ? 'Edit Transaction' : currentType === 'income' ? 'Add Income' : 'Add Expense' }}
-         </h2>
+          <button
+            type="button"
+            class="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 transition hover:bg-emerald-400"
+            @click="openReceiptScanner"
+          >
+            Scan Receipt
+          </button>
         </div>
-
-        <button
-          @click="closeModal"
-          class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
-        >
-          ✕
-        </button>
       </div>
 
-      <!-- Form -->
-      <form class="space-y-5" @submit.prevent="submitTransaction">
-        <div
-          v-if="canScanReceipt"
-          class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4"
-        >
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p class="text-sm font-semibold text-emerald-300">
-                Expense Receipt Scanner
-              </p>
-              <p class="mt-1 text-sm text-slate-300">
-                Open a full-screen camera scanner, then review the draft before saving.
-              </p>
-            </div>
+      <div>
+        <label class="mb-2 block text-sm font-semibold text-slate-300">
+          Title
+        </label>
 
-            <button
-              type="button"
-              class="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-400"
-              @click="openReceiptScanner"
-            >
-              Scan Receipt
-            </button>
-          </div>
-        </div>
+        <input
+          v-model="form.title"
+          type="text"
+          placeholder="e.g. Jollibee Lunch"
+          class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+        />
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
         <div>
-          <label class="block text-sm font-semibold text-slate-300 mb-2">
-            Title
+          <label class="mb-2 block text-sm font-semibold text-slate-300">
+            Amount
           </label>
 
           <input
-            v-model="form.title"
-            type="text"
-            placeholder="e.g. Jollibee Lunch"
-            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
+            v-model="form.amount"
+            type="number"
+            placeholder="0.00"
+            class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
           />
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">
-              Amount
-            </label>
-
-            <input
-              v-model="form.amount"
-              type="number"
-              placeholder="0.00"
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">
-              Date
-            </label>
-
-            <input
-              v-model="form.transaction_date"
-              type="date"
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-            />
-          </div>
-        </div>
-
         <div>
-          <label class="block text-sm font-semibold text-slate-300 mb-2">
-            Category
+          <label class="mb-2 block text-sm font-semibold text-slate-300">
+            Date
           </label>
 
-          <select
-            v-model="form.category"
-            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-          >
-            <option disabled value="">Select Category</option>
-          
-            <template v-if="currentType === 'expense'">
-              <option value="Food">Food</option>
-              <option value="Transportation">Transportation</option>
-              <option value="Bills">Bills</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Electricity">Electricity</option>
-              <option value="Utilities">Utilities</option>
-            </template>
-          
-            <template v-if="currentType === 'income'">
-              <option value="Salary">Salary</option>
-              <option value="Allowance">Allowance</option>
-              <option value="Freelance">Freelance</option>
-              <option value="Business">Business</option>
-            </template>
-          </select>
+          <input
+            v-model="form.transaction_date"
+            type="date"
+            class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+          />
         </div>
+      </div>
 
-        <div>
-          <label class="block text-sm font-semibold text-slate-300 mb-2">
-            Note
-          </label>
+      <div>
+        <label class="mb-2 block text-sm font-semibold text-slate-300">
+          Category
+        </label>
 
-          <textarea
-            v-model="form.note"
-            rows="3"
-            placeholder="Optional note..."
-            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition resize-none"
-          ></textarea>
-        </div>
-
-        <p v-if="error" class="text-red-400 text-sm font-medium">
-          {{ error }}
-        </p>
-
-        <button
-          type="submit"
-          :disabled="saving"
-          class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
+        <select
+          v-model="form.category"
+          class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
         >
-          <span
-            v-if="saving"
-            class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
-          ></span>
-          {{ saving ? 'Saving...' : 'Save Transaction' }}
-        </button>
-      </form>
-    </div>
+          <option disabled value="">Select Category</option>
+
+          <template v-if="currentType === 'expense'">
+            <option value="Food">Food</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Bills">Bills</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Electricity">Electricity</option>
+            <option value="Utilities">Utilities</option>
+          </template>
+
+          <template v-if="currentType === 'income'">
+            <option value="Salary">Salary</option>
+            <option value="Allowance">Allowance</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Business">Business</option>
+          </template>
+        </select>
+      </div>
+
+      <div>
+        <label class="mb-2 block text-sm font-semibold text-slate-300">
+          Note
+        </label>
+
+        <textarea
+          v-model="form.note"
+          rows="3"
+          placeholder="Optional note..."
+          class="w-full resize-none rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+        ></textarea>
+      </div>
+
+      <p v-if="error" class="text-sm font-medium text-red-400">
+        {{ error }}
+      </p>
+
+      <button
+        type="submit"
+        :disabled="saving"
+        class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        <span
+          v-if="saving"
+          class="h-4 w-4 animate-spin rounded-full border-2 border-slate-950/30 border-t-slate-950"
+        ></span>
+        {{ saving ? 'Saving...' : 'Save Transaction' }}
+      </button>
+    </form>
 
     <ReceiptScannerModal
       v-if="canScanReceipt"
@@ -163,12 +144,13 @@
       @close="showReceiptDraft = false"
       @saved="handleReceiptDraftSaved"
     />
-  </div>
+  </AppModal>
 </template>
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import api from '../services/api'
+import AppModal from './AppModal.vue'
 import ReceiptScannerModal from './ReceiptScannerModal.vue'
 import ReceiptDraftForm from './ReceiptDraftForm.vue'
 
@@ -242,7 +224,6 @@ const submitTransaction = async () => {
   saving.value = true
 
   try {
-
     const payload = {
       ...form,
       type: props.transaction
@@ -251,23 +232,17 @@ const submitTransaction = async () => {
     }
 
     if (props.transaction) {
-
       await api.put(
         `/transactions/${props.transaction.id}`,
         payload
       )
-
     } else {
-
       await api.post('/transactions', payload)
-
     }
 
     emit('saved')
     closeModal()
-
   } catch (err) {
-
     error.value =
       err.response?.data?.message ||
       'Failed to save transaction.'

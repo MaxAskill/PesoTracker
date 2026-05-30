@@ -43,29 +43,37 @@
             
               <div
                 v-if="showNotifications"
-                class="finance-panel absolute right-0 z-50 mt-3 w-96 max-w-[90vw] overflow-hidden"
+                class="absolute right-0 z-[80] mt-3 w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-slate-700/60 bg-slate-950/95 shadow-2xl shadow-black/50 backdrop-blur-md"
               >
-                <div class="p-5 border-b border-slate-800 flex items-center justify-between">
-                  <h3 class="font-bold text-white">Notifications</h3>
+                <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">Updates</p>
+                    <h3 class="font-black text-white">Notifications</h3>
+                  </div>
             
                   <button
                     @click="markAllNotificationsRead"
-                    class="text-emerald-400 text-sm font-semibold"
+                    class="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-300 transition hover:bg-emerald-500 hover:text-slate-950"
                   >
                     Mark all read
                   </button>
                 </div>
             
-                <div v-if="notifications.length" class="max-h-96 overflow-y-auto">
+                <div v-if="notifications.length" class="notification-scroll max-h-[460px] overflow-y-auto py-2">
                   <div
                     v-for="notification in notifications"
                     :key="notification.id"
-                    class="p-5 border-b border-slate-800"
-                    :class="notification.is_read ? 'bg-slate-900' : 'bg-slate-950'"
+                    class="relative border-b border-slate-800/70 px-5 py-4 transition hover:bg-slate-900/80"
+                    :class="notification.is_read ? 'bg-slate-950' : 'bg-emerald-500/[0.04]'"
                   >
+                    <span
+                      v-if="!notification.is_read"
+                      class="absolute left-2 top-6 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
+                    ></span>
+
                     <div class="flex gap-3">
                       <div
-                        class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-white/10"
                         :class="{
                           'bg-emerald-500/10 text-emerald-400': notification.type === 'success',
                           'bg-amber-500/10 text-amber-400': notification.type === 'warning',
@@ -73,24 +81,33 @@
                           'bg-slate-800 text-slate-400': notification.type === 'info'
                         }"
                       >
-                        ✦
+                        !
                       </div>
             
-                      <div>
-                        <h4 class="font-semibold text-white">
+                      <div class="min-w-0">
+                        <h4 class="font-bold text-slate-100">
                           {{ notification.title }}
                         </h4>
             
-                        <p class="text-sm text-slate-400 mt-1">
+                        <p class="mt-1 text-sm leading-relaxed text-slate-400">
                           {{ notification.message }}
+                        </p>
+                        <p v-if="notification.created_at" class="mt-2 text-xs text-slate-600">
+                          {{ notification.created_at }}
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
             
-                <div v-else class="p-8 text-center text-slate-500">
-                  No notifications yet.
+                <div v-else class="p-10 text-center">
+                  <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-300">
+                    !
+                  </div>
+                  <p class="font-bold text-slate-200">No notifications yet.</p>
+                  <p class="mt-2 text-sm text-slate-500">
+                    Updates about your transactions will appear here.
+                  </p>
                 </div>
               </div>
             </div>
@@ -969,3 +986,24 @@ onBeforeUnmount(() => {
   clearInterval(refreshInterval)
 })
 </script>
+
+<style scoped>
+.notification-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(51 65 85) rgb(2 6 23);
+}
+
+.notification-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notification-scroll::-webkit-scrollbar-track {
+  background: rgb(2 6 23);
+}
+
+.notification-scroll::-webkit-scrollbar-thumb {
+  background: rgb(51 65 85);
+  border-radius: 999px;
+  border: 2px solid rgb(2 6 23);
+}
+</style>

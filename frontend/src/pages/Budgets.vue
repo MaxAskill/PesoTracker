@@ -81,55 +81,50 @@
       </div>
     </section>
 
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-      <div class="w-full max-w-lg rounded-[2rem] border border-white/10 bg-slate-950 p-8 shadow-2xl shadow-slate-950">
-        <div class="mb-8 flex items-center justify-between">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">PesoTracker</p>
-            <h2 class="mt-1 text-3xl font-black text-white">Add Budget</h2>
-          </div>
-
-          <button @click="showModal = false" class="h-10 w-10 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700">X</button>
+    <AppModal
+      :show="showModal"
+      title="Add Budget"
+      subtitle="Set a spending limit for a category and month."
+      @close="showModal = false"
+    >
+      <form class="space-y-5" @submit.prevent="saveBudget">
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-300">Category</label>
+          <select v-model="form.category" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10">
+            <option disabled value="">Select Category</option>
+            <option value="Food">Food</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Bills">Bills</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Utilities">Utilities</option>
+          </select>
         </div>
 
-        <form class="space-y-5" @submit.prevent="saveBudget">
-          <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-300">Category</label>
-            <select v-model="form.category" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10">
-              <option disabled value="">Select Category</option>
-              <option value="Food">Food</option>
-              <option value="Transportation">Transportation</option>
-              <option value="Bills">Bills</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Utilities">Utilities</option>
-            </select>
-          </div>
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-300">Budget Amount</label>
+          <input v-model="form.amount" type="number" placeholder="5000" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+        </div>
 
-          <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-300">Budget Amount</label>
-            <input v-model="form.amount" type="number" placeholder="5000" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
-          </div>
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-slate-300">Month</label>
+          <select v-model="form.month" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10">
+            <option disabled value="">Select Month</option>
+            <option v-for="month in months" :key="month.value" :value="month.value">{{ month.label }}</option>
+          </select>
+        </div>
 
-          <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-300">Month</label>
-            <select v-model="form.month" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10">
-              <option disabled value="">Select Month</option>
-              <option v-for="month in months" :key="month.value" :value="month.value">{{ month.label }}</option>
-            </select>
-          </div>
-
-          <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
-            Save Budget
-          </button>
-        </form>
-      </div>
-    </div>
+        <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+          Save Budget
+        </button>
+      </form>
+    </AppModal>
   </main>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import api from '../services/api'
+import AppModal from '../components/AppModal.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'

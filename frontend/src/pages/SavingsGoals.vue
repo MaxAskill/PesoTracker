@@ -76,33 +76,29 @@
       </div>
     </section>
 
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-      <div class="w-full max-w-lg rounded-[2rem] border border-white/10 bg-slate-950 p-8 shadow-2xl shadow-slate-950">
-        <div class="mb-8 flex items-center justify-between">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">PesoTracker</p>
-            <h2 class="mt-1 text-3xl font-black text-white">Add Savings Goal</h2>
-          </div>
-          <button @click="showModal = false" class="h-10 w-10 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700">X</button>
-        </div>
-
-        <form class="space-y-5" @submit.prevent="saveGoal">
-          <input v-model="form.title" type="text" required placeholder="Goal title" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
-          <textarea v-model="form.description" rows="3" placeholder="Optional description..." class="w-full resize-none rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"></textarea>
-          <input v-model="form.target_amount" type="number" required min="1" placeholder="Target amount" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
-          <input v-model="form.deadline" type="date" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
-          <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
-            Save Goal
-          </button>
-        </form>
-      </div>
-    </div>
+    <AppModal
+      :show="showModal"
+      title="Add Savings Goal"
+      subtitle="Create a target and track your progress over time."
+      @close="showModal = false"
+    >
+      <form class="space-y-5" @submit.prevent="saveGoal">
+        <input v-model="form.title" type="text" required placeholder="Goal title" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+        <textarea v-model="form.description" rows="3" placeholder="Optional description..." class="w-full resize-none rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"></textarea>
+        <input v-model="form.target_amount" type="number" required min="1" placeholder="Target amount" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+        <input v-model="form.deadline" type="date" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+        <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+          Save Goal
+        </button>
+      </form>
+    </AppModal>
   </main>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import api from '../services/api'
+import AppModal from '../components/AppModal.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'

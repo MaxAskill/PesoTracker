@@ -62,53 +62,50 @@
       </div>
     </section>
 
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-      <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-[2rem] border border-white/10 bg-slate-950 p-8 shadow-2xl shadow-slate-950">
-        <div class="mb-8 flex items-center justify-between">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">PesoTracker</p>
-            <h2 class="mt-1 text-3xl font-black text-white">Add Recurring</h2>
-          </div>
-          <button @click="showModal = false" class="h-10 w-10 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700">X</button>
-        </div>
-
-        <form class="space-y-5" @submit.prevent="saveRecurring">
-          <input v-model="form.title" type="text" required placeholder="Transaction title" class="form-field" />
-          <select v-model="form.type" required class="form-field">
-            <option disabled value="">Select Type</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
-          <select v-model="form.category" required class="form-field">
-            <option disabled value="">Select Category</option>
-            <option>Food</option>
-            <option>Bills</option>
-            <option>Transportation</option>
-            <option>Shopping</option>
-            <option>Salary</option>
-            <option>Savings</option>
-          </select>
-          <input v-model="form.amount" type="number" required min="1" placeholder="Amount" class="form-field" />
-          <select v-model="form.frequency" required class="form-field">
-            <option disabled value="">Select Frequency</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-          <input v-model="form.next_due_date" type="date" required class="form-field" />
-          <textarea v-model="form.note" rows="3" placeholder="Optional note..." class="form-field resize-none"></textarea>
-          <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
-            Save Recurring Transaction
-          </button>
-        </form>
-      </div>
-    </div>
+    <AppModal
+      :show="showModal"
+      title="Add Recurring"
+      subtitle="Automate repeating income and expenses."
+      size="lg"
+      @close="showModal = false"
+    >
+      <form class="space-y-5" @submit.prevent="saveRecurring">
+        <input v-model="form.title" type="text" required placeholder="Transaction title" class="form-field" />
+        <select v-model="form.type" required class="form-field">
+          <option disabled value="">Select Type</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <select v-model="form.category" required class="form-field">
+          <option disabled value="">Select Category</option>
+          <option>Food</option>
+          <option>Bills</option>
+          <option>Transportation</option>
+          <option>Shopping</option>
+          <option>Salary</option>
+          <option>Savings</option>
+        </select>
+        <input v-model="form.amount" type="number" required min="1" placeholder="Amount" class="form-field" />
+        <select v-model="form.frequency" required class="form-field">
+          <option disabled value="">Select Frequency</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+        <input v-model="form.next_due_date" type="date" required class="form-field" />
+        <textarea v-model="form.note" rows="3" placeholder="Optional note..." class="form-field resize-none"></textarea>
+        <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+          Save Recurring Transaction
+        </button>
+      </form>
+    </AppModal>
   </main>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import AppModal from '../components/AppModal.vue'
 import Sidebar from '../components/Sidebar.vue'
 import api from '../services/api'
 import { formatPeso } from '../utils/currency'

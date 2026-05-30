@@ -9,7 +9,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\SavingsGoalController;
 use App\Http\Controllers\InsightController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ReceiptScannerController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\FinancialHealthController;
@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('savings-goals', SavingsGoalController::class);
     Route::get('/insights', [InsightController::class, 'index']);
     Route::get('/reports/transactions/csv', [ReportController::class, 'transactionsCsv']);
-    Route::post('/receipts/scan', [ReceiptController::class, 'scan']);
+    Route::post('/receipts/scan', [ReceiptScannerController::class, 'scan']);
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);

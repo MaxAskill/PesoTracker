@@ -26,78 +26,27 @@
 
       <!-- Form -->
       <form class="space-y-5" @submit.prevent="submitTransaction">
-        <div>
-          <label class="block text-sm font-semibold text-slate-300 mb-2">
-            Scan Receipt
-          </label>
-        
-          <div class="grid gap-3">
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              @change="handleReceiptUpload"
-              class="block w-full text-sm text-slate-400
-              file:mr-4 file:py-3 file:px-4
-              file:rounded-xl file:border-0
-              file:bg-emerald-500 file:text-white
-              hover:file:bg-emerald-600"
-            />
-
-            <div class="flex flex-wrap items-center gap-3">
-              <button
-                v-if="!cameraActive"
-                type="button"
-                :disabled="cameraLoading || ocrLoading"
-                @click="startCamera"
-                class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {{ cameraLoading ? 'Opening camera...' : 'Use Camera' }}
-              </button>
-
-              <button
-                v-if="cameraActive"
-                type="button"
-                :disabled="ocrLoading"
-                @click="captureReceipt"
-                class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <span
-                  v-if="ocrLoading"
-                  class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
-                ></span>
-                {{ ocrLoading ? 'Scanning...' : 'Capture Receipt' }}
-              </button>
-
-              <button
-                v-if="cameraActive"
-                type="button"
-                @click="stopCamera"
-                class="rounded-xl bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-700"
-              >
-                Cancel Camera
-              </button>
+        <div
+          v-if="currentType === 'expense' && !transaction"
+          class="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4"
+        >
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm font-semibold text-emerald-300">
+                Expense Receipt Scanner
+              </p>
+              <p class="mt-1 text-sm text-slate-300">
+                Open a full-screen camera scanner, then review the draft before saving.
+              </p>
             </div>
 
-            <div v-if="cameraActive" class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
-              <video
-                ref="cameraVideo"
-                autoplay
-                muted
-                playsinline
-                class="aspect-video w-full object-cover"
-              ></video>
-            </div>
-
-            <canvas ref="cameraCanvas" class="hidden"></canvas>
-
-            <div v-if="ocrLoading" class="text-emerald-400 text-sm">
-              Scanning...
-            </div>
-
-            <p v-if="cameraError" class="text-sm text-red-400">
-              {{ cameraError }}
-            </p>
+            <button
+              type="button"
+              class="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-400"
+              @click="showReceiptScanner = true"
+            >
+              Scan Receipt
+            </button>
           </div>
         </div>
         <div>
@@ -199,20 +148,32 @@
         </button>
       </form>
     </div>
+
+    <ReceiptScannerModal
+      :show="showReceiptScanner"
+      @close="showReceiptScanner = false"
+      @draft="openReceiptDraft"
+    />
+
+    <ReceiptDraftForm
+      :show="showReceiptDraft"
+      :draft="receiptDraft"
+      @close="showReceiptDraft = false"
+      @saved="handleReceiptDraftSaved"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import api from '../services/api'
-const ocrLoading = ref(false)
-const cameraActive = ref(false)
-const cameraError = ref('')
-const cameraLoading = ref(false)
+import ReceiptScannerModal from './ReceiptScannerModal.vue'
+import ReceiptDraftForm from './ReceiptDraftForm.vue'
+
 const saving = ref(false)
-const cameraVideo = ref(null)
-const cameraCanvas = ref(null)
-let cameraStream = null
+const showReceiptScanner = ref(false)
+const showReceiptDraft = ref(false)
+const receiptDraft = ref(null)
 
 const props = defineProps({
   show: Boolean,
@@ -239,8 +200,6 @@ watch(
   () => props.show,
   (value) => {
     if (value) {
-      cameraError.value = ''
-
       if (props.transaction) {
         form.title = props.transaction.title
         form.amount = props.transaction.amount
@@ -255,7 +214,7 @@ watch(
         form.note = ''
       }
     } else {
-      stopCamera()
+      closeReceiptScanner()
     }
   }
 )
@@ -306,166 +265,26 @@ const submitTransaction = async () => {
 }
 
 const closeModal = () => {
-  stopCamera()
+  closeReceiptScanner()
   emit('close')
 }
 
-const handleReceiptUpload = async (event) => {
-
-  const file = event.target.files[0]
-
-  if (!file) return
-
-  await scanReceipt(file)
-  event.target.value = ''
+const openReceiptDraft = (draft) => {
+  receiptDraft.value = draft
+  showReceiptScanner.value = false
+  showReceiptDraft.value = true
 }
 
-const startCamera = async () => {
-  if (cameraLoading.value || ocrLoading.value) return
-
-  cameraError.value = ''
-  cameraLoading.value = true
-
-  if (!navigator.mediaDevices?.getUserMedia) {
-    cameraError.value = 'Camera access is not supported in this browser.'
-    cameraLoading.value = false
-    return
-  }
-
-  try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: 'environment' }
-      },
-      audio: false
-    })
-
-    cameraActive.value = true
-    await nextTick()
-
-    if (cameraVideo.value) {
-      cameraVideo.value.srcObject = cameraStream
-    }
-  } catch (err) {
-    cameraError.value = 'Could not open the camera. Please allow camera access and try again.'
-  } finally {
-    cameraLoading.value = false
-  }
+const handleReceiptDraftSaved = () => {
+  showReceiptDraft.value = false
+  receiptDraft.value = null
+  emit('saved')
+  closeModal()
 }
 
-const stopCamera = () => {
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop())
-    cameraStream = null
-  }
-
-  if (cameraVideo.value) {
-    cameraVideo.value.srcObject = null
-  }
-
-  cameraActive.value = false
+const closeReceiptScanner = () => {
+  showReceiptScanner.value = false
+  showReceiptDraft.value = false
+  receiptDraft.value = null
 }
-
-const captureReceipt = async () => {
-  if (ocrLoading.value) return
-
-  cameraError.value = ''
-
-  const video = cameraVideo.value
-  const canvas = cameraCanvas.value
-
-  if (!video || !canvas || !video.videoWidth || !video.videoHeight) {
-    cameraError.value = 'Camera preview is not ready yet.'
-    return
-  }
-
-  const maxSize = 1600
-  const scale = Math.min(maxSize / video.videoWidth, maxSize / video.videoHeight, 1)
-
-  canvas.width = Math.round(video.videoWidth * scale)
-  canvas.height = Math.round(video.videoHeight * scale)
-
-  const context = canvas.getContext('2d')
-  context.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-  const blob = await new Promise(resolve => {
-    canvas.toBlob(resolve, 'image/jpeg', 0.92)
-  })
-
-  if (!blob) {
-    cameraError.value = 'Could not capture the receipt image.'
-    return
-  }
-
-  const file = new File([blob], `receipt-${Date.now()}.jpg`, {
-    type: 'image/jpeg'
-  })
-
-  await scanReceipt(file)
-  stopCamera()
-}
-
-const scanReceipt = async (file) => {
-  if (ocrLoading.value) return
-
-  const formData = new FormData()
-
-  formData.append('receipt', file)
-
-  ocrLoading.value = true
-
-  try {
-
-    const response = await api.post(
-      '/receipts/scan',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-    )
-
-    const data = response.data
-
-    if (data.store_name) {
-      form.title = data.store_name
-    }
-
-    if (data.amount) {
-      form.amount = data.amount
-    }
-
-    if (data.date) {
-      form.transaction_date = formatDate(data.date)
-    }
-
-    if (data.category) {
-      form.category = data.category
-    }
-
-  } catch (error) {
-
-    console.error(error)
-    cameraError.value = 'Receipt scanning failed. Try a clearer photo with good lighting.'
-
-  } finally {
-
-    ocrLoading.value = false
-
-  }
-}
-
-const formatDate = (dateString) => {
-
-  const parts = dateString.split(/[\/\-]/)
-
-  if (parts.length !== 3) return ''
-
-  return `${parts[2]}-${parts[0]}-${parts[1]}`
-}
-
-onBeforeUnmount(() => {
-  stopCamera()
-})
 </script>

@@ -1,182 +1,97 @@
 <template>
-  <main class="min-h-screen bg-slate-950 text-white flex">
-    <!-- Sidebar -->
+  <main class="magic-bg min-h-screen text-white flex">
     <Sidebar />
 
-    <!-- Main -->
-    <section class="flex-1 p-6 pt-24 lg:pt-6 overflow-y-auto">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+    <section class="min-w-0 flex-1 p-4 pt-24 sm:p-6 lg:pt-6 overflow-y-auto">
+      <div class="mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/55 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur md:flex-row md:items-center md:justify-between">
         <div>
-          <p class="text-slate-400">Track your</p>
-          <h2 class="text-3xl font-bold">Savings Goals</h2>
+          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Future Fund</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">Savings Goals</h2>
+          <p class="mt-2 max-w-2xl text-sm text-slate-400">
+            Track your progress toward your financial goals.
+          </p>
         </div>
 
-        <button
-          @click="showModal = true"
-          class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl font-semibold transition"
-        >
-          + Add Goal
+        <button @click="showModal = true" class="rounded-2xl border border-emerald-300/50 bg-gradient-to-r from-emerald-400 to-teal-300 px-6 py-3 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:from-emerald-300 hover:to-teal-200">
+          Add Goal
         </button>
       </div>
 
-      <!-- Goal Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div
-          v-for="goal in goals"
-          :key="goal.id"
-          class="bg-slate-900 border border-slate-800 rounded-3xl p-6"
-        >
-          <div class="flex items-start justify-between gap-4 mb-5">
+      <div v-if="isLoading" class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div v-for="index in 3" :key="index" class="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6">
+          <div class="h-5 w-40 rounded-full bg-slate-800 animate-pulse"></div>
+          <div class="mt-6 h-32 rounded-3xl bg-slate-800/50 animate-pulse"></div>
+        </div>
+      </div>
+
+      <div v-else-if="goals.length" class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div v-for="goal in goals" :key="goal.id" class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20">
+          <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/10 blur-2xl"></div>
+          <div class="relative mb-5 flex items-start justify-between gap-4">
             <div>
-              <p class="text-slate-400 text-sm">{{ goal.deadline }}</p>
-              <h3 class="text-2xl font-bold mt-1">{{ goal.title }}</h3>
-              <p v-if="goal.description" class="text-slate-500 text-sm mt-2">
-                {{ goal.description }}
-              </p>
+              <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">{{ goal.deadline }}</p>
+              <h3 class="mt-1 text-2xl font-black">{{ goal.title }}</h3>
+              <p v-if="goal.description" class="mt-2 text-sm text-slate-500">{{ goal.description }}</p>
             </div>
 
-            <button
-              @click="deleteGoal(goal.id)"
-              class="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white px-3 py-2 rounded-xl text-sm transition"
-            >
-              Delete
-            </button>
+            <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
+              {{ goal.status || 'active' }}
+            </span>
           </div>
 
-          <div class="mb-5">
-            <div class="flex justify-between text-sm mb-2">
+          <div class="relative mb-5 rounded-3xl border border-white/10 bg-slate-950/80 p-5">
+            <div class="mb-3 flex justify-between text-sm">
               <span class="text-slate-400">Progress</span>
-              <span>{{ progress(goal) }}%</span>
+              <span class="font-black text-emerald-300">{{ progress(goal) }}%</span>
             </div>
-
-            <div class="h-3 bg-slate-800 rounded-full overflow-hidden">
-              <div
-                class="h-3 bg-emerald-500 rounded-full"
-                :style="{ width: progress(goal) + '%' }"
-              ></div>
+            <div class="h-3 overflow-hidden rounded-full bg-slate-800">
+              <div class="h-3 rounded-full bg-emerald-400 transition-all" :style="{ width: progress(goal) + '%' }"></div>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 mb-5">
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-              <p class="text-slate-500 text-sm">Saved</p>
-              <p class="text-emerald-400 font-bold mt-1">
-                {{ formatPeso(goal.saved_amount) }}
-              </p>
+          <div class="mb-5 grid grid-cols-2 gap-4">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+              <p class="text-sm text-slate-500">Saved</p>
+              <p class="mt-1 font-black text-emerald-300">{{ formatPeso(goal.saved_amount) }}</p>
             </div>
-
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-              <p class="text-slate-500 text-sm">Target</p>
-              <p class="font-bold mt-1">
-                {{ formatPeso(goal.target_amount) }}
-              </p>
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+              <p class="text-sm text-slate-500">Target</p>
+              <p class="mt-1 font-black">{{ formatPeso(goal.target_amount) }}</p>
             </div>
           </div>
 
           <form @submit.prevent="addContribution(goal)" class="flex gap-3">
-            <input
-              v-model="contributions[goal.id]"
-              type="number"
-              min="1"
-              placeholder="Add ₱"
-              class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-            />
-
-            <button
-              type="submit"
-              class="bg-emerald-500 hover:bg-emerald-600 px-5 py-3 rounded-xl font-bold transition"
-            >
-              Add
-            </button>
+            <input v-model="contributions[goal.id]" type="number" min="1" placeholder="Add amount" class="min-w-0 flex-1 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+            <button type="submit" class="rounded-xl bg-emerald-500 px-5 py-3 font-black text-slate-950 transition hover:bg-emerald-400">Add</button>
           </form>
+
+          <button @click="deleteGoal(goal.id)" class="mt-4 w-full rounded-xl bg-red-500/10 py-3 font-bold text-red-300 transition hover:bg-red-500 hover:text-white">
+            Delete Goal
+          </button>
         </div>
       </div>
 
-      <div v-if="!goals.length" class="h-72 flex items-center justify-center text-slate-500">
-        No savings goals yet.
+      <div v-else class="flex min-h-72 items-center justify-center rounded-[2rem] border border-dashed border-slate-800 bg-slate-950/60 p-10 text-center text-slate-500">
+        No savings goals yet. Create a goal and start building your future.
       </div>
     </section>
 
-    <!-- Add Goal Modal -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
-    >
-      <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-8">
-        <div class="flex items-center justify-between mb-8">
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+      <div class="w-full max-w-lg rounded-[2rem] border border-white/10 bg-slate-950 p-8 shadow-2xl shadow-slate-950">
+        <div class="mb-8 flex items-center justify-between">
           <div>
-            <p class="text-emerald-400 font-semibold text-sm">PesoTracker</p>
-            <h2 class="text-3xl font-bold text-white">Add Savings Goal</h2>
+            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">PesoTracker</p>
+            <h2 class="mt-1 text-3xl font-black text-white">Add Savings Goal</h2>
           </div>
-
-          <button
-            @click="showModal = false"
-            class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
-          >
-            ✕
-          </button>
+          <button @click="showModal = false" class="h-10 w-10 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700">X</button>
         </div>
 
         <form class="space-y-5" @submit.prevent="saveGoal">
-          <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">
-              Goal Title
-            </label>
-
-            <input
-              v-model="form.title"
-              type="text"
-              required
-              placeholder="e.g. Laptop Fund"
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">
-              Description
-            </label>
-
-            <textarea
-              v-model="form.description"
-              rows="3"
-              placeholder="Optional description..."
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition resize-none"
-            ></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">
-              Target Amount
-            </label>
-
-            <input
-              v-model="form.target_amount"
-              type="number"
-              required
-              min="1"
-              placeholder="60000"
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">
-              Deadline
-            </label>
-
-            <input
-              v-model="form.deadline"
-              type="date"
-              required
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-            />
-          </div>
-
-          <button
-            type="submit"
-            class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition"
-          >
+          <input v-model="form.title" type="text" required placeholder="Goal title" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+          <textarea v-model="form.description" rows="3" placeholder="Optional description..." class="w-full resize-none rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"></textarea>
+          <input v-model="form.target_amount" type="number" required min="1" placeholder="Target amount" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+          <input v-model="form.deadline" type="date" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+          <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
             Save Goal
           </button>
         </form>
@@ -187,15 +102,13 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import api from '../services/api'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'
 
-const router = useRouter()
-
 const goals = ref([])
+const isLoading = ref(false)
 const showModal = ref(false)
 const contributions = reactive({})
 
@@ -209,33 +122,32 @@ const form = reactive({
 const progress = (goal) => {
   const saved = Number(goal.saved_amount)
   const target = Number(goal.target_amount)
-
   if (!target) return 0
-
   return Math.min(Math.round((saved / target) * 100), 100)
 }
 
 const getGoals = async () => {
+  isLoading.value = !goals.value.length
+
   try {
     const response = await api.get('/savings-goals')
     goals.value = response.data
     saveDisplayCache('savings-goals', response.data)
   } catch (error) {
     console.error(error)
+  } finally {
+    isLoading.value = false
   }
 }
 
 const saveGoal = async () => {
   try {
     await api.post('/savings-goals', form)
-
     showModal.value = false
-
     form.title = ''
     form.description = ''
     form.target_amount = ''
     form.deadline = ''
-
     getGoals()
   } catch (error) {
     console.error(error.response?.data || error)
@@ -244,14 +156,12 @@ const saveGoal = async () => {
 
 const addContribution = async (goal) => {
   const amount = Number(contributions[goal.id])
-
   if (!amount || amount <= 0) return
 
   try {
     await api.put(`/savings-goals/${goal.id}`, {
       saved_amount: Number(goal.saved_amount) + amount
     })
-
     contributions[goal.id] = ''
     getGoals()
   } catch (error) {
@@ -261,7 +171,6 @@ const addContribution = async (goal) => {
 
 const deleteGoal = async (id) => {
   if (!confirm('Delete this savings goal?')) return
-
   try {
     await api.delete(`/savings-goals/${id}`)
     goals.value = goals.value.filter(goal => goal.id !== id)
@@ -273,11 +182,7 @@ const deleteGoal = async (id) => {
 
 onMounted(() => {
   const cachedGoals = loadDisplayCache('savings-goals')
-
-  if (cachedGoals) {
-    goals.value = cachedGoals
-  }
-
+  if (cachedGoals) goals.value = cachedGoals
   getGoals()
 })
 </script>

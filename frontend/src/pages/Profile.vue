@@ -1,64 +1,72 @@
 <template>
-  <main class="min-h-screen bg-slate-950 text-white flex">
+  <main class="magic-bg min-h-screen text-white flex">
     <Sidebar />
 
-    <section class="flex-1 p-6 pt-24 lg:pt-6">
-      <div class="mb-8">
-        <p class="text-slate-400">Manage your</p>
-        <h2 class="text-3xl font-bold">Profile & Settings</h2>
+    <section class="min-w-0 flex-1 p-4 pt-24 sm:p-6 lg:pt-6">
+      <div class="mb-8 rounded-[2rem] border border-white/10 bg-slate-950/55 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur">
+        <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Account Center</p>
+        <h2 class="mt-2 text-3xl font-black md:text-4xl">Profile</h2>
+        <p class="mt-2 max-w-2xl text-sm text-slate-400">
+          Manage your personal information and account settings.
+        </p>
       </div>
 
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div class="xl:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6">
-          <h3 class="text-xl font-bold mb-6">Account Information</h3>
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div class="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20 xl:col-span-2">
+          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Personal Information</p>
+          <h3 class="mb-6 mt-1 text-2xl font-black">Account Information</h3>
 
           <div class="space-y-5">
             <div>
-              <label class="block text-sm text-slate-400 mb-2">First Name</label>
+              <label class="mb-2 block text-sm text-slate-400">First Name</label>
               <input
                 v-model="user.first_name"
                 disabled
-                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-300"
+                class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-300"
               />
             </div>
 
             <div>
-              <label class="block text-sm text-slate-400 mb-2">Last Name</label>
+              <label class="mb-2 block text-sm text-slate-400">Last Name</label>
               <input
                 v-model="user.last_name"
                 disabled
-                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-300"
+                class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-300"
               />
             </div>
 
             <div>
-              <label class="block text-sm text-slate-400 mb-2">Email</label>
+              <label class="mb-2 block text-sm text-slate-400">Email</label>
               <input
                 v-model="user.email"
                 disabled
-                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-300"
+                class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-slate-300"
               />
             </div>
           </div>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-          <div class="w-20 h-20 bg-emerald-500 rounded-3xl flex items-center justify-center text-4xl font-black mb-6">
-            ₱
+        <div class="relative overflow-hidden rounded-[2rem] border border-emerald-400/15 bg-gradient-to-br from-slate-950/80 via-slate-950/70 to-emerald-950/20 p-6 shadow-2xl shadow-slate-950/20">
+          <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/10 blur-2xl"></div>
+          <div class="relative mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-emerald-500 text-4xl font-black text-slate-950">
+            P
           </div>
 
-          <h3 class="text-2xl font-bold">
-            PesoTracker
-          </h3>
+          <h3 class="relative text-2xl font-black">PesoTracker</h3>
 
-          <p class="text-slate-400 mt-3 leading-relaxed">
+          <p class="relative mt-3 leading-relaxed text-slate-400">
             Your smart finance tracker with budgets, savings goals, OCR receipts,
-            analytics, notifications, and AI-style insights.
+            analytics, notifications, and assistant-powered insights.
           </p>
+
+          <div class="relative mt-6 rounded-3xl border border-white/10 bg-slate-950/70 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Account Status</p>
+            <p class="mt-1 font-bold text-emerald-300">Active</p>
+          </div>
 
           <button
             @click="logout"
-            class="w-full mt-8 bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl font-bold transition"
+            class="relative mt-8 w-full rounded-2xl border border-red-500/30 bg-red-500/10 py-3 font-bold text-red-200 transition hover:bg-red-500 hover:text-white"
           >
             Logout
           </button>

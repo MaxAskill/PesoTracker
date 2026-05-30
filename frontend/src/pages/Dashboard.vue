@@ -159,7 +159,13 @@
           <div class="relative flex h-full flex-col justify-between">
             <div class="flex items-start justify-between gap-4">
               <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Current Balance</p>
-              <span class="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-200">Live</span>
+              <span class="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-200">
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a2 2 0 0 1 2 2v10.5a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 17V7.5Z" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M16 12h4v4h-4a2 2 0 0 1 0-4Z" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M7 8h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </span>
             </div>
             <h3 class="mt-5 text-4xl font-black tracking-tight text-white md:text-5xl">{{ formatPeso(dashboard.balance) }}</h3>
             <div class="mt-5 flex items-center justify-between">
@@ -172,7 +178,13 @@
         </div>
 
         <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
-          <div class="absolute right-6 top-6 h-14 w-14 rounded-2xl bg-emerald-400/10"></div>
+          <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
+            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 19V5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+              <path d="m6.5 10.5 5.5-5.5 5.5 5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 19h14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+          </div>
           <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Total Income</p>
           <h3 class="mt-6 text-4xl font-black tracking-tight text-emerald-300">
             {{ formatPeso(dashboard.total_income) }}
@@ -181,7 +193,13 @@
         </div>
 
         <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
-          <div class="absolute right-6 top-6 h-14 w-14 rounded-2xl bg-red-400/10"></div>
+          <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-400/20 bg-red-400/10 text-red-300">
+            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 5v14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+              <path d="m6.5 13.5 5.5 5.5 5.5-5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 5h14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            </svg>
+          </div>
           <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Total Expenses</p>
           <h3 class="mt-6 text-4xl font-black tracking-tight text-red-300">
             {{ formatPeso(dashboard.total_expenses) }}
@@ -190,7 +208,13 @@
         </div>
 
         <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
-          <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-full border border-amber-300/20 bg-amber-300/10 text-xs font-black text-amber-200">%</div>
+          <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-full border border-amber-300/20 bg-amber-300/10 text-amber-200">
+            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M19 5 5 19" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+              <path d="M7.5 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.9"/>
+              <path d="M16.5 19.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.9"/>
+            </svg>
+          </div>
           <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Savings Score</p>
           <h3 class="mt-6 text-4xl font-black tracking-tight text-amber-300">85%</h3>
           <p class="mt-5 text-sm text-slate-500">Healthy spending</p>

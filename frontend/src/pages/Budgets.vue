@@ -1,117 +1,101 @@
 <template>
-  <main class="min-h-screen bg-slate-950 text-white flex">
-    <!-- Sidebar -->
+  <main class="magic-bg min-h-screen text-white flex">
     <Sidebar />
-    <!-- Main -->
-    <section class="flex-1 p-6 pt-24 lg:pt-6 overflow-y-auto">
-      <!-- Header -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+
+    <section class="min-w-0 flex-1 p-4 pt-24 sm:p-6 lg:pt-6 overflow-y-auto">
+      <div class="mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/55 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur md:flex-row md:items-center md:justify-between">
         <div>
-          <p class="text-slate-400">Manage your</p>
-          <h2 class="text-3xl font-bold">Budgets</h2>
+          <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Spending Plan</p>
+          <h2 class="mt-2 text-3xl font-black md:text-4xl">Budgets</h2>
+          <p class="mt-2 max-w-2xl text-sm text-slate-400">
+            Plan spending limits and monitor your categories.
+          </p>
         </div>
 
         <button
           @click="showModal = true"
-          class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl font-semibold transition"
+          class="rounded-2xl border border-emerald-300/50 bg-gradient-to-r from-emerald-400 to-teal-300 px-6 py-3 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:from-emerald-300 hover:to-teal-200"
         >
-          + Add Budget
+          Add Budget
         </button>
       </div>
 
-      <!-- Budget Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div v-if="isLoading" class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div v-for="index in 3" :key="index" class="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6">
+          <div class="h-5 w-36 rounded-full bg-slate-800 animate-pulse"></div>
+          <div class="mt-6 h-24 rounded-3xl bg-slate-800/50 animate-pulse"></div>
+        </div>
+      </div>
+
+      <div v-else-if="budgets.length" class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         <div
           v-for="budget in budgets"
           :key="budget.id"
-          class="bg-slate-900 border border-slate-800 rounded-3xl p-6"
+          class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20"
         >
-          <div class="flex items-center justify-between mb-5">
-            <div>
-              <p class="text-slate-400 text-sm">
-                {{ budget.month }}
-              </p>
+          <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/10 blur-2xl"></div>
 
-              <h3 class="text-2xl font-bold mt-1">
-                {{ budget.category }}
-              </h3>
+          <div class="relative mb-6 flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">{{ budget.month }}</p>
+              <h3 class="mt-1 text-2xl font-black">{{ budget.category }}</h3>
             </div>
 
-            <button
-              @click="deleteBudget(budget.id)"
-              class="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white px-3 py-2 rounded-xl text-sm transition"
-            >
+            <button @click="deleteBudget(budget.id)" class="rounded-xl bg-red-500/10 px-3 py-2 text-sm text-red-300 transition hover:bg-red-500 hover:text-white">
               Delete
             </button>
           </div>
 
-          <div class="mb-4">
-            <div class="flex justify-between text-sm mb-2">
-              <span class="text-slate-400">Budget Limit</span>
-              <span>{{ formatPeso(budget.amount) }}</span>
+          <div class="relative mb-5 rounded-3xl border border-white/10 bg-slate-950/80 p-5">
+            <div class="mb-3 flex justify-between text-sm">
+              <span class="text-slate-400">Usage</span>
+              <span class="font-bold" :class="budgetTone(budget).text">{{ budgetUsage(budget) }}%</span>
             </div>
 
-            <div class="h-3 bg-slate-800 rounded-full overflow-hidden">
-              <div
-                class="h-3 bg-emerald-500 rounded-full"
-                style="width: 65%"
-              ></div>
+            <div class="h-3 overflow-hidden rounded-full bg-slate-800">
+              <div class="h-3 rounded-full transition-all" :class="budgetTone(budget).bar" :style="{ width: budgetUsage(budget) + '%' }"></div>
             </div>
           </div>
 
-          <div class="flex justify-between text-sm mt-4">
-            <span class="text-slate-400">Remaining</span>
-            <span class="text-emerald-400 font-semibold">
-              {{ formatPeso(budget.amount) }}
-            </span>
+          <div class="relative grid grid-cols-3 gap-3 text-sm">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-3">
+              <p class="text-slate-500">Spent</p>
+              <p class="mt-1 font-black">{{ formatPeso(budgetSpent(budget)) }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-3">
+              <p class="text-slate-500">Limit</p>
+              <p class="mt-1 font-black">{{ formatPeso(budget.amount) }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-3">
+              <p class="text-slate-500">Left</p>
+              <p class="mt-1 font-black" :class="remainingBudget(budget) >= 0 ? 'text-emerald-300' : 'text-red-300'">
+                {{ formatPeso(remainingBudget(budget)) }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div
-        v-if="!budgets.length"
-        class="h-72 flex items-center justify-center text-slate-500"
-      >
-        No budgets yet.
+      <div v-else class="flex min-h-72 items-center justify-center rounded-[2rem] border border-dashed border-slate-800 bg-slate-950/60 p-10 text-center text-slate-500">
+        No budgets yet. Create a budget to start controlling your spending.
       </div>
     </section>
 
-    <!-- Modal -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
-    >
-      <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-8">
-        <div class="flex items-center justify-between mb-8">
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+      <div class="w-full max-w-lg rounded-[2rem] border border-white/10 bg-slate-950 p-8 shadow-2xl shadow-slate-950">
+        <div class="mb-8 flex items-center justify-between">
           <div>
-            <p class="text-emerald-400 font-semibold text-sm">
-              PesoTracker
-            </p>
-
-            <h2 class="text-3xl font-bold text-white">
-              Add Budget
-            </h2>
+            <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">PesoTracker</p>
+            <h2 class="mt-1 text-3xl font-black text-white">Add Budget</h2>
           </div>
 
-          <button
-            @click="showModal = false"
-            class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
-          >
-            ✕
-          </button>
+          <button @click="showModal = false" class="h-10 w-10 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700">X</button>
         </div>
 
         <form class="space-y-5" @submit.prevent="saveBudget">
           <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">
-              Category
-            </label>
-
-            <select
-              v-model="form.category"
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-            >
+            <label class="mb-2 block text-sm font-semibold text-slate-300">Category</label>
+            <select v-model="form.category" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10">
               <option disabled value="">Select Category</option>
               <option value="Food">Food</option>
               <option value="Transportation">Transportation</option>
@@ -122,46 +106,19 @@
           </div>
 
           <div>
-            <label class="block text-sm font-semibold text-slate-300 mb-2">
-              Budget Amount
-            </label>
-
-            <input
-              v-model="form.amount"
-              type="number"
-              placeholder="5000"
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-            />
+            <label class="mb-2 block text-sm font-semibold text-slate-300">Budget Amount</label>
+            <input v-model="form.amount" type="number" placeholder="5000" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
           </div>
 
           <div>
-            <div>
-              <label class="block text-sm font-semibold text-slate-300 mb-2">
-                Month
-              </label>
-            
-              <select
-                v-model="form.month"
-                required
-                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none transition"
-              >
-                <option disabled value="">Select Month</option>
-            
-                <option
-                  v-for="month in months"
-                  :key="month.value"
-                  :value="month.value"
-                >
-                  {{ month.label }}
-                </option>
-              </select>
-            </div>
+            <label class="mb-2 block text-sm font-semibold text-slate-300">Month</label>
+            <select v-model="form.month" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10">
+              <option disabled value="">Select Month</option>
+              <option v-for="month in months" :key="month.value" :value="month.value">{{ month.label }}</option>
+            </select>
           </div>
 
-          <button
-            type="submit"
-            class="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition"
-          >
+          <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
             Save Budget
           </button>
         </form>
@@ -172,15 +129,14 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import api from '../services/api'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'
 
-const router = useRouter()
-
 const budgets = ref([])
+const transactions = ref([])
+const isLoading = ref(false)
 const showModal = ref(false)
 
 const form = reactive({
@@ -189,40 +145,56 @@ const form = reactive({
   month: ''
 })
 
-
 const months = Array.from({ length: 12 }, (_, index) => {
   const date = new Date(new Date().getFullYear(), index)
-
   return {
     value: `${date.getFullYear()}-${String(index + 1).padStart(2, '0')}`,
-    label: date.toLocaleString('en-US', {
-      month: 'long',
-      year: 'numeric'
-    })
+    label: date.toLocaleString('en-US', { month: 'long', year: 'numeric' })
   }
 })
 
-const getBudgets = async () => {
-  try {
-    const response = await api.get('/budgets')
+const budgetSpent = (budget) => {
+  return transactions.value
+    .filter(transaction => transaction.type === 'expense' && transaction.category === budget.category && transaction.transaction_date?.startsWith(budget.month))
+    .reduce((sum, transaction) => sum + Number(transaction.amount), 0)
+}
 
-    budgets.value = response.data
-    saveDisplayCache('budgets', response.data)
+const remainingBudget = (budget) => Number(budget.amount) - budgetSpent(budget)
+const budgetUsage = (budget) => Math.min(Math.round((budgetSpent(budget) / Number(budget.amount || 1)) * 100), 100)
+
+const budgetTone = (budget) => {
+  const usage = budgetUsage(budget)
+  if (remainingBudget(budget) < 0 || usage >= 100) return { text: 'text-red-300', bar: 'bg-red-400' }
+  if (usage >= 80) return { text: 'text-amber-300', bar: 'bg-amber-400' }
+  return { text: 'text-emerald-300', bar: 'bg-emerald-400' }
+}
+
+const getBudgets = async () => {
+  isLoading.value = !budgets.value.length
+
+  try {
+    const [budgetsResponse, transactionsResponse] = await Promise.all([
+      api.get('/budgets'),
+      api.get('/transactions')
+    ])
+
+    budgets.value = budgetsResponse.data
+    transactions.value = transactionsResponse.data
+    saveDisplayCache('budgets', budgetsResponse.data)
   } catch (error) {
     console.error(error)
+  } finally {
+    isLoading.value = false
   }
 }
 
 const saveBudget = async () => {
   try {
     await api.post('/budgets', form)
-
     showModal.value = false
-
     form.category = ''
     form.amount = ''
     form.month = ''
-
     getBudgets()
   } catch (error) {
     console.log(error.response?.data)
@@ -234,10 +206,7 @@ const deleteBudget = async (id) => {
 
   try {
     await api.delete(`/budgets/${id}`)
-
-    budgets.value = budgets.value.filter(
-      budget => budget.id !== id
-    )
+    budgets.value = budgets.value.filter(budget => budget.id !== id)
     saveDisplayCache('budgets', budgets.value)
   } catch (error) {
     console.error(error)
@@ -246,11 +215,7 @@ const deleteBudget = async (id) => {
 
 onMounted(() => {
   const cachedBudgets = loadDisplayCache('budgets')
-
-  if (cachedBudgets) {
-    budgets.value = cachedBudgets
-  }
-
+  if (cachedBudgets) budgets.value = cachedBudgets
   getBudgets()
 })
 </script>

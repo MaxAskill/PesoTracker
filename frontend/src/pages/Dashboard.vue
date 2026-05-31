@@ -169,7 +169,18 @@
               <path d="M16.5 19.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.9"/>
             </svg>
           </div>
-          <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Savings Score</p>
+          <div class="flex items-center gap-2">
+            <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Savings Score</p>
+            <button
+              type="button"
+              class="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-slate-900 text-xs font-black text-slate-300 transition hover:border-emerald-400/40 hover:text-emerald-200"
+              aria-label="Explain Savings Score"
+              title="How Savings Score works"
+              @click="showSavingsScoreModal = true"
+            >
+              i
+            </button>
+          </div>
           <h3 class="mt-6 text-4xl font-black tracking-tight md:text-5xl" :class="scoreTextClass">
             {{ financialHealth.score }}%
           </h3>
@@ -387,6 +398,13 @@
             <p class="text-slate-400 text-sm leading-relaxed">
               {{ financialHealth.recommendation }}
             </p>
+            <button
+              type="button"
+              class="mt-4 rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-2 text-sm font-bold text-emerald-200 transition hover:bg-emerald-500 hover:text-slate-950"
+              @click="showSavingsScoreModal = true"
+            >
+              View breakdown
+            </button>
           </div>
         </div>
         
@@ -567,6 +585,63 @@
       </div>
     </Transition>
 
+    <AppModal
+      :show="showSavingsScoreModal"
+      label="Savings Score"
+      title="How your Savings Score works"
+      subtitle="Your score is calculated from four weighted factors: savings rate, budget discipline, savings goal progress, and positive balance."
+      size="lg"
+      @close="showSavingsScoreModal = false"
+    >
+      <div class="space-y-5">
+        <div class="rounded-[2rem] border border-emerald-400/20 bg-emerald-500/10 p-5">
+          <p class="text-sm font-bold text-slate-400">Final Score</p>
+          <div class="mt-3 flex flex-wrap items-end gap-3">
+            <p class="text-5xl font-black" :class="scoreTextClass">{{ financialHealth.score }}%</p>
+            <p class="pb-1 text-xl font-black text-white">{{ financialHealth.status || 'Not enough data yet' }}</p>
+          </div>
+          <p class="mt-4 text-sm leading-6 text-slate-400">
+            This score updates as you add income, expenses, budgets, and savings goals.
+          </p>
+          <p class="mt-2 text-sm leading-6 text-slate-500">
+            Budgets and goals improve the accuracy of your score.
+          </p>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <article
+            v-for="item in savingsScoreBreakdownItems"
+            :key="item.key"
+            class="rounded-3xl border border-white/10 bg-slate-950/80 p-4"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h4 class="font-black text-white">{{ item.label }}</h4>
+                <p class="mt-1 text-xs leading-5 text-slate-500">{{ item.description }}</p>
+              </div>
+              <span class="rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-emerald-300">
+                {{ item.weight }}%
+              </span>
+            </div>
+
+            <div class="mt-4">
+              <div class="mb-2 flex items-center justify-between text-xs font-bold text-slate-400">
+                <span>{{ item.score }}/100</span>
+                <span>{{ item.contribution }} of {{ item.maxPoints }} pts</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-slate-800">
+                <div class="h-full rounded-full bg-emerald-400" :style="{ width: `${item.score}%` }"></div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="rounded-3xl border border-white/10 bg-slate-950/70 p-5 text-sm leading-6 text-slate-400">
+          Higher scores mean stronger savings habits and better spending discipline.
+        </div>
+      </div>
+    </AppModal>
+
     <TransactionModal
       :show="showExpenseModal"
       type="expense"
@@ -702,6 +777,7 @@ import ExpenseCategoryChart from '../components/ExpenseCategoryChart.vue'
 import MonthlySummaryChart from '../components/MonthlySummaryChart.vue'
 import Sidebar from '../components/Sidebar.vue'
 import SmartAssistantWidget from '../components/SmartAssistantWidget.vue'
+import AppModal from '../components/AppModal.vue'
 import { formatPeso } from '../utils/currency'
 import {
   loadDashboardSnapshot,
@@ -718,6 +794,7 @@ const isMobileSidebarOpen = ref(false)
 const notificationPanel = ref(null)
 const notificationTrigger = ref(null)
 const dashboardError = ref('')
+const showSavingsScoreModal = ref(false)
 
 let refreshInterval = null
 
@@ -981,6 +1058,61 @@ const scoreBarClass = computed(() => ({
   'bg-amber-500': scoreTone.value === 'attention',
   'bg-red-500': scoreTone.value === 'risk'
 }))
+
+const savingsScoreBreakdownItems = computed(() => {
+  const breakdown = financialHealth.value.score_breakdown || dashboard.score_breakdown || {}
+  const weighted = breakdown.weighted || {}
+
+  const items = [
+    {
+      key: 'savings_rate',
+      label: 'Savings Rate',
+      description: 'How much income remains after expenses.',
+      weight: 40,
+      maxPoints: 40,
+      score: breakdown.savings_rate_score ?? 0,
+      contribution: weighted.savings_rate
+    },
+    {
+      key: 'budget_discipline',
+      label: 'Budget Discipline',
+      description: 'How well your spending stays within budgets.',
+      weight: 30,
+      maxPoints: 30,
+      score: breakdown.budget_discipline_score ?? 0,
+      contribution: weighted.budget_discipline
+    },
+    {
+      key: 'savings_goal_progress',
+      label: 'Savings Goal Progress',
+      description: 'How much progress you made toward active goals.',
+      weight: 20,
+      maxPoints: 20,
+      score: breakdown.savings_goal_progress_score ?? 0,
+      contribution: weighted.savings_goal_progress
+    },
+    {
+      key: 'positive_balance',
+      label: 'Positive Balance',
+      description: 'Whether your income is higher than expenses.',
+      weight: 10,
+      maxPoints: 10,
+      score: breakdown.positive_balance_score ?? 0,
+      contribution: weighted.positive_balance
+    }
+  ]
+
+  return items.map((item) => ({
+    ...item,
+    score: Math.max(0, Math.min(100, Math.round(Number(item.score) || 0))),
+    contribution: formatContribution(item.contribution ?? ((Number(item.score) || 0) * (item.weight / 100)))
+  }))
+})
+
+const formatContribution = (value) => {
+  const number = Number(value) || 0
+  return Number.isInteger(number) ? String(number) : number.toFixed(1)
+}
 
 const getFinancialHealth = async () => {
   try {

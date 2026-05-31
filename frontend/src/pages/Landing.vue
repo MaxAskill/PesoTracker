@@ -163,6 +163,60 @@
       </div>
     </section>
 
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <div class="grid gap-8 rounded-[2.5rem] border border-emerald-400/20 bg-gradient-to-br from-slate-950/90 via-slate-950/80 to-emerald-950/20 p-6 shadow-2xl shadow-emerald-950/20 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:p-10">
+        <div class="motion-fade-up">
+          <p class="text-sm font-black uppercase tracking-wide text-emerald-300">Sample calculation</p>
+          <h2 class="mt-3 text-4xl font-black md:text-5xl">Your money habits, simplified into one score.</h2>
+          <p class="mt-4 text-base leading-7 text-slate-400">
+            PesoTracker calculates a Savings Score using your savings rate, budget discipline, savings goal progress, and monthly balance.
+          </p>
+
+          <div class="mt-8 rounded-[2rem] border border-white/10 bg-slate-950/80 p-6">
+            <p class="text-sm font-bold text-slate-400">Demo Savings Score</p>
+            <div class="mt-3 flex flex-wrap items-end gap-3">
+              <p class="text-6xl font-black text-emerald-300">86%</p>
+              <p class="pb-2 text-xl font-black text-white">Healthy</p>
+            </div>
+            <p class="mt-4 text-sm leading-6 text-slate-500">
+              Use it as a quick snapshot of your financial health. The higher your score, the better your savings and spending discipline.
+            </p>
+            <RouterLink to="/register" class="mt-6 inline-flex rounded-2xl bg-emerald-400 px-5 py-3 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-300">
+              Create your account to see your real score
+            </RouterLink>
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <article
+            v-for="(factor, index) in savingsScoreFactors"
+            :key="factor.label"
+            class="motion-card-hover motion-fade-up rounded-[2rem] border border-white/10 bg-slate-950/75 p-5"
+            :style="{ animationDelay: `${index * 0.06}s` }"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-sm font-black text-white">{{ factor.label }}</p>
+                <p class="mt-2 text-sm leading-6 text-slate-400">{{ factor.text }}</p>
+              </div>
+              <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-sm font-black text-emerald-300">
+                {{ factor.weight }}%
+              </span>
+            </div>
+            <div class="mt-5">
+              <div class="mb-2 flex items-center justify-between text-xs font-bold text-slate-500">
+                <span>{{ factor.sample }}/100</span>
+                <span>{{ factor.points }} pts</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full bg-slate-800">
+                <div class="h-full rounded-full bg-emerald-400" :style="{ width: `${factor.sample}%` }"></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <section class="mx-auto grid max-w-7xl gap-6 px-4 py-16 sm:px-6 lg:grid-cols-2">
       <article class="motion-card-hover motion-fade-up pt-card-glow p-6 sm:p-8">
         <p class="text-sm font-black uppercase tracking-wide text-emerald-300">Receipt scanner</p>
@@ -419,6 +473,37 @@ const insights = [
   'You are 62% toward your savings goal.',
   'Your expenses are 20% of your recorded income.',
   'You are still within your monthly budget.'
+]
+
+const savingsScoreFactors = [
+  {
+    label: 'Savings Rate',
+    weight: 40,
+    sample: 100,
+    points: '40 of 40',
+    text: 'How much income remains after expenses.'
+  },
+  {
+    label: 'Budget Discipline',
+    weight: 30,
+    sample: 80,
+    points: '24 of 30',
+    text: 'How well your spending stays within budgets.'
+  },
+  {
+    label: 'Savings Goal Progress',
+    weight: 20,
+    sample: 62,
+    points: '12.4 of 20',
+    text: 'How much progress you made toward active goals.'
+  },
+  {
+    label: 'Positive Balance',
+    weight: 10,
+    sample: 100,
+    points: '10 of 10',
+    text: 'Whether your income is higher than expenses.'
+  }
 ]
 
 const SectionHeader = defineComponent({

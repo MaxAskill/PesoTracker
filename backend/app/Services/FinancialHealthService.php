@@ -52,6 +52,12 @@ class FinancialHealthService
                 'budget_discipline_score' => $budgetDisciplineScore,
                 'savings_goal_progress_score' => $savingsGoalProgressScore,
                 'positive_balance_score' => $positiveBalanceScore,
+                'weighted' => [
+                    'savings_rate' => round($savingsRateScore * 0.40, 1),
+                    'budget_discipline' => round($budgetDisciplineScore * 0.30, 1),
+                    'savings_goal_progress' => round($savingsGoalProgressScore * 0.20, 1),
+                    'positive_balance' => round($positiveBalanceScore * 0.10, 1),
+                ],
             ],
             'month' => $month,
             'income' => $totalIncome,

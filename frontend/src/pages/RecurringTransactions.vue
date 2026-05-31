@@ -81,13 +81,13 @@
           :options="categoryOptions"
           placeholder="Select Category"
         />
-        <input v-model="form.amount" type="number" required min="1" placeholder="Amount" class="form-field" />
+        <AppMoneyInput v-model="form.amount" placeholder="Amount" />
         <AppSelect
           v-model="form.frequency"
           :options="frequencyOptions"
           placeholder="Select Frequency"
         />
-        <input v-model="form.next_due_date" type="date" required class="form-field" />
+        <AppDatePicker v-model="form.next_due_date" placeholder="Select next due date" />
         <textarea v-model="form.note" rows="3" placeholder="Optional note..." class="form-field resize-none"></textarea>
         <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
           Save Recurring Transaction
@@ -99,7 +99,9 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import AppDatePicker from '../components/AppDatePicker.vue'
 import AppModal from '../components/AppModal.vue'
+import AppMoneyInput from '../components/AppMoneyInput.vue'
 import AppSelect from '../components/AppSelect.vue'
 import Sidebar from '../components/Sidebar.vue'
 import api from '../services/api'

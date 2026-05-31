@@ -50,11 +50,9 @@
             Amount
           </label>
 
-          <input
+          <AppMoneyInput
             v-model="form.amount"
-            type="number"
             placeholder="0.00"
-            class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
           />
         </div>
 
@@ -63,10 +61,9 @@
             Date
           </label>
 
-          <input
+          <AppDatePicker
             v-model="form.transaction_date"
-            type="date"
-            class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+            placeholder="Select date"
           />
         </div>
       </div>
@@ -133,6 +130,8 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import api from '../services/api'
+import AppDatePicker from './AppDatePicker.vue'
+import AppMoneyInput from './AppMoneyInput.vue'
 import AppSelect from './AppSelect.vue'
 import AppModal from './AppModal.vue'
 import ReceiptScannerModal from './ReceiptScannerModal.vue'
@@ -170,7 +169,7 @@ watch(
     if (value) {
       if (props.transaction) {
         form.title = props.transaction.title
-        form.amount = props.transaction.amount
+        form.amount = String(props.transaction.amount ?? '')
         form.category = props.transaction.category
         form.transaction_date = props.transaction.transaction_date
         form.note = props.transaction.note
@@ -212,10 +211,35 @@ watch(canScanReceipt, (value) => {
   }
 })
 
+const validateAmount = () => {
+  const value = String(form.amount ?? '').trim()
+
+  if (!value) {
+    error.value = 'Enter a valid amount.'
+    return false
+  }
+
+  if (!/^\d+(\.\d{1,2})?$/.test(value)) {
+    error.value = 'Use up to 2 decimal places only.'
+    return false
+  }
+
+  if (Number(value) <= 0) {
+    error.value = 'Amount must be greater than 0.'
+    return false
+  }
+
+  form.amount = value
+  return true
+}
+
 const submitTransaction = async () => {
   if (saving.value) return
 
   error.value = ''
+
+  if (!validateAmount()) return
+
   saving.value = true
 
   try {

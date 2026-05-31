@@ -99,7 +99,7 @@
 
         <div>
           <label class="mb-2 block text-sm font-semibold text-slate-300">Budget Amount</label>
-          <input v-model="form.amount" type="number" placeholder="5000" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+          <AppMoneyInput v-model="form.amount" placeholder="5000" />
         </div>
 
         <div>
@@ -123,6 +123,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import api from '../services/api'
 import AppModal from '../components/AppModal.vue'
+import AppMoneyInput from '../components/AppMoneyInput.vue'
 import AppSelect from '../components/AppSelect.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'

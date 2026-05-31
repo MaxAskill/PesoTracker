@@ -61,7 +61,7 @@
           </div>
 
           <form @submit.prevent="addContribution(goal)" class="flex gap-3">
-            <input v-model="contributions[goal.id]" type="number" min="1" placeholder="Add amount" class="min-w-0 flex-1 rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+            <AppMoneyInput v-model="contributions[goal.id]" placeholder="Add amount" class="min-w-0 flex-1" />
             <button type="submit" class="rounded-xl bg-emerald-500 px-5 py-3 font-black text-slate-950 transition hover:bg-emerald-400">Add</button>
           </form>
 
@@ -85,8 +85,8 @@
       <form class="space-y-5" @submit.prevent="saveGoal">
         <input v-model="form.title" type="text" required placeholder="Goal title" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
         <textarea v-model="form.description" rows="3" placeholder="Optional description..." class="w-full resize-none rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"></textarea>
-        <input v-model="form.target_amount" type="number" required min="1" placeholder="Target amount" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
-        <input v-model="form.deadline" type="date" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10" />
+        <AppMoneyInput v-model="form.target_amount" placeholder="Target amount" />
+        <AppDatePicker v-model="form.deadline" placeholder="Select deadline" />
         <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
           Save Goal
         </button>
@@ -98,7 +98,9 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import api from '../services/api'
+import AppDatePicker from '../components/AppDatePicker.vue'
 import AppModal from '../components/AppModal.vue'
+import AppMoneyInput from '../components/AppMoneyInput.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'

@@ -57,13 +57,9 @@
             <label class="mb-2 block text-sm font-semibold text-slate-300">
               Amount
             </label>
-            <input
+            <AppMoneyInput
               v-model="form.amount"
-              type="number"
-              min="0.01"
-              step="0.01"
               placeholder="0.00"
-              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
             />
           </div>
 
@@ -94,10 +90,9 @@
             <label class="mb-2 block text-sm font-semibold text-slate-300">
               Date
             </label>
-            <input
+            <AppDatePicker
               v-model="form.date"
-              type="date"
-              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+              placeholder="Select date"
             />
           </div>
 
@@ -143,6 +138,8 @@
 <script setup>
 import { reactive, ref, watch } from 'vue'
 import api from '../services/api'
+import AppDatePicker from './AppDatePicker.vue'
+import AppMoneyInput from './AppMoneyInput.vue'
 import AppSelect from './AppSelect.vue'
 
 const props = defineProps({
@@ -180,7 +177,7 @@ watch(
   (draft) => {
     if (!draft) return
 
-    form.amount = draft.amount ?? ''
+    form.amount = String(draft.amount ?? '')
     form.category = draft.category ?? ''
     form.merchant = draft.merchant ?? ''
     form.date = draft.date ?? new Date().toISOString().slice(0, 10)
@@ -195,6 +192,9 @@ const saveDraft = async () => {
   if (saving.value) return
 
   error.value = ''
+
+  if (!validateAmount()) return
+
   saving.value = true
 
   try {
@@ -213,5 +213,27 @@ const saveDraft = async () => {
   } finally {
     saving.value = false
   }
+}
+
+const validateAmount = () => {
+  const value = String(form.amount ?? '').trim()
+
+  if (!value) {
+    error.value = 'Enter a valid amount.'
+    return false
+  }
+
+  if (!/^\d+(\.\d{1,2})?$/.test(value)) {
+    error.value = 'Use up to 2 decimal places only.'
+    return false
+  }
+
+  if (Number(value) <= 0) {
+    error.value = 'Amount must be greater than 0.'
+    return false
+  }
+
+  form.amount = value
+  return true
 }
 </script>

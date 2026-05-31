@@ -1,6 +1,6 @@
 <template>
-  <main class="magic-bg min-h-screen overflow-x-hidden text-white">
-    <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/75 px-4 py-4 backdrop-blur-xl sm:px-6">
+  <div class="min-h-screen bg-slate-950 text-white">
+    <header class="fixed left-0 right-0 top-0 z-[999] border-b border-slate-800/70 bg-slate-950/90 px-4 py-4 backdrop-blur-xl sm:px-6">
       <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4">
         <RouterLink to="/" class="flex min-w-0 items-center gap-3">
           <img src="/logo.png" alt="PesoTracker" class="h-11 w-11 shrink-0 rounded-2xl shadow-lg shadow-emerald-500/20" />
@@ -42,7 +42,7 @@
         </button>
       </nav>
 
-      <div v-if="mobileMenuOpen" class="mx-auto mt-4 grid max-w-7xl gap-2 rounded-3xl border border-white/10 bg-slate-950 p-4 sm:hidden">
+      <div v-if="mobileMenuOpen" class="relative z-[1000] mx-auto mt-4 grid max-w-7xl gap-2 rounded-3xl border border-white/10 bg-slate-950 p-4 shadow-2xl shadow-black/40 sm:hidden">
         <a
           v-for="link in navLinks"
           :key="link.href"
@@ -64,6 +64,7 @@
       </div>
     </header>
 
+    <main class="magic-bg min-h-screen overflow-x-hidden pt-24">
     <section class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:py-24">
       <div class="absolute left-1/2 top-10 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl"></div>
 
@@ -270,7 +271,8 @@
         <p class="text-sm text-slate-600">Copyright 2026 PesoTracker.</p>
       </div>
     </footer>
-  </main>
+    </main>
+  </div>
 </template>
 
 <script setup>

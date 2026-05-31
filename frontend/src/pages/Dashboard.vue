@@ -159,7 +159,10 @@
         </div>
 
         <div class="motion-card-hover motion-fade-up motion-delay-3 relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
-          <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-full border border-amber-300/20 bg-amber-300/10 text-amber-200">
+          <div
+            class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-full border"
+            :class="scoreIconClass"
+          >
             <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M19 5 5 19" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
               <path d="M7.5 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.9"/>
@@ -167,8 +170,12 @@
             </svg>
           </div>
           <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Savings Score</p>
-          <h3 class="mt-6 text-4xl font-black tracking-tight text-amber-300">85%</h3>
-          <p class="mt-5 text-sm text-slate-500">Healthy spending</p>
+          <h3 class="mt-6 text-4xl font-black tracking-tight md:text-5xl" :class="scoreTextClass">
+            {{ financialHealth.score }}%
+          </h3>
+          <p class="mt-5 text-sm text-slate-500">
+            {{ financialHealth.status || 'Add data to calculate your score' }}
+          </p>
         </div>
         </template>
       </div>
@@ -332,13 +339,7 @@
             <div
               v-else
               class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black"
-              :class="{
-                'bg-emerald-500/10 text-emerald-400': financialHealth.score >= 80,
-                'bg-amber-500/10 text-amber-400':
-                  financialHealth.score >= 60 &&
-                  financialHealth.score < 80,
-                'bg-red-500/10 text-red-400': financialHealth.score < 60
-              }"
+              :class="scoreBadgeClass"
             >
               {{ financialHealth.score }}
             </div>
@@ -369,13 +370,7 @@
               <div
                 class="h-3 rounded-full transition-all duration-500"
                 :style="{ width: financialHealth.score + '%' }"
-                :class="{
-                  'bg-emerald-500': financialHealth.score >= 80,
-                  'bg-amber-500':
-                    financialHealth.score >= 60 &&
-                    financialHealth.score < 80,
-                  'bg-red-500': financialHealth.score < 60
-                }"
+                :class="scoreBarClass"
               ></div>
             </div>
           </div>
@@ -810,6 +805,9 @@ const dashboard = reactive({
   total_income: 0,
   total_expenses: 0,
   balance: 0,
+  savings_score: 0,
+  savings_status: '',
+  score_breakdown: null,
   recent_transactions: []
 })
 
@@ -828,7 +826,14 @@ const applyDashboardSnapshot = (snapshot) => {
     dashboard.total_income = snapshot.dashboard.total_income ?? 0
     dashboard.total_expenses = snapshot.dashboard.total_expenses ?? 0
     dashboard.balance = snapshot.dashboard.balance ?? 0
+    dashboard.savings_score = snapshot.dashboard.savings_score ?? snapshot.dashboard.financial_health?.score ?? 0
+    dashboard.savings_status = snapshot.dashboard.savings_status ?? snapshot.dashboard.financial_health?.status ?? ''
+    dashboard.score_breakdown = snapshot.dashboard.score_breakdown ?? snapshot.dashboard.financial_health?.score_breakdown ?? null
     dashboard.recent_transactions = snapshot.dashboard.recent_transactions ?? []
+
+    if (snapshot.dashboard.financial_health) {
+      financialHealth.value = snapshot.dashboard.financial_health
+    }
   }
 
   if (snapshot.analytics) {
@@ -861,7 +866,14 @@ const getDashboard = async () => {
     dashboard.total_income = response.data.total_income
     dashboard.total_expenses = response.data.total_expenses
     dashboard.balance = response.data.balance
+    dashboard.savings_score = response.data.savings_score ?? response.data.financial_health?.score ?? 0
+    dashboard.savings_status = response.data.savings_status ?? response.data.financial_health?.status ?? ''
+    dashboard.score_breakdown = response.data.score_breakdown ?? response.data.financial_health?.score_breakdown ?? null
     dashboard.recent_transactions = response.data.recent_transactions
+
+    if (response.data.financial_health) {
+      financialHealth.value = response.data.financial_health
+    }
   } catch (error) {
     console.error(error)
   }
@@ -931,9 +943,44 @@ const financialHealth = ref({
   score: 0,
   status: '',
   recommendation: '',
+  score_breakdown: null,
+  savings_score: 0,
+  savings_status: '',
+  month: '',
   income: 0,
-  expenses: 0
+  expenses: 0,
+  balance: 0
 })
+
+const scoreTone = computed(() => {
+  if (financialHealth.value.score >= 75) return 'healthy'
+  if (financialHealth.value.score >= 50) return 'attention'
+  return 'risk'
+})
+
+const scoreTextClass = computed(() => ({
+  'text-emerald-300': scoreTone.value === 'healthy',
+  'text-amber-300': scoreTone.value === 'attention',
+  'text-red-300': scoreTone.value === 'risk'
+}))
+
+const scoreIconClass = computed(() => ({
+  'border-emerald-300/20 bg-emerald-300/10 text-emerald-200': scoreTone.value === 'healthy',
+  'border-amber-300/20 bg-amber-300/10 text-amber-200': scoreTone.value === 'attention',
+  'border-red-300/20 bg-red-300/10 text-red-200': scoreTone.value === 'risk'
+}))
+
+const scoreBadgeClass = computed(() => ({
+  'bg-emerald-500/10 text-emerald-400': scoreTone.value === 'healthy',
+  'bg-amber-500/10 text-amber-400': scoreTone.value === 'attention',
+  'bg-red-500/10 text-red-400': scoreTone.value === 'risk'
+}))
+
+const scoreBarClass = computed(() => ({
+  'bg-emerald-500': scoreTone.value === 'healthy',
+  'bg-amber-500': scoreTone.value === 'attention',
+  'bg-red-500': scoreTone.value === 'risk'
+}))
 
 const getFinancialHealth = async () => {
   try {

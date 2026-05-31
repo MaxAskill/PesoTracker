@@ -83,33 +83,66 @@
           <div v-for="index in 5" :key="`filter-${index}`" class="h-12 animate-pulse rounded-2xl bg-slate-800/70"></div>
         </div>
 
-        <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <input
-            v-model="search"
-            type="text"
-            placeholder="Search transactions..."
-            class="transaction-field xl:col-span-1"
-          />
+        <div v-else>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <input
+              v-model="search"
+              type="text"
+              placeholder="Search transactions..."
+              class="transaction-field xl:col-span-1"
+            />
 
-          <AppSelect
-            v-model="selectedType"
-            :options="typeOptions"
-            placeholder="All Types"
-          />
+            <AppSelect
+              v-model="selectedType"
+              :options="typeOptions"
+              placeholder="All Types"
+            />
 
-          <AppSelect
-            v-model="selectedCategory"
-            :options="categoryOptions"
-            placeholder="All Categories"
-          />
+            <AppSelect
+              v-model="selectedCategory"
+              :options="categoryOptions"
+              placeholder="All Categories"
+            />
 
-          <input v-model="selectedMonth" type="month" class="transaction-field" />
+            <AppMonthFilter v-model="selectedMonth" />
 
-          <AppSelect
-            v-model="sortBy"
-            :options="sortOptions"
-            placeholder="Newest first"
-          />
+            <AppSelect
+              v-model="sortBy"
+              :options="sortOptions"
+              placeholder="Newest first"
+            />
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center gap-2">
+            <span class="mr-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Quick month</span>
+            <button
+              type="button"
+              class="filter-chip"
+              :class="selectedMonth === currentMonthValue ? 'filter-chip-active' : ''"
+              @click="setThisMonth"
+            >
+              This Month
+            </button>
+            <button
+              type="button"
+              class="filter-chip"
+              :class="selectedMonth === previousMonthValue ? 'filter-chip-active' : ''"
+              @click="setLastMonth"
+            >
+              Last Month
+            </button>
+            <button
+              v-if="selectedMonth"
+              type="button"
+              class="filter-chip"
+              @click="clearMonthFilter"
+            >
+              Clear
+            </button>
+            <span v-if="selectedMonth" class="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-200">
+              Viewing {{ formattedSelectedMonth }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -216,10 +249,18 @@
               <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-500/10 text-2xl font-black text-emerald-300">
                 i
               </div>
-              <h3 class="text-xl font-black text-white">{{ transactions.length ? 'No matching transactions' : 'No transactions yet' }}</h3>
+              <h3 class="text-xl font-black text-white">{{ emptyStateTitle }}</h3>
               <p class="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                {{ transactions.length ? 'Try adjusting your search or filters.' : 'Add your first income or expense to start tracking your money.' }}
+                {{ emptyStateMessage }}
               </p>
+              <button
+                v-if="transactions.length && selectedMonth"
+                type="button"
+                class="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-5 py-3 font-bold text-emerald-200 transition hover:bg-emerald-500 hover:text-slate-950"
+                @click="clearMonthFilter"
+              >
+                Clear month filter
+              </button>
               <div v-if="!transactions.length" class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <button type="button" class="rounded-2xl bg-emerald-500 px-5 py-3 font-black text-slate-950 transition hover:bg-emerald-400" @click="showIncomeModal = true">
                   Add Income
@@ -274,6 +315,7 @@
 <script setup>
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import api from '../services/api'
+import AppMonthFilter from '../components/AppMonthFilter.vue'
 import AppSelect from '../components/AppSelect.vue'
 import TransactionModal from '../components/TransactionModal.vue'
 import Sidebar from '../components/Sidebar.vue'
@@ -309,6 +351,13 @@ const sortOptions = [
 const totalIncome = computed(() => transactions.value.filter(item => item.type === 'income').reduce((sum, item) => sum + Number(item.amount), 0))
 const totalExpenses = computed(() => transactions.value.filter(item => item.type === 'expense').reduce((sum, item) => sum + Number(item.amount), 0))
 const netBalance = computed(() => totalIncome.value - totalExpenses.value)
+const currentMonthValue = computed(() => monthValueFromDate(new Date()))
+const previousMonthValue = computed(() => {
+  const date = new Date()
+  date.setMonth(date.getMonth() - 1)
+  return monthValueFromDate(date)
+})
+const formattedSelectedMonth = computed(() => formatMonthValue(selectedMonth.value))
 
 const categories = computed(() => {
   const values = transactions.value
@@ -411,6 +460,34 @@ const handleEscape = (event) => {
   }
 }
 
+const monthValueFromDate = (date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+const formatMonthValue = (value) => {
+  if (!value) return ''
+
+  const [year, month] = value.split('-').map(Number)
+  if (!year || !month) return ''
+
+  return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
+const setThisMonth = () => {
+  selectedMonth.value = currentMonthValue.value
+}
+
+const setLastMonth = () => {
+  selectedMonth.value = previousMonthValue.value
+}
+
+const clearMonthFilter = () => {
+  selectedMonth.value = ''
+}
+
 const filteredTransactions = computed(() => {
   let data = [...transactions.value]
 
@@ -454,6 +531,24 @@ const filteredTransactions = computed(() => {
   }
 
   return data
+})
+
+const emptyStateTitle = computed(() => {
+  if (!transactions.value.length) return 'No transactions yet'
+  if (selectedMonth.value) return `No transactions for ${formattedSelectedMonth.value}`
+  return 'No matching transactions'
+})
+
+const emptyStateMessage = computed(() => {
+  if (!transactions.value.length) {
+    return 'Add your first income or expense to start tracking your money.'
+  }
+
+  if (selectedMonth.value) {
+    return 'Try another month or clear the month filter.'
+  }
+
+  return 'Try adjusting your search or filters.'
 })
 
 const SummaryCard = defineComponent({
@@ -591,6 +686,29 @@ watch(detailsTransaction, (value) => {
 .transaction-field:focus {
   border-color: rgb(52 211 153);
   box-shadow: 0 0 0 4px rgb(52 211 153 / 0.1);
+}
+
+.filter-chip {
+  border-radius: 9999px;
+  border: 1px solid rgb(30 41 59);
+  background: rgb(15 23 42 / 0.75);
+  padding: 0.55rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: rgb(203 213 225);
+  transition: 0.2s ease;
+}
+
+.filter-chip:hover {
+  border-color: rgb(52 211 153 / 0.4);
+  background: rgb(16 185 129 / 0.1);
+  color: rgb(167 243 208);
+}
+
+.filter-chip-active {
+  border-color: rgb(52 211 153 / 0.55);
+  background: rgb(16 185 129 / 0.18);
+  color: rgb(167 243 208);
 }
 
 .icon-action-button,

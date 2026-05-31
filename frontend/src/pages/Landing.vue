@@ -1,6 +1,6 @@
 <template>
   <main class="magic-bg min-h-screen overflow-x-hidden text-white">
-    <header class="sticky top-0 z-40 border-b border-white/10 bg-slate-950/75 px-4 py-4 backdrop-blur-xl sm:px-6">
+    <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/75 px-4 py-4 backdrop-blur-xl sm:px-6">
       <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4">
         <RouterLink to="/" class="flex min-w-0 items-center gap-3">
           <img src="/logo.png" alt="PesoTracker" class="h-11 w-11 shrink-0 rounded-2xl shadow-lg shadow-emerald-500/20" />
@@ -11,7 +11,14 @@
         </RouterLink>
 
         <div class="hidden items-center gap-7 text-sm font-bold text-slate-300 lg:flex">
-          <a v-for="link in navLinks" :key="link.href" :href="link.href" class="transition hover:text-emerald-300">
+          <a
+            v-for="link in navLinks"
+            :key="link.href"
+            :href="link.href"
+            class="transition hover:text-emerald-300"
+            :class="navLinkClass(link.href)"
+            @click.prevent="scrollToSection(link.href)"
+          >
             {{ link.label }}
           </a>
         </div>
@@ -41,7 +48,8 @@
           :key="link.href"
           :href="link.href"
           class="rounded-2xl px-4 py-3 text-sm font-bold text-slate-300 transition hover:bg-emerald-500/10 hover:text-emerald-200"
-          @click="mobileMenuOpen = false"
+          :class="activeSection === link.href.slice(1) ? 'bg-emerald-500/10 text-emerald-200' : ''"
+          @click.prevent="scrollToSection(link.href)"
         >
           {{ link.label }}
         </a>
@@ -79,14 +87,14 @@
 
         <div class="mt-10 flex flex-col gap-3 sm:flex-row">
           <RouterLink to="/register" class="pt-primary text-center">Start Tracking</RouterLink>
-          <a href="#preview" class="pt-secondary text-center">View App Preview</a>
+          <a href="#preview" class="pt-secondary text-center" @click.prevent="scrollToSection('#preview')">View App Preview</a>
         </div>
       </div>
 
       <HeroDashboardPreview />
     </section>
 
-    <section id="preview" class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+    <section id="preview" class="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
       <SectionHeader
         eyebrow="App preview"
         title="See how PesoTracker works"
@@ -116,7 +124,7 @@
       </div>
     </section>
 
-    <section id="features" class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+    <section id="features" class="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
       <SectionHeader
         eyebrow="Features"
         title="A finance workspace shaped like the real app"
@@ -148,7 +156,7 @@
       </div>
     </section>
 
-    <section id="how" class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+    <section id="how" class="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
       <SectionHeader
         eyebrow="How it works"
         title="From records to better habits"
@@ -171,7 +179,7 @@
       </div>
     </section>
 
-    <section id="insights" class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+    <section id="insights" class="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
       <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
         <div>
           <p class="text-sm font-black uppercase tracking-wide text-emerald-300">Demo insights</p>
@@ -257,7 +265,7 @@
         <div class="flex flex-wrap gap-4 text-sm font-bold text-slate-400">
           <RouterLink to="/login" class="hover:text-emerald-300">Login</RouterLink>
           <RouterLink to="/register" class="hover:text-emerald-300">Register</RouterLink>
-          <a href="#features" class="hover:text-emerald-300">Features</a>
+          <a href="#features" class="hover:text-emerald-300" @click.prevent="scrollToSection('#features')">Features</a>
         </div>
         <p class="text-sm text-slate-600">Copyright 2026 PesoTracker.</p>
       </div>
@@ -266,9 +274,11 @@
 </template>
 
 <script setup>
-import { defineComponent, h, ref } from 'vue'
+import { defineComponent, h, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const mobileMenuOpen = ref(false)
+const activeSection = ref('')
+let sectionObserver = null
 
 const navLinks = [
   { label: 'Features', href: '#features' },
@@ -276,6 +286,50 @@ const navLinks = [
   { label: 'How it works', href: '#how' },
   { label: 'Insights', href: '#insights' }
 ]
+
+const scrollToSection = (href) => {
+  mobileMenuOpen.value = false
+
+  const target = document.querySelector(href)
+  if (!target) return
+
+  window.history.pushState(null, '', href)
+  target.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  })
+}
+
+const navLinkClass = (href) => {
+  return activeSection.value === href.slice(1)
+    ? 'text-emerald-300'
+    : 'text-slate-300'
+}
+
+onMounted(() => {
+  const targets = navLinks
+    .map(link => document.querySelector(link.href))
+    .filter(Boolean)
+
+  sectionObserver = new IntersectionObserver((entries) => {
+    const visible = entries
+      .filter(entry => entry.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+
+    if (visible?.target?.id) {
+      activeSection.value = visible.target.id
+    }
+  }, {
+    rootMargin: '-96px 0px -58% 0px',
+    threshold: [0.12, 0.3, 0.6]
+  })
+
+  targets.forEach(target => sectionObserver.observe(target))
+})
+
+onBeforeUnmount(() => {
+  sectionObserver?.disconnect()
+})
 
 const featureChips = ['Expense Tracking', 'Budget Alerts', 'Savings Goals', 'Receipt Scanner', 'Smart Insights']
 

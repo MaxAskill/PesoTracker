@@ -1,14 +1,6 @@
 <template>
-  <main class="magic-bg min-h-screen px-6 py-6 text-white">
-    <header class="mx-auto mb-6 flex max-w-7xl items-center justify-between">
-      <RouterLink to="/" class="flex items-center gap-3">
-        <AppLogo />
-      </RouterLink>
-
-      <RouterLink to="/" class="rounded-full bg-slate-950/70 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-emerald-400/10 hover:text-emerald-100">
-        Back to home
-      </RouterLink>
-    </header>
+  <main class="magic-bg min-h-screen px-6 pb-6 pt-24 text-white">
+    <AuthHeader />
 
     <div class="flex min-h-[calc(100vh-112px)] items-center justify-center">
       <section class="grid w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-emerald-950/40 backdrop-blur-xl lg:grid-cols-2">
@@ -120,6 +112,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
+import AuthHeader from '../components/AuthHeader.vue'
 import AppLogo from '../components/AppLogo.vue'
 import { preloadAuthenticatedData } from '../services/preload'
 

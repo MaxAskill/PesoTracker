@@ -11,24 +11,31 @@
       <div class="absolute left-1/2 top-10 h-80 w-80 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl"></div>
 
       <div class="relative z-10">
-        <div class="mb-6 inline-flex rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-100 shadow-lg shadow-emerald-500/10">
+        <div class="motion-fade-up mb-6 inline-flex rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm font-bold text-emerald-100 shadow-lg shadow-emerald-500/10">
           Smart finance workspace
         </div>
 
-        <h1 class="max-w-4xl text-5xl font-black leading-tight tracking-tight md:text-7xl">
+        <h1 class="motion-fade-up motion-delay-1 max-w-4xl text-5xl font-black leading-tight tracking-tight md:text-7xl">
           Track your money with a dashboard that
           <span class="text-emerald-300">thinks with you.</span>
         </h1>
 
-        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+        <p class="motion-fade-up motion-delay-2 mt-6 max-w-2xl text-lg leading-8 text-slate-300">
           Monitor income, expenses, budgets, savings goals, receipt scans, and smart insights in one clean PesoTracker workspace.
         </p>
 
         <div class="mt-8 flex flex-wrap gap-3">
-          <span v-for="chip in featureChips" :key="chip" class="pt-chip">{{ chip }}</span>
+          <span
+            v-for="(chip, index) in featureChips"
+            :key="chip"
+            class="motion-fade-up pt-chip"
+            :style="{ animationDelay: `${0.24 + index * 0.05}s` }"
+          >
+            {{ chip }}
+          </span>
         </div>
 
-        <div class="mt-10 flex flex-col gap-3 sm:flex-row">
+        <div class="motion-fade-up motion-delay-4 mt-10 flex flex-col gap-3 sm:flex-row">
           <RouterLink to="/register" class="pt-primary text-center">Start Tracking</RouterLink>
           <a href="#preview" class="pt-secondary text-center" @click.prevent="scrollToSection('#preview')">View App Preview</a>
         </div>
@@ -45,7 +52,12 @@
       />
 
       <div class="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        <article v-for="item in appPreviews" :key="item.title" class="pt-card p-5">
+        <article
+          v-for="(item, index) in appPreviews"
+          :key="item.title"
+          class="motion-card-hover motion-fade-up pt-card p-5"
+          :style="{ animationDelay: `${index * 0.05}s` }"
+        >
           <div class="mb-5 flex items-start justify-between gap-4">
             <div class="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-500/10 text-lg font-black text-emerald-300">
               {{ item.icon }}
@@ -78,7 +90,7 @@
         <article
           v-for="feature in bentoFeatures"
           :key="feature.title"
-          class="pt-card-glow p-6"
+          class="motion-card-hover motion-fade-up pt-card-glow p-6"
           :class="feature.span"
         >
           <p class="text-sm font-bold uppercase tracking-wide text-emerald-300">{{ feature.kicker }}</p>
@@ -107,7 +119,12 @@
       />
 
       <div class="mt-10 grid gap-5 md:grid-cols-3">
-        <article v-for="step in steps" :key="step.title" class="pt-card p-6">
+        <article
+          v-for="(step, index) in steps"
+          :key="step.title"
+          class="motion-card-hover motion-fade-up pt-card p-6"
+          :style="{ animationDelay: `${index * 0.08}s` }"
+        >
           <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400 text-xl font-black text-slate-950">
             {{ step.number }}
           </div>
@@ -124,7 +141,7 @@
 
     <section id="insights" class="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
       <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-        <div>
+        <div class="motion-fade-up">
           <p class="text-sm font-black uppercase tracking-wide text-emerald-300">Demo insights</p>
           <h2 class="mt-3 text-4xl font-black md:text-5xl">Understand your spending without digging.</h2>
           <p class="mt-4 text-base leading-7 text-slate-400">
@@ -133,7 +150,12 @@
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
-          <article v-for="insight in insights" :key="insight" class="rounded-3xl border border-white/10 bg-slate-950/75 p-5 shadow-xl shadow-slate-950/20">
+          <article
+            v-for="(insight, index) in insights"
+            :key="insight"
+            class="motion-card-hover motion-fade-up rounded-3xl border border-white/10 bg-slate-950/75 p-5 shadow-xl shadow-slate-950/20"
+            :style="{ animationDelay: `${index * 0.05}s` }"
+          >
             <p class="text-xs font-bold uppercase tracking-wide text-emerald-300">Sample data</p>
             <p class="mt-3 text-sm leading-6 text-slate-200">{{ insight }}</p>
           </article>
@@ -142,7 +164,7 @@
     </section>
 
     <section class="mx-auto grid max-w-7xl gap-6 px-4 py-16 sm:px-6 lg:grid-cols-2">
-      <article class="pt-card-glow p-6 sm:p-8">
+      <article class="motion-card-hover motion-fade-up pt-card-glow p-6 sm:p-8">
         <p class="text-sm font-black uppercase tracking-wide text-emerald-300">Receipt scanner</p>
         <h2 class="mt-3 text-3xl font-black">Scan receipts, review before saving</h2>
         <p class="mt-4 text-sm leading-7 text-slate-400">
@@ -164,7 +186,7 @@
         </RouterLink>
       </article>
 
-      <article class="pt-card p-6 sm:p-8">
+      <article class="motion-card-hover motion-fade-up motion-delay-1 pt-card p-6 sm:p-8">
         <p class="text-sm font-black uppercase tracking-wide text-emerald-300">Smart assistant</p>
         <h2 class="mt-3 text-3xl font-black">Ask about your finances</h2>
         <p class="mt-4 text-sm leading-7 text-slate-400">
@@ -183,7 +205,7 @@
     </section>
 
     <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-      <div class="overflow-hidden rounded-[2.5rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-slate-950 to-slate-950 p-8 text-center shadow-2xl shadow-emerald-950/20 sm:p-12">
+      <div class="motion-fade-up overflow-hidden rounded-[2.5rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-slate-950 to-slate-950 p-8 text-center shadow-2xl shadow-emerald-950/20 sm:p-12">
         <p class="text-sm font-black uppercase tracking-wide text-emerald-300">Start free</p>
         <h2 class="mx-auto mt-3 max-w-3xl text-4xl font-black md:text-5xl">Ready to make your money easier to understand?</h2>
         <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-400">
@@ -196,7 +218,7 @@
       </div>
     </section>
 
-    <footer class="border-t border-slate-800/70 bg-slate-950/40 px-4 py-8 sm:px-6">
+    <footer class="motion-fade-in border-t border-slate-800/70 bg-slate-950/40 px-4 py-8 sm:px-6">
       <div class="mx-auto flex max-w-7xl flex-col gap-5 md:flex-row md:items-center md:justify-between">
         <div class="max-w-xl">
           <AppLogo subtitle="Built for smarter money tracking." />
@@ -406,7 +428,7 @@ const SectionHeader = defineComponent({
     text: { type: String, required: true }
   },
   setup(props) {
-    return () => h('div', { class: 'mx-auto max-w-3xl text-center' }, [
+    return () => h('div', { class: 'motion-fade-up mx-auto max-w-3xl text-center' }, [
       h('p', { class: 'text-sm font-black uppercase tracking-wide text-emerald-300' }, props.eyebrow),
       h('h2', { class: 'mt-3 text-4xl font-black md:text-5xl' }, props.title),
       h('p', { class: 'mt-4 text-base leading-7 text-slate-400' }, props.text)
@@ -416,7 +438,7 @@ const SectionHeader = defineComponent({
 
 const HeroDashboardPreview = defineComponent({
   setup() {
-    return () => h('div', { class: 'relative' }, [
+    return () => h('div', { class: 'motion-slide-right motion-delay-3 relative' }, [
       h('div', { class: 'floating-card pt-stat absolute -left-5 top-12 hidden w-44 rotate-[-8deg] text-sm text-slate-200 sm:block' }, [
         h('p', { class: 'text-xs font-semibold uppercase tracking-wide text-emerald-300' }, 'Sample data'),
         h('p', { class: 'mt-2 text-2xl font-black' }, '85%'),

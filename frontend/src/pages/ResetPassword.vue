@@ -3,7 +3,7 @@
     <AuthHeader />
 
     <div class="flex min-h-[calc(100vh-112px)] items-center justify-center">
-      <section class="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/75 p-8 shadow-2xl shadow-emerald-950/30 backdrop-blur-xl">
+      <section class="motion-scale-in w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/75 p-8 shadow-2xl shadow-emerald-950/30 backdrop-blur-xl">
         <div class="mb-8">
           <p class="mb-2 font-semibold text-emerald-300">New password</p>
           <h1 class="text-4xl font-black">Create new password</h1>

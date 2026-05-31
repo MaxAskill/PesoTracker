@@ -3,7 +3,7 @@
     <AuthHeader />
 
     <div class="flex min-h-[calc(100vh-112px)] items-center justify-center">
-      <section class="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/75 p-8 shadow-2xl shadow-emerald-950/30 backdrop-blur-xl">
+      <section class="motion-scale-in w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/75 p-8 shadow-2xl shadow-emerald-950/30 backdrop-blur-xl">
         <div class="mb-8 text-center">
           <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500 text-3xl font-black text-slate-950 shadow-lg shadow-emerald-500/20">
             P

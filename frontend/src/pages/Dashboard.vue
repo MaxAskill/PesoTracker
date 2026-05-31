@@ -6,7 +6,7 @@
     <!-- Main Content -->
     <section class="magic-bg min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pt-24 sm:p-6 lg:h-screen lg:pt-6">
       <!-- Top Bar -->
-      <header class="relative z-10 mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur xl:flex-row xl:items-start xl:justify-between">
+      <header class="motion-fade-up relative z-10 mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">PesoTracker Overview</p>
           <h2 class="mt-2 text-3xl font-bold text-white md:text-4xl">{{ displayName }}</h2>
@@ -91,7 +91,8 @@
           <div
             v-for="index in 4"
             :key="`summary-skeleton-${index}`"
-            class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20"
+            class="motion-fade-up motion-shimmer relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20"
+            :style="{ animationDelay: `${index * 0.05}s` }"
           >
             <div class="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-emerald-500/10 blur-2xl"></div>
             <div class="h-4 w-28 rounded-full bg-slate-800/80 animate-pulse"></div>
@@ -104,7 +105,7 @@
         </template>
 
         <template v-else>
-        <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-slate-950/80 to-slate-950 p-6 shadow-2xl shadow-emerald-950/20" :class="loadingClass">
+        <div class="motion-card-hover motion-fade-up relative min-h-44 overflow-hidden rounded-[2rem] border border-emerald-400/20 bg-gradient-to-br from-emerald-400/15 via-slate-950/80 to-slate-950 p-6 shadow-2xl shadow-emerald-950/20" :class="loadingClass">
           <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/20 blur-2xl"></div>
           <div class="relative flex h-full flex-col justify-between">
             <div class="flex items-start justify-between gap-4">
@@ -127,7 +128,7 @@
           </div>
         </div>
 
-        <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+        <div class="motion-card-hover motion-fade-up motion-delay-1 relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
           <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
             <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 19V5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
@@ -142,7 +143,7 @@
           <p class="mt-5 text-sm text-slate-500">All income recorded</p>
         </div>
 
-        <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+        <div class="motion-card-hover motion-fade-up motion-delay-2 relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
           <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-400/20 bg-red-400/10 text-red-300">
             <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 5v14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
@@ -157,7 +158,7 @@
           <p class="mt-5 text-sm text-slate-500">All expenses recorded</p>
         </div>
 
-        <div class="relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+        <div class="motion-card-hover motion-fade-up motion-delay-3 relative min-h-44 overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
           <div class="absolute right-6 top-6 flex h-14 w-14 items-center justify-center rounded-full border border-amber-300/20 bg-amber-300/10 text-amber-200">
             <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M19 5 5 19" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
@@ -176,7 +177,7 @@
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
 
         <!-- Expense by Category -->
-        <div class="relative min-h-[410px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+        <div class="motion-fade-up relative min-h-[410px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
           <div class="mb-6 flex items-center justify-between">
             <div>
               <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Expense Mix</p>
@@ -210,7 +211,7 @@
         </div>
 
         <!-- Monthly Income vs Expenses -->
-        <div class="relative min-h-[410px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20 xl:col-span-2" :class="loadingClass">
+        <div class="motion-fade-up motion-delay-1 relative min-h-[410px] overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20 xl:col-span-2" :class="loadingClass">
           <div class="mb-6 flex items-center justify-between">
             <div>
               <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Cash Flow</p>
@@ -246,7 +247,7 @@
 
       <!-- AI Insights and Health -->
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6 items-stretch">
-        <div class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20 xl:col-span-2" :class="loadingClass">
+        <div class="motion-fade-up relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/20 xl:col-span-2" :class="loadingClass">
           <div class="flex items-center justify-between mb-6">
             <div>
               <p class="text-emerald-400 font-semibold text-sm uppercase tracking-wide">Smart Signals</p>
@@ -262,7 +263,7 @@
             <div
               v-for="index in 2"
               :key="`insight-skeleton-${index}`"
-              class="min-h-44 rounded-3xl border border-white/10 bg-slate-950/80 p-5"
+              class="motion-shimmer min-h-44 rounded-3xl border border-white/10 bg-slate-950/80 p-5"
             >
               <div class="mb-4 h-10 w-10 rounded-xl bg-slate-800/80 animate-pulse"></div>
               <div class="mb-3 h-5 w-36 rounded-full bg-slate-800/80 animate-pulse"></div>
@@ -276,9 +277,10 @@
 
           <div v-else-if="insights.length" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div
-              v-for="insight in insights"
+              v-for="(insight, index) in insights"
               :key="insight.title"
-              class="min-h-44 rounded-3xl border border-white/10 bg-slate-950/80 p-5 transition hover:border-emerald-400/20"
+              class="motion-card-hover motion-fade-up min-h-44 rounded-3xl border border-white/10 bg-slate-950/80 p-5 transition hover:border-emerald-400/20"
+              :style="{ animationDelay: `${index * 0.05}s` }"
             >
               <div
                 class="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
@@ -309,7 +311,7 @@
             </div>
           </div>
         </div>
-        <div class="relative overflow-hidden rounded-[2rem] border border-emerald-400/15 bg-gradient-to-br from-slate-950/80 via-slate-950/70 to-emerald-950/20 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+        <div class="motion-fade-up motion-delay-1 relative overflow-hidden rounded-[2rem] border border-emerald-400/15 bg-gradient-to-br from-slate-950/80 via-slate-950/70 to-emerald-950/20 p-6 shadow-2xl shadow-slate-950/20" :class="loadingClass">
           <div class="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-emerald-400/10 blur-2xl"></div>
           <div class="flex items-center justify-between mb-6">
             <div>
@@ -396,7 +398,7 @@
       </div>
 
       <!-- Recent Transactions -->
-      <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-slate-950/20" :class="loadingClass">
+      <div class="motion-fade-up overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-slate-950/20" :class="loadingClass">
         <div class="flex items-center justify-between border-b border-slate-800 p-6">
           <div>
             <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Activity</p>
@@ -426,9 +428,10 @@
 
         <div v-else-if="dashboard.recent_transactions?.length">
           <div
-            v-for="transaction in dashboard.recent_transactions"
+            v-for="(transaction, index) in dashboard.recent_transactions"
             :key="transaction.id"
-            class="grid grid-cols-1 gap-3 border-b border-slate-800 px-6 py-5 transition hover:bg-slate-900/60 md:grid-cols-[minmax(0,1.5fr)_minmax(8rem,0.8fr)_minmax(8rem,0.8fr)_7rem] md:items-center"
+            class="motion-fade-up grid grid-cols-1 gap-3 border-b border-slate-800 px-6 py-5 transition hover:bg-slate-900/60 md:grid-cols-[minmax(0,1.5fr)_minmax(8rem,0.8fr)_minmax(8rem,0.8fr)_7rem] md:items-center"
+            :style="{ animationDelay: `${index * 0.04}s` }"
           >
             <div>
               <p class="font-semibold">{{ transaction.title }}</p>
@@ -462,93 +465,112 @@
       </div>
     </section>
 
-    <div
-      v-if="showNotifications"
-      class="fixed inset-0 z-[60] bg-slate-950/70 backdrop-blur-sm md:hidden"
-      @click="closeNotifications"
-    ></div>
-
-    <div
-      v-if="showNotifications"
-      ref="notificationPanel"
-      class="notification-panel fixed inset-x-4 bottom-4 z-[70] max-h-[78vh] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 md:inset-x-auto md:bottom-auto md:right-6 md:top-24 md:w-[min(420px,calc(100vw-2rem))] lg:right-8"
-      @click.stop
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
     >
-      <div class="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950 px-5 py-4">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">Updates</p>
-          <h3 class="font-black text-white">Notifications</h3>
-        </div>
+      <div
+        v-if="showNotifications"
+        class="fixed inset-0 z-[60] bg-slate-950/70 backdrop-blur-sm md:hidden"
+        @click="closeNotifications"
+      ></div>
+    </Transition>
 
-        <div class="flex items-center gap-2">
-          <button
-            @click="markAllNotificationsRead"
-            class="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-300 transition hover:bg-emerald-500 hover:text-slate-950"
-          >
-            Mark all read
-          </button>
-          <button
-            type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-slate-300 transition hover:bg-slate-800 hover:text-white md:hidden"
-            aria-label="Close notifications"
-            @click="closeNotifications"
-          >
-            X
-          </button>
-        </div>
-      </div>
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="translate-y-4 opacity-0 scale-95 md:translate-y-0 md:translate-x-3"
+      enter-to-class="translate-y-0 opacity-100 scale-100 md:translate-x-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="translate-y-0 opacity-100 scale-100 md:translate-x-0"
+      leave-to-class="translate-y-4 opacity-0 scale-95 md:translate-y-0 md:translate-x-3"
+    >
+      <div
+        v-if="showNotifications"
+        ref="notificationPanel"
+        class="notification-panel fixed inset-x-4 bottom-4 z-[70] max-h-[78vh] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 md:inset-x-auto md:bottom-auto md:right-6 md:top-24 md:w-[min(420px,calc(100vw-2rem))] lg:right-8"
+        @click.stop
+      >
+        <div class="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950 px-5 py-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">Updates</p>
+            <h3 class="font-black text-white">Notifications</h3>
+          </div>
 
-      <div v-if="notifications.length" class="notification-scroll max-h-[calc(78vh-88px)] overflow-y-auto bg-[#020617] py-2 md:max-h-[460px]">
-        <div
-          v-for="notification in notifications"
-          :key="notification.id"
-          class="relative border-b border-slate-800/70 px-5 py-4 transition hover:bg-slate-900"
-          :class="notification.is_read ? 'bg-[#020617]' : 'bg-slate-950'"
-        >
-          <span
-            v-if="!notification.is_read"
-            class="absolute left-2 top-6 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
-          ></span>
-
-          <div class="flex gap-3">
-            <div
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10"
-              :class="{
-                'bg-emerald-500/10 text-emerald-400': notification.type === 'success',
-                'bg-amber-500/10 text-amber-400': notification.type === 'warning',
-                'bg-red-500/10 text-red-400': notification.type === 'danger',
-                'bg-slate-800 text-slate-400': notification.type === 'info'
-              }"
+          <div class="flex items-center gap-2">
+            <button
+              @click="markAllNotificationsRead"
+              class="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-300 transition hover:bg-emerald-500 hover:text-slate-950"
             >
-              !
-            </div>
+              Mark all read
+            </button>
+            <button
+              type="button"
+              class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-slate-300 transition hover:bg-slate-800 hover:text-white md:hidden"
+              aria-label="Close notifications"
+              @click="closeNotifications"
+            >
+              X
+            </button>
+          </div>
+        </div>
 
-            <div class="min-w-0">
-              <h4 class="font-bold text-slate-100">
-                {{ notification.title }}
-              </h4>
+        <div v-if="notifications.length" class="notification-scroll max-h-[calc(78vh-88px)] overflow-y-auto bg-[#020617] py-2 md:max-h-[460px]">
+          <div
+            v-for="(notification, index) in notifications"
+            :key="notification.id"
+            class="motion-fade-up relative border-b border-slate-800/70 px-5 py-4 transition hover:bg-slate-900"
+            :class="notification.is_read ? 'bg-[#020617]' : 'bg-slate-950'"
+            :style="{ animationDelay: `${index * 0.035}s` }"
+          >
+            <span
+              v-if="!notification.is_read"
+              class="absolute left-2 top-6 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
+            ></span>
 
-              <p class="mt-1 text-sm leading-relaxed text-slate-400">
-                {{ notification.message }}
-              </p>
-              <p v-if="notification.created_at" class="mt-2 text-xs text-slate-600">
-                {{ notification.created_at }}
-              </p>
+            <div class="flex gap-3">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10"
+                :class="{
+                  'bg-emerald-500/10 text-emerald-400': notification.type === 'success',
+                  'bg-amber-500/10 text-amber-400': notification.type === 'warning',
+                  'bg-red-500/10 text-red-400': notification.type === 'danger',
+                  'bg-slate-800 text-slate-400': notification.type === 'info'
+                }"
+              >
+                !
+              </div>
+
+              <div class="min-w-0">
+                <h4 class="font-bold text-slate-100">
+                  {{ notification.title }}
+                </h4>
+
+                <p class="mt-1 text-sm leading-relaxed text-slate-400">
+                  {{ notification.message }}
+                </p>
+                <p v-if="notification.created_at" class="mt-2 text-xs text-slate-600">
+                  {{ notification.created_at }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div v-else class="bg-[#020617] p-10 text-center">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-300">
-          !
+        <div v-else class="bg-[#020617] p-10 text-center">
+          <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-300">
+            !
+          </div>
+          <p class="font-bold text-slate-200">No notifications yet.</p>
+          <p class="mt-2 text-sm text-slate-500">
+            Updates about your transactions will appear here.
+          </p>
         </div>
-        <p class="font-bold text-slate-200">No notifications yet.</p>
-        <p class="mt-2 text-sm text-slate-500">
-          Updates about your transactions will appear here.
-        </p>
       </div>
-    </div>
+    </Transition>
 
     <TransactionModal
       :show="showExpenseModal"

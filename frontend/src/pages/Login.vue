@@ -3,8 +3,8 @@
     <AuthHeader />
 
     <div class="flex min-h-[calc(100vh-112px)] items-center justify-center">
-      <section class="grid w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-emerald-950/40 backdrop-blur-xl lg:grid-cols-2">
-        <div class="relative hidden min-h-[680px] flex-col justify-between overflow-hidden border-r border-white/10 p-10 lg:flex">
+      <section class="motion-scale-in grid w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-emerald-950/40 backdrop-blur-xl lg:grid-cols-2">
+        <div class="motion-slide-left relative hidden min-h-[680px] flex-col justify-between overflow-hidden border-r border-white/10 p-10 lg:flex">
           <div class="absolute -right-16 top-10 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl"></div>
           <div class="absolute bottom-20 left-8 h-56 w-56 rounded-full bg-lime-300/10 blur-3xl"></div>
 
@@ -43,7 +43,7 @@
           </div>
         </div>
 
-        <div class="flex items-center p-8 sm:p-12 lg:p-16">
+        <div class="motion-fade-up motion-delay-2 flex items-center p-8 sm:p-12 lg:p-16">
           <div class="mx-auto w-full max-w-md">
             <div class="mb-8">
               <p class="mb-2 font-semibold text-emerald-300">Welcome back</p>

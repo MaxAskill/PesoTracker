@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!isOpen"
-    class="pointer-events-none fixed bottom-24 right-5 z-50 hidden max-w-64 rounded-2xl border border-emerald-400/20 bg-slate-950/90 px-4 py-3 text-sm text-slate-200 shadow-2xl shadow-slate-950/30 backdrop-blur md:block"
+    class="motion-fade-in pointer-events-none fixed bottom-24 right-5 z-50 hidden max-w-64 rounded-2xl border border-emerald-400/20 bg-slate-950/90 px-4 py-3 text-sm text-slate-200 shadow-2xl shadow-slate-950/30 backdrop-blur md:block"
   >
     Need help understanding your spending?
   </div>
@@ -10,7 +10,7 @@
     <button
       type="button"
       aria-label="Open PesoTracker Assistant"
-      class="group relative flex h-16 w-16 items-center justify-center overflow-visible rounded-full bg-emerald-500 text-slate-950 shadow-2xl shadow-emerald-500/30 transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:bg-emerald-400 sm:h-14 sm:w-auto sm:gap-3 sm:rounded-full sm:bg-gradient-to-r sm:from-emerald-400 sm:to-teal-300 sm:px-5"
+      class="motion-pulse-glow group relative flex h-16 w-16 items-center justify-center overflow-visible rounded-full bg-emerald-500 text-slate-950 shadow-2xl shadow-emerald-500/30 transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:bg-emerald-400 sm:h-14 sm:w-auto sm:gap-3 sm:rounded-full sm:bg-gradient-to-r sm:from-emerald-400 sm:to-teal-300 sm:px-5"
       @click="toggleAssistant"
     >
       <span class="absolute inset-0 -z-10 rounded-full bg-emerald-400/30 blur-xl transition group-hover:bg-emerald-300/40"></span>

@@ -37,26 +37,35 @@
       </button>
     </nav>
 
-    <div v-if="mobileMenuOpen" class="relative z-[1000] mx-auto mt-4 grid max-w-7xl gap-2 rounded-3xl border border-white/10 bg-slate-950 p-4 shadow-2xl shadow-black/40 sm:hidden">
-      <a
-        v-for="link in links"
-        :key="link.href"
-        :href="link.href"
-        class="rounded-2xl px-4 py-3 text-sm font-bold text-slate-300 transition hover:bg-emerald-500/10 hover:text-emerald-200"
-        :class="activeSection === link.href.slice(1) ? 'bg-emerald-500/10 text-emerald-200' : ''"
-        @click.prevent="handleMobileNavigate(link.href)"
-      >
-        {{ link.label }}
-      </a>
-      <div class="mt-2 grid grid-cols-2 gap-2">
-        <RouterLink to="/login" class="rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-center text-sm font-bold text-slate-200">
-          Login
-        </RouterLink>
-        <RouterLink to="/register" class="rounded-2xl bg-emerald-400 px-4 py-3 text-center text-sm font-black text-slate-950">
-          Get Started
-        </RouterLink>
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="-translate-y-2 opacity-0 scale-95"
+      enter-to-class="translate-y-0 opacity-100 scale-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="translate-y-0 opacity-100 scale-100"
+      leave-to-class="-translate-y-2 opacity-0 scale-95"
+    >
+      <div v-if="mobileMenuOpen" class="relative z-[1000] mx-auto mt-4 grid max-w-7xl gap-2 rounded-3xl border border-white/10 bg-slate-950 p-4 shadow-2xl shadow-black/40 sm:hidden">
+        <a
+          v-for="link in links"
+          :key="link.href"
+          :href="link.href"
+          class="rounded-2xl px-4 py-3 text-sm font-bold text-slate-300 transition hover:bg-emerald-500/10 hover:text-emerald-200"
+          :class="activeSection === link.href.slice(1) ? 'bg-emerald-500/10 text-emerald-200' : ''"
+          @click.prevent="handleMobileNavigate(link.href)"
+        >
+          {{ link.label }}
+        </a>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <RouterLink to="/login" class="rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-center text-sm font-bold text-slate-200">
+            Login
+          </RouterLink>
+          <RouterLink to="/register" class="rounded-2xl bg-emerald-400 px-4 py-3 text-center text-sm font-black text-slate-950">
+            Get Started
+          </RouterLink>
+        </div>
       </div>
-    </div>
+    </Transition>
   </header>
 </template>
 

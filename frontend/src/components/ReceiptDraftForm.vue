@@ -71,18 +71,11 @@
             <label class="mb-2 block text-sm font-semibold text-slate-300">
               Category
             </label>
-            <select
+            <AppSelect
               v-model="form.category"
-              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
-            >
-              <option disabled value="">Select Category</option>
-              <option value="Food">Food</option>
-              <option value="Transportation">Transportation</option>
-              <option value="Bills">Bills</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Electricity">Electricity</option>
-              <option value="Utilities">Utilities</option>
-            </select>
+              :options="categoryOptions"
+              placeholder="Select Category"
+            />
           </div>
 
           <div>
@@ -150,6 +143,7 @@
 <script setup>
 import { reactive, ref, watch } from 'vue'
 import api from '../services/api'
+import AppSelect from './AppSelect.vue'
 
 const props = defineProps({
   show: Boolean,
@@ -171,6 +165,15 @@ const form = reactive({
   notes: '',
   receipt_image_url: ''
 })
+
+const categoryOptions = [
+  { label: 'Food', value: 'Food' },
+  { label: 'Transportation', value: 'Transportation' },
+  { label: 'Bills', value: 'Bills' },
+  { label: 'Shopping', value: 'Shopping' },
+  { label: 'Electricity', value: 'Electricity' },
+  { label: 'Utilities', value: 'Utilities' }
+]
 
 watch(
   () => props.draft,

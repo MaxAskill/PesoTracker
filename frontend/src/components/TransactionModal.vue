@@ -76,28 +76,11 @@
           Category
         </label>
 
-        <select
+        <AppSelect
           v-model="form.category"
-          class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
-        >
-          <option disabled value="">Select Category</option>
-
-          <template v-if="currentType === 'expense'">
-            <option value="Food">Food</option>
-            <option value="Transportation">Transportation</option>
-            <option value="Bills">Bills</option>
-            <option value="Shopping">Shopping</option>
-            <option value="Electricity">Electricity</option>
-            <option value="Utilities">Utilities</option>
-          </template>
-
-          <template v-if="currentType === 'income'">
-            <option value="Salary">Salary</option>
-            <option value="Allowance">Allowance</option>
-            <option value="Freelance">Freelance</option>
-            <option value="Business">Business</option>
-          </template>
-        </select>
+          :options="categoryOptions"
+          placeholder="Select Category"
+        />
       </div>
 
       <div>
@@ -150,6 +133,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import api from '../services/api'
+import AppSelect from './AppSelect.vue'
 import AppModal from './AppModal.vue'
 import ReceiptScannerModal from './ReceiptScannerModal.vue'
 import ReceiptDraftForm from './ReceiptDraftForm.vue'
@@ -209,6 +193,17 @@ const currentType = computed(() => {
 
 const canScanReceipt = computed(() => {
   return currentType.value === 'expense' && !props.transaction
+})
+
+const categoryOptions = computed(() => {
+  const options = currentType.value === 'income'
+    ? ['Salary', 'Allowance', 'Freelance', 'Business']
+    : ['Food', 'Transportation', 'Bills', 'Shopping', 'Electricity', 'Utilities']
+
+  return options.map(category => ({
+    label: category,
+    value: category
+  }))
 })
 
 watch(canScanReceipt, (value) => {

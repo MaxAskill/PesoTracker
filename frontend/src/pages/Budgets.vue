@@ -90,14 +90,11 @@
       <form class="space-y-5" @submit.prevent="saveBudget">
         <div>
           <label class="mb-2 block text-sm font-semibold text-slate-300">Category</label>
-          <select v-model="form.category" class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10">
-            <option disabled value="">Select Category</option>
-            <option value="Food">Food</option>
-            <option value="Transportation">Transportation</option>
-            <option value="Bills">Bills</option>
-            <option value="Shopping">Shopping</option>
-            <option value="Utilities">Utilities</option>
-          </select>
+          <AppSelect
+            v-model="form.category"
+            :options="categoryOptions"
+            placeholder="Select Category"
+          />
         </div>
 
         <div>
@@ -107,10 +104,11 @@
 
         <div>
           <label class="mb-2 block text-sm font-semibold text-slate-300">Month</label>
-          <select v-model="form.month" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10">
-            <option disabled value="">Select Month</option>
-            <option v-for="month in months" :key="month.value" :value="month.value">{{ month.label }}</option>
-          </select>
+          <AppSelect
+            v-model="form.month"
+            :options="months"
+            placeholder="Select Month"
+          />
         </div>
 
         <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
@@ -125,6 +123,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import api from '../services/api'
 import AppModal from '../components/AppModal.vue'
+import AppSelect from '../components/AppSelect.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'
@@ -139,6 +138,14 @@ const form = reactive({
   amount: '',
   month: ''
 })
+
+const categoryOptions = [
+  { label: 'Food', value: 'Food' },
+  { label: 'Transportation', value: 'Transportation' },
+  { label: 'Bills', value: 'Bills' },
+  { label: 'Shopping', value: 'Shopping' },
+  { label: 'Utilities', value: 'Utilities' }
+]
 
 const months = Array.from({ length: 12 }, (_, index) => {
   const date = new Date(new Date().getFullYear(), index)

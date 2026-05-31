@@ -71,28 +71,22 @@
     >
       <form class="space-y-5" @submit.prevent="saveRecurring">
         <input v-model="form.title" type="text" required placeholder="Transaction title" class="form-field" />
-        <select v-model="form.type" required class="form-field">
-          <option disabled value="">Select Type</option>
-          <option value="income">Income</option>
-          <option value="expense">Expense</option>
-        </select>
-        <select v-model="form.category" required class="form-field">
-          <option disabled value="">Select Category</option>
-          <option>Food</option>
-          <option>Bills</option>
-          <option>Transportation</option>
-          <option>Shopping</option>
-          <option>Salary</option>
-          <option>Savings</option>
-        </select>
+        <AppSelect
+          v-model="form.type"
+          :options="typeOptions"
+          placeholder="Select Type"
+        />
+        <AppSelect
+          v-model="form.category"
+          :options="categoryOptions"
+          placeholder="Select Category"
+        />
         <input v-model="form.amount" type="number" required min="1" placeholder="Amount" class="form-field" />
-        <select v-model="form.frequency" required class="form-field">
-          <option disabled value="">Select Frequency</option>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </select>
+        <AppSelect
+          v-model="form.frequency"
+          :options="frequencyOptions"
+          placeholder="Select Frequency"
+        />
         <input v-model="form.next_due_date" type="date" required class="form-field" />
         <textarea v-model="form.note" rows="3" placeholder="Optional note..." class="form-field resize-none"></textarea>
         <button type="submit" class="w-full rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
@@ -106,6 +100,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import AppModal from '../components/AppModal.vue'
+import AppSelect from '../components/AppSelect.vue'
 import Sidebar from '../components/Sidebar.vue'
 import api from '../services/api'
 import { formatPeso } from '../utils/currency'
@@ -123,6 +118,27 @@ const form = reactive({
   next_due_date: '',
   note: ''
 })
+
+const typeOptions = [
+  { label: 'Income', value: 'income' },
+  { label: 'Expense', value: 'expense' }
+]
+
+const categoryOptions = [
+  { label: 'Food', value: 'Food' },
+  { label: 'Bills', value: 'Bills' },
+  { label: 'Transportation', value: 'Transportation' },
+  { label: 'Shopping', value: 'Shopping' },
+  { label: 'Salary', value: 'Salary' },
+  { label: 'Savings', value: 'Savings' }
+]
+
+const frequencyOptions = [
+  { label: 'Daily', value: 'daily' },
+  { label: 'Weekly', value: 'weekly' },
+  { label: 'Monthly', value: 'monthly' },
+  { label: 'Yearly', value: 'yearly' }
+]
 
 const typeBadgeClass = (type) => {
   return type === 'income'

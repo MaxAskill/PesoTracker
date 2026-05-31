@@ -52,6 +52,9 @@
               <p class="mt-2 text-sm leading-6 text-slate-500">
                 Review expenses, budgets, savings, receipts, and AI insights in one focused dashboard.
               </p>
+              <p v-if="successMessage" class="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200">
+                {{ successMessage }}
+              </p>
             </div>
 
             <form class="space-y-5" @submit.prevent="handleLogin">
@@ -106,13 +109,13 @@
             </p>
 
             <p class="mt-4 text-center">
-              <a
-                href="#"
+              <RouterLink
+                to="/forgot-password"
                 tabindex="5"
                 class="rounded-lg text-sm font-semibold text-slate-500 outline-none transition hover:text-emerald-200 focus:ring-4 focus:ring-emerald-400/20"
               >
                 Forgot password?
-              </a>
+              </RouterLink>
             </p>
           </div>
         </div>
@@ -122,7 +125,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
 import AuthHeader from '../components/AuthHeader.vue'
@@ -131,11 +134,17 @@ import { preloadAuthenticatedData } from '../services/preload'
 
 const router = useRouter()
 const error = ref('')
+const successMessage = ref('')
 const loading = ref(false)
 
 const form = reactive({
   email: '',
   password: ''
+})
+
+onMounted(() => {
+  successMessage.value = localStorage.getItem('login_success_message') || ''
+  localStorage.removeItem('login_success_message')
 })
 
 const handleLogin = async () => {

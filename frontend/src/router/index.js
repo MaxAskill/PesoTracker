@@ -3,6 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import VerifyOtp from '../pages/VerifyOtp.vue'
+import ForgotPassword from '../pages/ForgotPassword.vue'
+import ResetPasswordVerifyOtp from '../pages/ResetPasswordVerifyOtp.vue'
+import ResetPassword from '../pages/ResetPassword.vue'
 import Dashboard from '../pages/Dashboard.vue'
 import Transactions from '../pages/Transactions.vue'
 import Budgets from '../pages/Budgets.vue'
@@ -33,6 +36,27 @@ const routes = [
     path: '/verify-otp',
     name: 'verify-otp',
     component: VerifyOtp,
+    meta: { guest: true, keepAlive: false }
+  },
+
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPassword,
+    meta: { guest: true, keepAlive: false }
+  },
+
+  {
+    path: '/reset-password/verify-otp',
+    name: 'reset-password-verify-otp',
+    component: ResetPasswordVerifyOtp,
+    meta: { guest: true, keepAlive: false }
+  },
+
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: ResetPassword,
     meta: { guest: true, keepAlive: false }
   },
 

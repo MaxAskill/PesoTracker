@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Mail\OtpVerificationMail;
+use App\Mail\PasswordResetOtpMail;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -19,7 +20,28 @@ class OtpEmailService
         Mail::to($email)->send(new OtpVerificationMail($otp));
     }
 
-    private function sendWithBrevo(string $email, string $otp): void
+    public function sendPasswordReset(string $email, string $otp): void
+    {
+        if (config('services.brevo.key')) {
+            $this->sendWithBrevo(
+                $email,
+                $otp,
+                'PesoTracker Password Reset OTP',
+                'emails.password-reset-otp'
+            );
+
+            return;
+        }
+
+        Mail::to($email)->send(new PasswordResetOtpMail($otp));
+    }
+
+    private function sendWithBrevo(
+        string $email,
+        string $otp,
+        string $subject = 'Your PesoTracker verification code',
+        string $view = 'emails.otp-verification'
+    ): void
     {
         $senderEmail = config('services.brevo.sender_email');
         $senderName = config('services.brevo.sender_name', 'PesoTracker');
@@ -39,8 +61,8 @@ class OtpEmailService
             'to' => [
                 ['email' => $email],
             ],
-            'subject' => 'Your PesoTracker verification code',
-            'htmlContent' => view('emails.otp-verification', [
+            'subject' => $subject,
+            'htmlContent' => view($view, [
                 'otp' => $otp,
             ])->render(),
         ]);

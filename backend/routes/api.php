@@ -15,6 +15,7 @@ use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\FinancialHealthController;
 use App\Http\Controllers\FinanceAssistantController;
 use App\Http\Controllers\AssistantController;
+use App\Http\Controllers\PasswordResetController;
 
 Route::get('/test', function () {
     return response()->json([
@@ -52,3 +53,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+Route::post('/forgot-password/verify-otp', [PasswordResetController::class, 'verifyOtp']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);

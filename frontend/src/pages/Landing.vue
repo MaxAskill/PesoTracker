@@ -157,7 +157,7 @@
       </div>
     </section>
 
-    <section id="how" class="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
+    <section id="how-it-works" class="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
       <SectionHeader
         eyebrow="How it works"
         title="From records to better habits"
@@ -283,9 +283,9 @@ const activeSection = ref('')
 let sectionObserver = null
 
 const navLinks = [
-  { label: 'Features', href: '#features' },
   { label: 'Preview', href: '#preview' },
-  { label: 'How it works', href: '#how' },
+  { label: 'Features', href: '#features' },
+  { label: 'How it works', href: '#how-it-works' },
   { label: 'Insights', href: '#insights' }
 ]
 

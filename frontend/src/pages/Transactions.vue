@@ -115,7 +115,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <div class="grid grid-cols-1 gap-6">
         <div class="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 shadow-2xl shadow-slate-950/20">
           <div class="flex flex-col gap-3 border-b border-slate-800 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -184,9 +184,31 @@
               </div>
 
               <div class="flex items-center gap-2 md:justify-end" @click.stop>
-                <button type="button" class="action-button" @click="openDetails(transaction)">View</button>
-                <button type="button" class="action-button" @click="editTransaction(transaction)">Edit</button>
-                <button type="button" class="danger-button" @click="deleteTransaction(transaction.id)">Delete</button>
+                <button
+                  type="button"
+                  class="icon-action-button"
+                  aria-label="Edit transaction"
+                  title="Edit transaction"
+                  @click="editTransaction(transaction)"
+                >
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="m14 8 2 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="icon-danger-button"
+                  aria-label="Delete transaction"
+                  title="Delete transaction"
+                  @click="deleteTransaction(transaction.id)"
+                >
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 7h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    <path d="M7 7l1 13h8l1-13M9 7l1-3h4l1 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -212,37 +234,38 @@
           </div>
         </div>
 
-        <aside class="hidden xl:block">
-          <TransactionDetailsPanel
-            :transaction="detailsTransaction"
-            :format-peso="formatPeso"
-            @edit="editTransaction"
-            @delete="deleteTransaction"
-            @close="detailsTransaction = null"
-          />
-        </aside>
       </div>
     </section>
 
     <div
       v-if="detailsTransaction"
-      class="fixed inset-0 z-[70] bg-slate-950/75 backdrop-blur-sm xl:hidden"
-      @click="detailsTransaction = null"
+      class="fixed inset-0 z-[60] bg-slate-950/75 backdrop-blur-sm"
+      @click="closeDetails"
     ></div>
 
-    <div
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="translate-y-full opacity-80 md:translate-x-full md:translate-y-0"
+      enter-to-class="translate-y-0 opacity-100 md:translate-x-0"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="translate-y-0 opacity-100 md:translate-x-0"
+      leave-to-class="translate-y-full opacity-80 md:translate-x-full md:translate-y-0"
+    >
+    <aside
       v-if="detailsTransaction"
-      class="fixed inset-x-0 bottom-0 z-[80] max-h-[88vh] overflow-y-auto rounded-t-[2rem] border border-white/10 bg-slate-950 p-5 shadow-2xl shadow-black/60 xl:hidden"
+      class="fixed inset-x-0 bottom-0 z-[70] max-h-[90vh] overflow-y-auto rounded-t-[2rem] border border-white/10 bg-slate-950 p-5 shadow-2xl shadow-black/60 md:inset-y-0 md:left-auto md:right-0 md:h-screen md:max-h-none md:w-[min(480px,100vw)] md:rounded-l-[2rem] md:rounded-tr-none md:border-l md:border-r-0 md:border-t-0 md:p-6"
+      @click.stop
     >
       <TransactionDetailsPanel
         :transaction="detailsTransaction"
         :format-peso="formatPeso"
-        compact
+        drawer
         @edit="editTransaction"
         @delete="deleteTransaction"
-        @close="detailsTransaction = null"
+        @close="closeDetails"
       />
-    </div>
+    </aside>
+    </Transition>
 
     <TransactionModal :show="showEditModal" :transaction="editingTransaction" @close="closeEditModal" @saved="handleTransactionSaved" />
     <TransactionModal :show="showExpenseModal" type="expense" @close="showExpenseModal = false" @saved="handleTransactionSaved" />
@@ -251,7 +274,7 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h, onMounted, ref } from 'vue'
+import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import api from '../services/api'
 import TransactionModal from '../components/TransactionModal.vue'
 import Sidebar from '../components/Sidebar.vue'
@@ -350,12 +373,22 @@ const openDetails = (transaction) => {
   detailsTransaction.value = transaction
 }
 
+const closeDetails = () => {
+  detailsTransaction.value = null
+}
+
 const handleTransactionSaved = () => {
   showEditModal.value = false
   showExpenseModal.value = false
   showIncomeModal.value = false
   editingTransaction.value = null
   getTransactions()
+}
+
+const handleEscape = (event) => {
+  if (event.key === 'Escape') {
+    closeDetails()
+  }
 }
 
 const filteredTransactions = computed(() => {
@@ -435,7 +468,7 @@ const TransactionDetailsPanel = defineComponent({
   props: {
     transaction: { type: Object, default: null },
     formatPeso: { type: Function, required: true },
-    compact: Boolean
+    drawer: Boolean
   },
   emits: ['edit', 'delete', 'close'],
   setup(props, { emit }) {
@@ -447,26 +480,18 @@ const TransactionDetailsPanel = defineComponent({
     return () => {
       const transaction = props.transaction
 
-      if (!transaction) {
-        return h('div', { class: 'sticky top-6 rounded-[2rem] border border-dashed border-slate-800 bg-slate-950/60 p-8 text-center shadow-2xl shadow-slate-950/20' }, [
-          h('div', { class: 'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-500/10 text-2xl font-black text-emerald-300' }, 'i'),
-          h('h3', { class: 'text-xl font-black text-white' }, 'Select a transaction'),
-          h('p', { class: 'mt-2 text-sm leading-6 text-slate-500' }, 'Choose a transaction from the list to view its details.')
-        ])
-      }
+      if (!transaction) return null
 
       const isIncome = transaction.type === 'income'
       const image = receiptUrl(transaction)
 
       return h('div', {
-        class: props.compact
-          ? 'space-y-5'
-          : 'sticky top-6 space-y-5 rounded-[2rem] border border-white/10 bg-slate-950/75 p-5 shadow-2xl shadow-slate-950/20'
+        class: 'space-y-5'
       }, [
-        h('div', { class: `relative overflow-hidden rounded-[2rem] border p-5 ${isIncome ? 'border-emerald-400/20 bg-emerald-500/10' : 'border-red-400/20 bg-red-500/10'}` }, [
+        h('div', { class: `relative overflow-hidden rounded-[2rem] border p-5 shadow-2xl ${isIncome ? 'border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-slate-950 to-slate-950 shadow-emerald-950/20' : 'border-red-400/20 bg-gradient-to-br from-red-500/15 via-slate-950 to-slate-950 shadow-red-950/20'}` }, [
           h('div', { class: 'flex items-start justify-between gap-4' }, [
             h('div', { class: 'min-w-0' }, [
-              h('p', { class: 'text-xs font-semibold uppercase tracking-wide text-slate-400' }, 'Recorded Transaction'),
+              h('p', { class: 'text-xs font-semibold uppercase tracking-wide text-emerald-300' }, 'Recorded Transaction'),
               h('h3', { class: 'mt-2 break-words text-2xl font-black text-white' }, transaction.title),
               h('span', { class: `mt-3 inline-flex rounded-full px-3 py-1 text-xs font-bold capitalize ${isIncome ? 'bg-emerald-500/15 text-emerald-200' : 'bg-red-500/15 text-red-200'}` }, transaction.type)
             ]),
@@ -505,6 +530,8 @@ const TransactionDetailsPanel = defineComponent({
 })
 
 onMounted(() => {
+  window.addEventListener('keydown', handleEscape)
+
   const cachedTransactions = loadDisplayCache('transactions')
 
   if (cachedTransactions) {
@@ -512,6 +539,15 @@ onMounted(() => {
   }
 
   getTransactions()
+})
+
+onBeforeUnmount(() => {
+  document.body.classList.remove('overflow-hidden')
+  window.removeEventListener('keydown', handleEscape)
+})
+
+watch(detailsTransaction, (value) => {
+  document.body.classList.toggle('overflow-hidden', Boolean(value))
 })
 </script>
 
@@ -537,29 +573,37 @@ onMounted(() => {
   box-shadow: 0 0 0 4px rgb(52 211 153 / 0.1);
 }
 
-.action-button {
+.icon-action-button,
+.icon-danger-button {
+  display: inline-flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
   border-radius: 0.875rem;
-  background: rgb(30 41 59);
-  padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
-  color: rgb(226 232 240);
   transition: 0.2s ease;
 }
 
-.action-button:hover {
-  background: rgb(51 65 85);
+.icon-action-button {
+  border: 1px solid rgb(71 85 105 / 0.7);
+  background: rgb(30 41 59 / 0.75);
+  color: rgb(203 213 225);
 }
 
-.danger-button {
-  border-radius: 0.875rem;
+.icon-action-button:hover {
+  border-color: rgb(52 211 153 / 0.45);
+  background: rgb(16 185 129 / 0.12);
+  color: rgb(110 231 183);
+}
+
+.icon-danger-button {
+  border: 1px solid rgb(248 113 113 / 0.22);
   background: rgb(239 68 68 / 0.1);
-  padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
   color: rgb(252 165 165);
-  transition: 0.2s ease;
 }
 
-.danger-button:hover {
+.icon-danger-button:hover {
+  border-color: rgb(248 113 113 / 0.5);
   background: rgb(239 68 68);
   color: white;
 }

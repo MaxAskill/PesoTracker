@@ -39,7 +39,7 @@
         <div
           v-if="isOpen"
           ref="menuRef"
-          class="custom-select-menu fixed z-[95] overflow-y-auto rounded-2xl border border-slate-700/70 bg-slate-950/95 p-2 shadow-2xl shadow-black/50"
+          class="custom-select-menu fixed z-[160] overflow-y-auto rounded-2xl border border-slate-700/70 bg-slate-950/95 p-2 shadow-2xl shadow-black/50"
           :style="menuStyle"
         >
           <button

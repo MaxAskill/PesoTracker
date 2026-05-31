@@ -6,7 +6,7 @@
     <!-- Main Content -->
     <section class="magic-bg min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pt-24 sm:p-6 lg:h-screen lg:pt-6">
       <!-- Top Bar -->
-      <header class="relative z-[90] mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur xl:flex-row xl:items-start xl:justify-between">
+      <header class="relative z-10 mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur xl:flex-row xl:items-start xl:justify-between">
         <div>
           <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">PesoTracker Overview</p>
           <h2 class="mt-2 text-3xl font-bold text-white md:text-4xl">{{ displayName }}</h2>
@@ -464,14 +464,14 @@
 
     <div
       v-if="showNotifications"
-      class="fixed inset-0 z-[110] bg-slate-950/70 backdrop-blur-sm md:hidden"
+      class="fixed inset-0 z-[60] bg-slate-950/70 backdrop-blur-sm md:hidden"
       @click="closeNotifications"
     ></div>
 
     <div
       v-if="showNotifications"
       ref="notificationPanel"
-      class="notification-panel fixed inset-x-4 bottom-4 z-[120] max-h-[78vh] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 md:inset-x-auto md:bottom-auto md:right-6 md:top-24 md:w-[min(420px,calc(100vw-2rem))] lg:right-8"
+      class="notification-panel fixed inset-x-4 bottom-4 z-[70] max-h-[78vh] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 md:inset-x-auto md:bottom-auto md:right-6 md:top-24 md:w-[min(420px,calc(100vw-2rem))] lg:right-8"
       @click.stop
     >
       <div class="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950 px-5 py-4">
@@ -1033,6 +1033,10 @@ const handleSidebarState = (event) => {
   }
 }
 
+const handleModalOpen = () => {
+  closeNotifications()
+}
+
 watch(showNotifications, (value) => {
   if (value) {
     document.body.classList.add('overflow-hidden')
@@ -1048,6 +1052,7 @@ onMounted(() => {
   document.addEventListener('click', handleDocumentClick)
   window.addEventListener('keydown', handleEscape)
   window.addEventListener('pesotracker-sidebar-state', handleSidebarState)
+  window.addEventListener('pesotracker-modal-open', handleModalOpen)
 
   const snapshot = loadDashboardSnapshot()
 
@@ -1072,6 +1077,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleDocumentClick)
   window.removeEventListener('keydown', handleEscape)
   window.removeEventListener('pesotracker-sidebar-state', handleSidebarState)
+  window.removeEventListener('pesotracker-modal-open', handleModalOpen)
   clearInterval(refreshInterval)
 })
 </script>

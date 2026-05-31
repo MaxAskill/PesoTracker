@@ -28,7 +28,7 @@
         <div
           v-if="isOpen"
           ref="menuRef"
-          class="fixed z-[96] rounded-3xl border border-slate-700/70 bg-slate-950/95 p-4 text-white shadow-2xl shadow-black/50"
+          class="fixed z-[160] rounded-3xl border border-slate-700/70 bg-slate-950/95 p-4 text-white shadow-2xl shadow-black/50"
           :style="menuStyle"
         >
           <div class="mb-4 flex items-center justify-between gap-3">

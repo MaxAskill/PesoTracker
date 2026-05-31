@@ -31,14 +31,14 @@
   <!-- Mobile Overlay -->
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-[95] bg-slate-950/70 backdrop-blur-sm lg:hidden"
+    class="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm lg:hidden"
     @click="closeDrawer"
   ></div>
 
   <!-- Sidebar -->
   <aside
     :class="[
-      'fixed left-0 top-0 z-[100] flex h-screen w-[82vw] max-w-[320px] flex-col justify-between overflow-y-auto border-r border-slate-800 bg-slate-950/95 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur transition-transform duration-300 lg:w-72 lg:max-w-none',
+      'fixed left-0 top-0 z-50 flex h-screen w-[82vw] max-w-[320px] flex-col justify-between overflow-y-auto border-r border-slate-800 bg-slate-950/95 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur transition-transform duration-300 lg:w-72 lg:max-w-none',
       isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
     ]"
   >

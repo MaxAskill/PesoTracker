@@ -196,17 +196,17 @@
       </div>
     </section>
 
-    <footer class="border-t border-white/10 px-4 py-10 sm:px-6">
-      <div class="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div class="flex items-center gap-3">
-          <AppLogo subtitle="A personal finance workspace for tracking expenses, budgets, receipts, and savings." />
+    <footer class="border-t border-slate-800/70 bg-slate-950/40 px-4 py-8 sm:px-6">
+      <div class="mx-auto flex max-w-7xl flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div class="max-w-xl">
+          <AppLogo subtitle="Built for smarter money tracking." />
+          <p class="mt-3 text-sm leading-6 text-slate-500">
+            A personal finance workspace for tracking income, expenses, budgets, savings goals, receipts, and insights.
+          </p>
         </div>
-        <div class="flex flex-wrap gap-4 text-sm font-bold text-slate-400">
-          <RouterLink to="/login" class="hover:text-emerald-300">Login</RouterLink>
-          <RouterLink to="/register" class="hover:text-emerald-300">Register</RouterLink>
-          <a href="#features" class="hover:text-emerald-300" @click.prevent="scrollToSection('#features')">Features</a>
-        </div>
-        <p class="text-sm text-slate-600">Copyright 2026 PesoTracker.</p>
+        <p class="text-sm text-slate-500 md:text-right">
+          Copyright 2026 PesoTracker. All rights reserved.
+        </p>
       </div>
     </footer>
     </main>

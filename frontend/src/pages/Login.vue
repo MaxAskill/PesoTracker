@@ -2,13 +2,7 @@
   <main class="magic-bg min-h-screen px-6 py-6 text-white">
     <header class="mx-auto mb-6 flex max-w-7xl items-center justify-between">
       <RouterLink to="/" class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400 text-2xl font-black text-slate-950 shadow-lg shadow-emerald-500/25">
-          P
-        </div>
-        <div>
-          <h1 class="text-xl font-black">Peso<span class="text-emerald-300">Tracker</span></h1>
-          <p class="text-xs text-slate-400">Finance Assistant</p>
-        </div>
+        <AppLogo />
       </RouterLink>
 
       <RouterLink to="/" class="rounded-full bg-slate-950/70 px-4 py-2 text-sm font-bold text-slate-200 transition hover:bg-emerald-400/10 hover:text-emerald-100">
@@ -24,13 +18,7 @@
 
           <div class="relative z-10">
             <RouterLink to="/" class="flex items-center gap-3">
-              <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400 text-3xl font-black text-slate-950 shadow-lg shadow-emerald-500/25">
-                P
-              </div>
-              <div>
-                <h1 class="text-3xl font-black">Peso<span class="text-emerald-300">Tracker</span></h1>
-                <p class="text-sm text-slate-400">Smart Expense Tracker</p>
-              </div>
+              <AppLogo size="lg" subtitle="Smart Expense Tracker" />
             </RouterLink>
 
             <div class="mt-20">
@@ -132,6 +120,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
+import AppLogo from '../components/AppLogo.vue'
 import { preloadAuthenticatedData } from '../services/preload'
 
 const router = useRouter()

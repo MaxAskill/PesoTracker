@@ -2,20 +2,7 @@
   <!-- Mobile Topbar -->
   <header class="fixed left-0 right-0 top-0 z-40 flex items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 py-4 backdrop-blur lg:hidden">
     <div class="flex items-center gap-3">
-      <img
-        src="/logo.png"
-        class="h-12 w-12 rounded-2xl"
-      />
-
-      <div>
-        <h1 class="text-2xl font-bold text-white">
-          Peso<span class="text-emerald-400">Tracker</span>
-        </h1>
-
-        <p class="text-sm text-slate-400">
-          Smart Expense Tracker
-        </p>
-      </div>
+      <AppLogo subtitle="Smart Expense Tracker" />
     </div>
 
     <button
@@ -45,19 +32,7 @@
     <div class="min-h-0">
       <!-- Header -->
       <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <img
-            src="/logo.png"
-            class="h-11 w-11 rounded-2xl border border-emerald-400/20"
-          />
-
-          <div>
-            <h1 class="text-xl font-bold text-white">
-              Peso<span class="text-emerald-400">Tracker</span>
-            </h1>
-            <p class="text-xs text-slate-500">Finance workspace</p>
-          </div>
-        </div>
+        <AppLogo subtitle="Finance workspace" />
 
         <button
           type="button"
@@ -110,6 +85,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import AppLogo from './AppLogo.vue'
 
 const route = useRoute()
 const router = useRouter()

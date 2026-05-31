@@ -3,11 +3,7 @@
     <header class="fixed left-0 right-0 top-0 z-[999] border-b border-slate-800/70 bg-slate-950/90 px-4 py-4 backdrop-blur-xl sm:px-6">
       <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4">
         <RouterLink to="/" class="flex min-w-0 items-center gap-3">
-          <img src="/logo.png" alt="PesoTracker" class="h-11 w-11 shrink-0 rounded-2xl shadow-lg shadow-emerald-500/20" />
-          <div class="min-w-0">
-            <h1 class="truncate text-lg font-black sm:text-xl">Peso<span class="text-emerald-300">Tracker</span></h1>
-            <p class="hidden text-xs text-slate-400 sm:block">Finance Assistant</p>
-          </div>
+          <AppLogo />
         </RouterLink>
 
         <div class="hidden items-center gap-7 text-sm font-bold text-slate-300 lg:flex">
@@ -257,11 +253,7 @@
     <footer class="border-t border-white/10 px-4 py-10 sm:px-6">
       <div class="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div class="flex items-center gap-3">
-          <img src="/logo.png" alt="PesoTracker" class="h-11 w-11 rounded-2xl" />
-          <div>
-            <p class="font-black">Peso<span class="text-emerald-300">Tracker</span></p>
-            <p class="max-w-md text-sm text-slate-500">A personal finance workspace for tracking expenses, budgets, receipts, and savings.</p>
-          </div>
+          <AppLogo subtitle="A personal finance workspace for tracking expenses, budgets, receipts, and savings." />
         </div>
         <div class="flex flex-wrap gap-4 text-sm font-bold text-slate-400">
           <RouterLink to="/login" class="hover:text-emerald-300">Login</RouterLink>
@@ -277,6 +269,7 @@
 
 <script setup>
 import { defineComponent, h, onBeforeUnmount, onMounted, ref } from 'vue'
+import AppLogo from '../components/AppLogo.vue'
 
 const mobileMenuOpen = ref(false)
 const activeSection = ref('')

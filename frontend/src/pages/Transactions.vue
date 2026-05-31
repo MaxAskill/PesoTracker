@@ -351,11 +351,9 @@ const sortOptions = [
 const totalIncome = computed(() => transactions.value.filter(item => item.type === 'income').reduce((sum, item) => sum + Number(item.amount), 0))
 const totalExpenses = computed(() => transactions.value.filter(item => item.type === 'expense').reduce((sum, item) => sum + Number(item.amount), 0))
 const netBalance = computed(() => totalIncome.value - totalExpenses.value)
-const currentMonthValue = computed(() => monthValueFromDate(new Date()))
+const currentMonthValue = computed(() => getCurrentMonthValue())
 const previousMonthValue = computed(() => {
-  const date = new Date()
-  date.setMonth(date.getMonth() - 1)
-  return monthValueFromDate(date)
+  return getPreviousMonthValue()
 })
 const formattedSelectedMonth = computed(() => formatMonthValue(selectedMonth.value))
 
@@ -462,6 +460,16 @@ const handleEscape = (event) => {
 
 const monthValueFromDate = (date) => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+const getCurrentMonthValue = () => {
+  const now = new Date()
+  return monthValueFromDate(new Date(now.getFullYear(), now.getMonth(), 1))
+}
+
+const getPreviousMonthValue = () => {
+  const now = new Date()
+  return monthValueFromDate(new Date(now.getFullYear(), now.getMonth() - 1, 1))
 }
 
 const formatMonthValue = (value) => {

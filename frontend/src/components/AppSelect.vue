@@ -39,7 +39,7 @@
         <div
           v-if="isOpen"
           ref="menuRef"
-          class="fixed z-[95] max-h-60 overflow-y-auto rounded-2xl border border-slate-700/70 bg-slate-950 p-2 shadow-2xl shadow-black/50"
+          class="custom-select-menu fixed z-[95] overflow-y-auto rounded-2xl border border-slate-700/70 bg-slate-950/95 p-2 shadow-2xl shadow-black/50"
           :style="menuStyle"
         >
           <button
@@ -146,12 +146,15 @@ const updateMenuPosition = () => {
 
   const spaceBelow = window.innerHeight - rect.bottom
   const openAbove = spaceBelow < 260 && rect.top > spaceBelow
+  const availableSpace = openAbove ? rect.top : spaceBelow
+  const maxHeight = Math.max(180, Math.min(240, availableSpace - 16))
 
   menuStyle.value = {
     left: `${rect.left}px`,
     top: openAbove ? 'auto' : `${rect.bottom + 8}px`,
     bottom: openAbove ? `${window.innerHeight - rect.top + 8}px` : 'auto',
-    width: `${rect.width}px`
+    width: `${rect.width}px`,
+    maxHeight: `${maxHeight}px`
   }
 }
 
@@ -181,3 +184,28 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateMenuPosition, true)
 })
 </script>
+
+<style scoped>
+.custom-select-menu {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(16 185 129 / 0.45) rgb(15 23 42 / 0.6);
+}
+
+.custom-select-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-select-menu::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgb(15 23 42 / 0.6);
+}
+
+.custom-select-menu::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(16 185 129 / 0.45);
+}
+
+.custom-select-menu::-webkit-scrollbar-thumb:hover {
+  background: rgb(16 185 129 / 0.7);
+}
+</style>

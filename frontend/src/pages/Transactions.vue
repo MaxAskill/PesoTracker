@@ -91,27 +91,25 @@
             class="transaction-field xl:col-span-1"
           />
 
-          <select v-model="selectedType" class="transaction-field">
-            <option value="">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
+          <AppSelect
+            v-model="selectedType"
+            :options="typeOptions"
+            placeholder="All Types"
+          />
 
-          <select v-model="selectedCategory" class="transaction-field">
-            <option value="">All Categories</option>
-            <option v-for="category in categories" :key="category" :value="category">
-              {{ category }}
-            </option>
-          </select>
+          <AppSelect
+            v-model="selectedCategory"
+            :options="categoryOptions"
+            placeholder="All Categories"
+          />
 
           <input v-model="selectedMonth" type="month" class="transaction-field" />
 
-          <select v-model="sortBy" class="transaction-field">
-            <option value="latest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-            <option value="highest">Highest amount</option>
-            <option value="lowest">Lowest amount</option>
-          </select>
+          <AppSelect
+            v-model="sortBy"
+            :options="sortOptions"
+            placeholder="Newest first"
+          />
         </div>
       </div>
 
@@ -276,6 +274,7 @@
 <script setup>
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import api from '../services/api'
+import AppSelect from '../components/AppSelect.vue'
 import TransactionModal from '../components/TransactionModal.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
@@ -294,6 +293,19 @@ const selectedType = ref('')
 const selectedMonth = ref('')
 const sortBy = ref('latest')
 
+const typeOptions = [
+  { label: 'All Types', value: '' },
+  { label: 'Income', value: 'income' },
+  { label: 'Expense', value: 'expense' }
+]
+
+const sortOptions = [
+  { label: 'Newest first', value: 'latest' },
+  { label: 'Oldest first', value: 'oldest' },
+  { label: 'Highest amount', value: 'highest' },
+  { label: 'Lowest amount', value: 'lowest' }
+]
+
 const totalIncome = computed(() => transactions.value.filter(item => item.type === 'income').reduce((sum, item) => sum + Number(item.amount), 0))
 const totalExpenses = computed(() => transactions.value.filter(item => item.type === 'expense').reduce((sum, item) => sum + Number(item.amount), 0))
 const netBalance = computed(() => totalIncome.value - totalExpenses.value)
@@ -305,6 +317,14 @@ const categories = computed(() => {
 
   return [...new Set(['Food', 'Bills', 'Transportation', 'Shopping', 'Salary', 'Savings', ...values])]
 })
+
+const categoryOptions = computed(() => [
+  { label: 'All Categories', value: '' },
+  ...categories.value.map(category => ({
+    label: category,
+    value: category
+  }))
+])
 
 const amountClass = (type) => {
   return type === 'income' ? 'text-emerald-300' : 'text-red-300'

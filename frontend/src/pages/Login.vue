@@ -62,6 +62,7 @@
                   v-model="form.email"
                   type="email"
                   placeholder="example@email.com"
+                  tabindex="1"
                   class="pt-input"
                 />
               </div>
@@ -69,13 +70,14 @@
               <div>
                 <div class="mb-2 flex items-center justify-between">
                   <label for="password" class="block text-sm font-semibold text-slate-300">Password</label>
-                  <a href="#" class="text-sm font-semibold text-emerald-300 hover:text-emerald-200">Forgot password?</a>
+                  <span class="text-sm font-semibold text-slate-600">Secure login</span>
                 </div>
                 <input
                   id="password"
                   v-model="form.password"
                   type="password"
                   placeholder="Enter your password"
+                  tabindex="2"
                   class="pt-input"
                 />
               </div>
@@ -85,7 +87,8 @@
               <button
                 type="submit"
                 :disabled="loading"
-                class="pt-primary inline-flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-70"
+                tabindex="3"
+                class="pt-primary inline-flex w-full items-center justify-center gap-2 focus:outline-none focus:ring-4 focus:ring-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <span
                   v-if="loading"
@@ -97,9 +100,19 @@
 
             <p class="mt-8 text-center text-slate-400">
               Don't have an account?
-              <RouterLink to="/register" class="font-bold text-emerald-300 hover:text-emerald-200">
+              <RouterLink to="/register" tabindex="4" class="rounded-lg font-bold text-emerald-300 outline-none transition hover:text-emerald-200 focus:ring-4 focus:ring-emerald-400/20">
                 Create account
               </RouterLink>
+            </p>
+
+            <p class="mt-4 text-center">
+              <a
+                href="#"
+                tabindex="5"
+                class="rounded-lg text-sm font-semibold text-slate-500 outline-none transition hover:text-emerald-200 focus:ring-4 focus:ring-emerald-400/20"
+              >
+                Forgot password?
+              </a>
             </p>
           </div>
         </div>

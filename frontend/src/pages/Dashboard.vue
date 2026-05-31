@@ -43,93 +43,6 @@
                 </span>
               </button>
 
-              <div
-                v-if="showNotifications"
-                class="fixed inset-0 z-[60] bg-slate-950/70 backdrop-blur-sm md:hidden"
-                @click="closeNotifications"
-              ></div>
-            
-              <div
-                v-if="showNotifications"
-                ref="notificationPanel"
-                class="notification-panel fixed inset-x-4 bottom-4 z-[70] max-h-[78vh] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 md:inset-x-auto md:bottom-auto md:right-6 md:top-24 md:z-[120] md:w-[min(420px,calc(100vw-2rem))] lg:right-8"
-                @click.stop
-              >
-                <div class="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950 px-5 py-4">
-                  <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">Updates</p>
-                    <h3 class="font-black text-white">Notifications</h3>
-                  </div>
-            
-                  <div class="flex items-center gap-2">
-                    <button
-                      @click="markAllNotificationsRead"
-                      class="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-300 transition hover:bg-emerald-500 hover:text-slate-950"
-                    >
-                      Mark all read
-                    </button>
-                    <button
-                      type="button"
-                      class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-slate-300 transition hover:bg-slate-800 hover:text-white md:hidden"
-                      aria-label="Close notifications"
-                      @click="closeNotifications"
-                    >
-                      X
-                    </button>
-                  </div>
-                </div>
-            
-                <div v-if="notifications.length" class="notification-scroll max-h-[calc(78vh-88px)] overflow-y-auto bg-[#020617] py-2 md:max-h-[460px]">
-                  <div
-                    v-for="notification in notifications"
-                    :key="notification.id"
-                    class="relative border-b border-slate-800/70 px-5 py-4 transition hover:bg-slate-900"
-                    :class="notification.is_read ? 'bg-[#020617]' : 'bg-slate-950'"
-                  >
-                    <span
-                      v-if="!notification.is_read"
-                      class="absolute left-2 top-6 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
-                    ></span>
-
-                    <div class="flex gap-3">
-                      <div
-                        class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-white/10"
-                        :class="{
-                          'bg-emerald-500/10 text-emerald-400': notification.type === 'success',
-                          'bg-amber-500/10 text-amber-400': notification.type === 'warning',
-                          'bg-red-500/10 text-red-400': notification.type === 'danger',
-                          'bg-slate-800 text-slate-400': notification.type === 'info'
-                        }"
-                      >
-                        !
-                      </div>
-            
-                      <div class="min-w-0">
-                        <h4 class="font-bold text-slate-100">
-                          {{ notification.title }}
-                        </h4>
-            
-                        <p class="mt-1 text-sm leading-relaxed text-slate-400">
-                          {{ notification.message }}
-                        </p>
-                        <p v-if="notification.created_at" class="mt-2 text-xs text-slate-600">
-                          {{ notification.created_at }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-            
-                <div v-else class="bg-[#020617] p-10 text-center">
-                  <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-300">
-                    !
-                  </div>
-                  <p class="font-bold text-slate-200">No notifications yet.</p>
-                  <p class="mt-2 text-sm text-slate-500">
-                    Updates about your transactions will appear here.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -548,6 +461,95 @@
         </div>
       </div>
     </section>
+
+    <div
+      v-if="showNotifications"
+      class="fixed inset-0 z-[110] bg-slate-950/70 backdrop-blur-sm md:hidden"
+      @click="closeNotifications"
+    ></div>
+
+    <div
+      v-if="showNotifications"
+      ref="notificationPanel"
+      class="notification-panel fixed inset-x-4 bottom-4 z-[120] max-h-[78vh] overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-950 shadow-2xl shadow-black/70 md:inset-x-auto md:bottom-auto md:right-6 md:top-24 md:w-[min(420px,calc(100vw-2rem))] lg:right-8"
+      @click.stop
+    >
+      <div class="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-950 px-5 py-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-300">Updates</p>
+          <h3 class="font-black text-white">Notifications</h3>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            @click="markAllNotificationsRead"
+            class="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-300 transition hover:bg-emerald-500 hover:text-slate-950"
+          >
+            Mark all read
+          </button>
+          <button
+            type="button"
+            class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-slate-300 transition hover:bg-slate-800 hover:text-white md:hidden"
+            aria-label="Close notifications"
+            @click="closeNotifications"
+          >
+            X
+          </button>
+        </div>
+      </div>
+
+      <div v-if="notifications.length" class="notification-scroll max-h-[calc(78vh-88px)] overflow-y-auto bg-[#020617] py-2 md:max-h-[460px]">
+        <div
+          v-for="notification in notifications"
+          :key="notification.id"
+          class="relative border-b border-slate-800/70 px-5 py-4 transition hover:bg-slate-900"
+          :class="notification.is_read ? 'bg-[#020617]' : 'bg-slate-950'"
+        >
+          <span
+            v-if="!notification.is_read"
+            class="absolute left-2 top-6 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.9)]"
+          ></span>
+
+          <div class="flex gap-3">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10"
+              :class="{
+                'bg-emerald-500/10 text-emerald-400': notification.type === 'success',
+                'bg-amber-500/10 text-amber-400': notification.type === 'warning',
+                'bg-red-500/10 text-red-400': notification.type === 'danger',
+                'bg-slate-800 text-slate-400': notification.type === 'info'
+              }"
+            >
+              !
+            </div>
+
+            <div class="min-w-0">
+              <h4 class="font-bold text-slate-100">
+                {{ notification.title }}
+              </h4>
+
+              <p class="mt-1 text-sm leading-relaxed text-slate-400">
+                {{ notification.message }}
+              </p>
+              <p v-if="notification.created_at" class="mt-2 text-xs text-slate-600">
+                {{ notification.created_at }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="bg-[#020617] p-10 text-center">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-300">
+          !
+        </div>
+        <p class="font-bold text-slate-200">No notifications yet.</p>
+        <p class="mt-2 text-sm text-slate-500">
+          Updates about your transactions will appear here.
+        </p>
+      </div>
+    </div>
+
     <TransactionModal
       :show="showExpenseModal"
       type="expense"
@@ -1023,11 +1025,23 @@ const handleSidebarState = (event) => {
 
   if (isMobileSidebarOpen.value) {
     closeNotifications()
+    return
+  }
+
+  if (showNotifications.value) {
+    document.body.classList.add('overflow-hidden')
   }
 }
 
 watch(showNotifications, (value) => {
-  document.body.classList.toggle('overflow-hidden', value)
+  if (value) {
+    document.body.classList.add('overflow-hidden')
+    return
+  }
+
+  if (!isMobileSidebarOpen.value) {
+    document.body.classList.remove('overflow-hidden')
+  }
 })
 
 onMounted(() => {

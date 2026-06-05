@@ -229,16 +229,7 @@ const loadInsights = async () => {
 
   insightsLoading.value = true
   insightsError.value = ''
-
-  try {
-    const response = await api.get('/assistant/insights')
-    assistantData.value = response.data
-  } catch (error) {
-    if (isCanceledRequest(error)) return
-    insightsError.value = 'I could not load your insights right now. Please try again in a moment.'
-  } finally {
-    insightsLoading.value = false
-  }
+  insightsLoading.value = false
 }
 
 const askQuestion = async (question) => {
@@ -258,19 +249,19 @@ const askQuestion = async (question) => {
   await scrollToBottom()
 
   try {
-    const response = await api.post('/assistant/ask', {
+    const response = await api.post('/ai/assistant', {
       message: text
     })
 
     messages.value.push({
       role: 'assistant',
-      text: response.data.reply
+      text: response.data.reply || response.data.message
     })
   } catch (error) {
     if (isCanceledRequest(error)) return
     messages.value.push({
       role: 'assistant',
-      text: 'Sorry, I could not answer that right now. Please try again.'
+      text: error.response?.data?.message || 'Sorry, I could not answer that right now. Please try again.'
     })
   } finally {
     askLoading.value = false

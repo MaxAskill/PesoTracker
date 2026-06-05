@@ -1171,13 +1171,13 @@ const sendAssistantMessage = async () => {
 
   try {
 
-    const response = await api.post('/finance-assistant', {
+    const response = await api.post('/ai/assistant', {
       message: userMessage
     })
 
     assistantMessages.value.push({
       role: 'assistant',
-      text: response.data.reply
+      text: response.data.reply || response.data.message
     })
 
   } catch (error) {
@@ -1185,7 +1185,7 @@ const sendAssistantMessage = async () => {
 
     assistantMessages.value.push({
       role: 'assistant',
-      text: 'Something went wrong.'
+      text: error.response?.data?.message || 'Something went wrong.'
     })
 
   } finally {

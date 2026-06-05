@@ -15,6 +15,7 @@ use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\FinancialHealthController;
 use App\Http\Controllers\FinanceAssistantController;
 use App\Http\Controllers\AssistantController;
+use App\Http\Controllers\AiAssistantController;
 use App\Http\Controllers\PasswordResetController;
 
 Route::get('/test', function () {
@@ -49,6 +50,11 @@ Route::middleware(['auth:sanctum', 'verified.api', 'throttle:auth-api'])->group(
     Route::post('/assistant/insights', [AssistantController::class, 'insights']);
     Route::post('/assistant/ask', [AssistantController::class, 'ask']);
 });
+
+// Future AI integrations must stay backend-only. The Vue frontend should call
+// this Laravel route and must never receive provider API keys or secrets.
+Route::middleware(['auth:sanctum', 'verified.api', 'throttle:ai'])
+    ->post('/ai/assistant', AiAssistantController::class);
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:registration');
 Route::post('/login', [AuthController::class, 'login']);

@@ -75,6 +75,15 @@ class AppServiceProvider extends ServiceProvider
                     )),
             ];
         });
+
+        RateLimiter::for('ai', function (Request $request) {
+            return Limit::perMinute(10)
+                ->by($this->rateLimitKey($request))
+                ->response(fn (Request $request, array $headers) => $this->rateLimitResponse(
+                    'Too many AI Assistant requests. Please wait before trying again.',
+                    $headers
+                ));
+        });
     }
 
     private function rateLimitKey(Request $request): string

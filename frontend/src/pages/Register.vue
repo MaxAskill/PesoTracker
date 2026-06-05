@@ -172,21 +172,28 @@ const handleRegister = async () => {
   loading.value = true
 
   try {
+    const normalizedEmail = form.email.trim().toLowerCase()
+
     const payload = {
       first_name: form.first_name,
       last_name: form.last_name,
-      email: form.email,
+      email: normalizedEmail,
       password: form.password,
       password_confirmation: form.password_confirmation
     }
 
     await api.post('/register', payload)
 
-    localStorage.setItem('pending_email', form.email)
+    localStorage.setItem('pending_email', normalizedEmail)
 
     router.push('/verify-otp')
 
   } catch (err) {
+    if (err.response?.status === 429) {
+      error.value = 'Too many attempts. Please wait before trying again.'
+      return
+    }
+
     error.value =
       err.response?.data?.message ||
       'Registration failed. Please try again.'

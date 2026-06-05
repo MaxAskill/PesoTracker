@@ -99,14 +99,14 @@
 
       <button
         type="submit"
-        :disabled="saving"
+        :disabled="isSubmitting"
         class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 font-black text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
       >
         <span
-          v-if="saving"
+          v-if="isSubmitting"
           class="h-4 w-4 animate-spin rounded-full border-2 border-slate-950/30 border-t-slate-950"
         ></span>
-        {{ saving ? 'Saving...' : 'Save Transaction' }}
+        {{ isSubmitting ? 'Saving...' : 'Save Transaction' }}
       </button>
     </form>
 
@@ -140,7 +140,7 @@ import { useAuth } from '../composables/useAuth'
 
 const { isAuthenticated } = useAuth()
 
-const saving = ref(false)
+const isSubmitting = ref(false)
 const showReceiptScanner = ref(false)
 const showReceiptDraft = ref(false)
 const receiptDraft = ref(null)
@@ -237,13 +237,13 @@ const validateAmount = () => {
 }
 
 const submitTransaction = async () => {
-  if (saving.value || !isAuthenticated.value) return
+  if (isSubmitting.value || !isAuthenticated.value) return
 
   error.value = ''
 
   if (!validateAmount()) return
 
-  saving.value = true
+  isSubmitting.value = true
 
   try {
     const payload = {
@@ -259,19 +259,42 @@ const submitTransaction = async () => {
         payload
       )
     } else {
-      await api.post('/transactions', payload)
+      await api.post('/transactions', payload, {
+        headers: {
+          'Idempotency-Key': createIdempotencyKey()
+        }
+      })
     }
 
     emit('saved')
     closeModal()
   } catch (err) {
     if (isCanceledRequest(err)) return
+
+    if (err.response?.status === 409) {
+      error.value = err.response.data?.message || 'This transaction was already saved.'
+      return
+    }
+
+    if (err.response?.status === 429) {
+      error.value = err.response.data?.message || 'Too many requests. Please wait a moment and try again.'
+      return
+    }
+
     error.value =
       err.response?.data?.message ||
       'Failed to save transaction.'
   } finally {
-    saving.value = false
+    isSubmitting.value = false
   }
+}
+
+const createIdempotencyKey = () => {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
 const closeModal = () => {

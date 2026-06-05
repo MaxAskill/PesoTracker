@@ -16,5 +16,6 @@ class Transaction extends Model
     'category',
     'transaction_date',
     'note',
+    'idempotency_key',
 ];
 }

@@ -65,7 +65,7 @@
 
       <button
         type="button"
-        :disabled="resendLoading"
+        :disabled="resendLoading || resendCooldown > 0"
         @click="handleResendOtp"
         class="mt-4 w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-3 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
       >
@@ -73,14 +73,14 @@
           v-if="resendLoading"
           class="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-300/30 border-t-emerald-300 align-[-2px]"
         ></span>
-        {{ resendLoading ? 'Sending...' : 'Resend OTP' }}
+        {{ resendButtonText }}
       </button>
     </section>
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
 import { useAuth } from '../composables/useAuth'
@@ -94,13 +94,25 @@ const error = ref('')
 const success = ref('')
 const verifyLoading = ref(false)
 const resendLoading = ref(false)
+const resendCooldown = ref(0)
+let cooldownInterval = null
+
+const resendButtonText = computed(() => {
+  if (resendLoading.value) return 'Sending...'
+  if (resendCooldown.value > 0) return `Resend OTP in ${resendCooldown.value}s`
+  return 'Resend OTP'
+})
 
 onMounted(() => {
-  email.value = localStorage.getItem('pending_email')
+  email.value = (localStorage.getItem('pending_email') || '').trim().toLowerCase()
 
   if (!email.value) {
     router.push('/register')
   }
+})
+
+onBeforeUnmount(() => {
+  stopResendCooldown()
 })
 
 const handleVerifyOtp = async () => {
@@ -129,6 +141,11 @@ const handleVerifyOtp = async () => {
 
     router.push('/dashboard')
   } catch (err) {
+    if (err.response?.status === 429) {
+      error.value = 'Too many attempts. Please wait before trying again.'
+      return
+    }
+
     error.value =
       err.response?.data?.message ||
       'Invalid or expired OTP.'
@@ -138,7 +155,7 @@ const handleVerifyOtp = async () => {
 }
 
 const handleResendOtp = async () => {
-  if (resendLoading.value) return
+  if (resendLoading.value || resendCooldown.value > 0) return
 
   error.value = ''
   success.value = ''
@@ -156,12 +173,39 @@ const handleResendOtp = async () => {
     })
 
     success.value = 'A new OTP has been sent.'
+    startResendCooldown()
   } catch (err) {
+    if (err.response?.status === 429) {
+      error.value = 'Too many attempts. Please wait before trying again.'
+      startResendCooldown()
+      return
+    }
+
     error.value =
       err.response?.data?.message ||
       'Failed to resend OTP.'
   } finally {
     resendLoading.value = false
+  }
+}
+
+const startResendCooldown = (seconds = 60) => {
+  resendCooldown.value = seconds
+  stopResendCooldown()
+
+  cooldownInterval = setInterval(() => {
+    resendCooldown.value = Math.max(resendCooldown.value - 1, 0)
+
+    if (resendCooldown.value === 0) {
+      stopResendCooldown()
+    }
+  }, 1000)
+}
+
+const stopResendCooldown = () => {
+  if (cooldownInterval) {
+    clearInterval(cooldownInterval)
+    cooldownInterval = null
   }
 }
 </script>

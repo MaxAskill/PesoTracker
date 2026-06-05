@@ -17,10 +17,14 @@ class AuthController extends Controller
 
    public function register(Request $request)
    {
+       $request->merge([
+           'email' => strtolower(trim((string) $request->email)),
+       ]);
+
        $request->validate([
            'first_name' => 'required',
            'last_name' => 'required',
-           'email' => 'required|email|unique:users',
+           'email' => 'required|email|unique:users,email',
            'password' => 'required|min:6|confirmed'
        ]);
    
@@ -57,6 +61,10 @@ class AuthController extends Controller
 
     public function verifyOtp(Request $request)
     {
+        $request->merge([
+            'email' => strtolower(trim((string) $request->email)),
+        ]);
+
         $request->validate([
             'email' => 'required|email',
             'otp' => 'required|string',
@@ -95,6 +103,10 @@ class AuthController extends Controller
     
     public function login(Request $request)
     {
+        $request->merge([
+            'email' => strtolower(trim((string) $request->email)),
+        ]);
+
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -121,6 +133,10 @@ class AuthController extends Controller
 
     public function resendOtp(Request $request)
     {
+        $request->merge([
+            'email' => strtolower(trim((string) $request->email)),
+        ]);
+
         $request->validate([
             'email' => 'required|email',
         ]);

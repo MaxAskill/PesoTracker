@@ -208,15 +208,38 @@ const saveDraft = async () => {
       category: form.category,
       transaction_date: form.date,
       note: form.notes
+    }, {
+      headers: {
+        'Idempotency-Key': createIdempotencyKey()
+      }
     })
 
     emit('saved')
   } catch (err) {
     if (isCanceledRequest(err)) return
+
+    if (err.response?.status === 409) {
+      error.value = err.response.data?.message || 'This transaction was already saved.'
+      return
+    }
+
+    if (err.response?.status === 429) {
+      error.value = err.response.data?.message || 'Too many requests. Please wait a moment and try again.'
+      return
+    }
+
     error.value = err.response?.data?.message || 'Failed to save expense. Please review the required fields.'
   } finally {
     saving.value = false
   }
+}
+
+const createIdempotencyKey = () => {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID()
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
 const validateAmount = () => {

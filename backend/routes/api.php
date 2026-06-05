@@ -23,9 +23,11 @@ Route::get('/test', function () {
     ]);
 });
 
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('transactions', TransactionController::class);
+Route::middleware(['auth:sanctum', 'verified.api', 'throttle:auth-api'])->group(function () {
+    Route::post('/transactions', [TransactionController::class, 'store'])
+        ->middleware('throttle:transaction-create');
+    Route::apiResource('transactions', TransactionController::class)
+        ->except(['store']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/analytics/summary', [AnalyticsController::class, 'summary']);
     Route::apiResource('budgets', BudgetController::class);
@@ -48,11 +50,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/assistant/ask', [AssistantController::class, 'ask']);
 });
 
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:registration');
 Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware(['auth:sanctum', 'throttle:auth-api'])->post('/logout', [AuthController::class, 'logout']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
-Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+Route::post('/send-otp', [AuthController::class, 'resendOtp'])->middleware('throttle:otp-send');
+Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->middleware('throttle:otp-send');
 Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
 Route::post('/forgot-password/verify-otp', [PasswordResetController::class, 'verifyOtp']);
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);

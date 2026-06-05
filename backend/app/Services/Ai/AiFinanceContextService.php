@@ -8,6 +8,9 @@ use App\Models\Transaction;
 use App\Services\FinancialHealthService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class AiFinanceContextService
 {
@@ -62,24 +65,7 @@ class AiFinanceContextService
             })
             ->values();
 
-        $goals = SavingsGoal::query()
-            ->where('user_id', $userId)
-            ->select(['title', 'target_amount', 'saved_amount'])
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(function (SavingsGoal $goal) {
-                $target = (float) $goal->target_amount;
-                $saved = (float) $goal->saved_amount;
-
-                return [
-                    'title' => $goal->title,
-                    'target_amount' => $target,
-                    'saved_amount' => $saved,
-                    'progress_percent' => $target > 0 ? min(round(($saved / $target) * 100), 100) : 0,
-                ];
-            })
-            ->values();
+        $goals = $this->savingsGoalsSummary($userId);
 
         return [
             'period' => $now->format('F Y'),
@@ -99,6 +85,79 @@ class AiFinanceContextService
             'budgets' => $budgets,
             'savings_goals' => $goals,
         ];
+    }
+
+    private function savingsGoalsSummary(int $userId): Collection
+    {
+        try {
+            $table = (new SavingsGoal())->getTable();
+            $nameColumn = $this->firstExistingColumn($table, ['title', 'name', 'goal_name']);
+
+            if (! $nameColumn || ! Schema::hasColumn($table, 'target_amount') || ! Schema::hasColumn($table, 'saved_amount')) {
+                Log::warning('AI savings goals summary skipped because expected columns are missing.', [
+                    'table' => $table,
+                    'name_column' => $nameColumn,
+                    'has_target_amount' => Schema::hasColumn($table, 'target_amount'),
+                    'has_saved_amount' => Schema::hasColumn($table, 'saved_amount'),
+                ]);
+
+                return collect();
+            }
+
+            $columns = [$nameColumn, 'target_amount', 'saved_amount'];
+
+            if (Schema::hasColumn($table, 'created_at')) {
+                $columns[] = 'created_at';
+            }
+
+            $query = SavingsGoal::query()
+                ->where('user_id', $userId)
+                ->select($columns);
+
+            if (Schema::hasColumn($table, 'status')) {
+                $query->where('status', 'active');
+            }
+
+            if (Schema::hasColumn($table, 'created_at')) {
+                $query->latest();
+            }
+
+            return $query
+                ->limit(5)
+                ->get()
+                ->map(function (SavingsGoal $goal) use ($nameColumn) {
+                    $target = (float) $goal->target_amount;
+                    $saved = (float) $goal->saved_amount;
+
+                    return [
+                        'title' => $goal->{$nameColumn},
+                        'target_amount' => $target,
+                        'saved_amount' => $saved,
+                        'progress_percent' => $target > 0 ? min(round(($saved / $target) * 100), 100) : 0,
+                    ];
+                })
+                ->values();
+        } catch (Throwable $error) {
+            Log::warning('AI savings goals summary failed and was skipped.', [
+                'message' => $error->getMessage(),
+                'file' => $error->getFile(),
+                'line' => $error->getLine(),
+                'user_id' => $userId,
+            ]);
+
+            return collect();
+        }
+    }
+
+    private function firstExistingColumn(string $table, array $columns): ?string
+    {
+        foreach ($columns as $column) {
+            if (Schema::hasColumn($table, $column)) {
+                return $column;
+            }
+        }
+
+        return null;
     }
 
     private function savingsScore(int $userId, string $month): array

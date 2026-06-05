@@ -7,7 +7,9 @@ use App\Models\User;
 use App\Models\AiUsageLog;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -246,6 +248,62 @@ class AiAssistantIntegrationTest extends TestCase
         ])
             ->assertStatus(502)
             ->assertJsonPath('message', 'AI provider returned an invalid response. Please try again later.');
+    }
+
+    public function test_ai_assistant_maps_savings_goal_name_column_without_requiring_title(): void
+    {
+        config([
+            'ai.enabled' => true,
+            'ai.provider' => 'gemini',
+            'ai.gemini.key' => 'test-key',
+            'ai.gemini.base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+            'ai.gemini.model' => 'gemini-test',
+        ]);
+
+        if (! Schema::hasColumn('savings_goals', 'name')) {
+            Schema::table('savings_goals', function ($table) {
+                $table->string('name')->nullable();
+            });
+        }
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        DB::table('savings_goals')->insert([
+            'user_id' => $user->id,
+            'name' => 'Emergency fund',
+            'target_amount' => 10000,
+            'saved_amount' => 2500,
+            'deadline' => now()->addMonths(6)->toDateString(),
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [[
+                    'content' => [
+                        'parts' => [
+                            ['text' => 'Your emergency fund is 25% funded.'],
+                        ],
+                    ],
+                ]],
+            ]),
+        ]);
+
+        $this->postJson('/api/ai/assistant', [
+            'message' => 'How are my savings goals?',
+        ])
+            ->assertOk()
+            ->assertJsonPath('reply', 'Your emergency fund is 25% funded.');
+
+        Http::assertSent(function ($request) {
+            $body = json_encode($request->data());
+
+            return str_contains($body, 'Emergency fund')
+                && str_contains($body, 'progress_percent');
+        });
     }
 
     public function test_ai_assistant_refuses_prompt_injection_requests(): void

@@ -183,6 +183,7 @@ import { computed, nextTick, ref } from 'vue'
 import api, { isCanceledRequest } from '../services/api'
 import { formatPeso } from '../utils/currency'
 import { useAuth } from '../composables/useAuth'
+import { assistantErrorMessage } from '../utils/apiErrors'
 
 const { isAuthenticated } = useAuth()
 
@@ -261,7 +262,7 @@ const askQuestion = async (question) => {
     if (isCanceledRequest(error)) return
     messages.value.push({
       role: 'assistant',
-      text: error.response?.data?.message || 'Sorry, I could not answer that right now. Please try again.'
+      text: assistantErrorMessage(error)
     })
   } finally {
     askLoading.value = false

@@ -5,6 +5,7 @@ namespace App\Services\Ai;
 use App\Models\AiUsageLog;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AiUsageService
 {
@@ -36,13 +37,23 @@ class AiUsageService
 
     public function log(User $user, string $status): void
     {
-        AiUsageLog::create([
-            'user_id' => $user->id,
-            'provider' => (string) config('ai.provider', 'gemini'),
-            'model' => $this->configuredModel(),
-            'status' => $status,
-            'created_at' => now(),
-        ]);
+        try {
+            AiUsageLog::create([
+                'user_id' => $user->id,
+                'provider' => (string) config('ai.provider', 'gemini'),
+                'model' => $this->configuredModel(),
+                'status' => $status,
+                'created_at' => now(),
+            ]);
+        } catch (\Throwable $error) {
+            Log::error('Failed to write AI usage log.', [
+                'message' => $error->getMessage(),
+                'file' => $error->getFile(),
+                'line' => $error->getLine(),
+                'user_id' => $user->id,
+                'status' => $status,
+            ]);
+        }
     }
 
     public function shouldRefuseMessage(string $message): bool

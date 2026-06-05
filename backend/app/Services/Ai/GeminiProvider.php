@@ -6,6 +6,7 @@ use App\Services\Ai\Concerns\BuildsAiPrompts;
 use App\Services\Ai\Exceptions\AiProviderException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class GeminiProvider implements AiProvider
 {
@@ -50,24 +51,59 @@ class GeminiProvider implements AiProvider
                         'maxOutputTokens' => 500,
                     ],
                 ]);
-        } catch (ConnectionException) {
+        } catch (ConnectionException $exception) {
+            Log::error('Gemini request timed out or could not connect.', [
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'model' => $this->model,
+            ]);
+
             throw new AiProviderException('AI provider request timed out.');
         }
 
         if ($response->status() === 429) {
+            Log::error('Gemini API rate limit response.', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'model' => $this->model,
+            ]);
+
             throw new AiProviderException('AI provider rate limit reached.');
         }
 
         if (! $response->successful()) {
+            Log::error('Gemini API returned non-2xx response.', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'model' => $this->model,
+            ]);
+
             throw new AiProviderException('AI provider request failed.');
         }
 
-        $reply = collect($response->json('candidates.0.content.parts', []))
+        $parts = $response->json('candidates.0.content.parts');
+
+        if (! is_array($parts)) {
+            Log::error('Gemini API response did not include expected text parts.', [
+                'body' => $response->body(),
+                'model' => $this->model,
+            ]);
+
+            throw new AiProviderException('AI provider returned an empty response.');
+        }
+
+        $reply = collect($parts)
             ->pluck('text')
             ->filter()
             ->implode("\n");
 
         if (blank($reply)) {
+            Log::error('Gemini API response text was empty.', [
+                'body' => $response->body(),
+                'model' => $this->model,
+            ]);
+
             throw new AiProviderException('AI provider returned an empty response.');
         }
 

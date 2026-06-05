@@ -103,8 +103,8 @@ class AiAssistantIntegrationTest extends TestCase
         $this->postJson('/api/ai/assistant', [
             'message' => 'Summarize my spending.',
         ])
-            ->assertStatus(503)
-            ->assertJsonPath('message', 'AI Assistant is missing its provider API key.');
+            ->assertStatus(500)
+            ->assertJsonPath('message', 'AI Assistant is not configured correctly.');
 
         $this->assertDatabaseHas('ai_usage_logs', [
             'user_id' => auth()->id(),
@@ -196,6 +196,56 @@ class AiAssistantIntegrationTest extends TestCase
             'model' => 'gemini-test',
             'status' => 'success',
         ]);
+    }
+
+    public function test_ai_assistant_returns_502_when_gemini_fails(): void
+    {
+        config([
+            'ai.enabled' => true,
+            'ai.provider' => 'gemini',
+            'ai.gemini.key' => 'test-key',
+            'ai.gemini.base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+            'ai.gemini.model' => 'gemini-test',
+        ]);
+
+        Sanctum::actingAs(User::factory()->create());
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'error' => ['message' => 'Provider failed'],
+            ], 500),
+        ]);
+
+        $this->postJson('/api/ai/assistant', [
+            'message' => 'Summarize my spending.',
+        ])
+            ->assertStatus(502)
+            ->assertJsonPath('message', 'AI provider error. Please try again later.');
+    }
+
+    public function test_ai_assistant_returns_502_when_gemini_response_is_missing_text(): void
+    {
+        config([
+            'ai.enabled' => true,
+            'ai.provider' => 'gemini',
+            'ai.gemini.key' => 'test-key',
+            'ai.gemini.base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+            'ai.gemini.model' => 'gemini-test',
+        ]);
+
+        Sanctum::actingAs(User::factory()->create());
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [[]],
+            ]),
+        ]);
+
+        $this->postJson('/api/ai/assistant', [
+            'message' => 'Summarize my spending.',
+        ])
+            ->assertStatus(502)
+            ->assertJsonPath('message', 'AI provider returned an invalid response. Please try again later.');
     }
 
     public function test_ai_assistant_refuses_prompt_injection_requests(): void

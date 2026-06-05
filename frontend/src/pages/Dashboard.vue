@@ -779,6 +779,7 @@ import Sidebar from '../components/Sidebar.vue'
 import SmartAssistantWidget from '../components/SmartAssistantWidget.vue'
 import AppModal from '../components/AppModal.vue'
 import { formatPeso } from '../utils/currency'
+import { assistantErrorMessage } from '../utils/apiErrors'
 import {
   loadDashboardSnapshot,
   preloadAuthenticatedData,
@@ -1185,7 +1186,7 @@ const sendAssistantMessage = async () => {
 
     assistantMessages.value.push({
       role: 'assistant',
-      text: error.response?.data?.message || 'Something went wrong.'
+      text: assistantErrorMessage(error)
     })
 
   } finally {

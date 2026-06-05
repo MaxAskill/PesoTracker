@@ -41,10 +41,15 @@
 </template>
 
 <script setup>
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import Sidebar from '../components/Sidebar.vue'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const downloadTransactionsCsv = async () => {
+  if (!isAuthenticated.value) return
+
   try {
     const response = await api.get('/reports/transactions/csv', {
       responseType: 'blob'
@@ -61,6 +66,7 @@ const downloadTransactionsCsv = async () => {
 
     window.URL.revokeObjectURL(url)
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }

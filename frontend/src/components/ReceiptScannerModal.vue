@@ -146,7 +146,10 @@
 
 <script setup>
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const props = defineProps({
   show: Boolean
@@ -298,7 +301,7 @@ const retake = async () => {
 }
 
 const usePhoto = async () => {
-  if (!capturedFile.value || processing.value) return
+  if (!capturedFile.value || processing.value || !isAuthenticated.value) return
 
   const formData = new FormData()
   formData.append('receipt', capturedFile.value)
@@ -316,6 +319,7 @@ const usePhoto = async () => {
     emit('draft', response.data.draft)
     resetScanner()
   } catch (err) {
+    if (isCanceledRequest(err)) return
     error.value = err.response?.data?.message || 'Receipt upload failed. Please try another photo.'
   } finally {
     processing.value = false

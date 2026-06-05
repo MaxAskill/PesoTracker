@@ -137,10 +137,13 @@
 
 <script setup>
 import { reactive, ref, watch } from 'vue'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import AppDatePicker from './AppDatePicker.vue'
 import AppMoneyInput from './AppMoneyInput.vue'
 import AppSelect from './AppSelect.vue'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const props = defineProps({
   show: Boolean,
@@ -189,7 +192,7 @@ watch(
 )
 
 const saveDraft = async () => {
-  if (saving.value) return
+  if (saving.value || !isAuthenticated.value) return
 
   error.value = ''
 
@@ -209,6 +212,7 @@ const saveDraft = async () => {
 
     emit('saved')
   } catch (err) {
+    if (isCanceledRequest(err)) return
     error.value = err.response?.data?.message || 'Failed to save expense. Please review the required fields.'
   } finally {
     saving.value = false

@@ -83,8 +83,10 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
+import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
+const { setAuthState } = useAuth()
 
 const email = ref('')
 const otp = ref('')
@@ -120,8 +122,7 @@ const handleVerifyOtp = async () => {
       otp: otp.value
     })
 
-    localStorage.setItem('token', response.data.token)
-    localStorage.setItem('user', JSON.stringify(response.data.user))
+    setAuthState(response.data.token, response.data.user)
     localStorage.removeItem('pending_email')
 
     success.value = 'Email verified successfully.'

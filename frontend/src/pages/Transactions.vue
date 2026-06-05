@@ -314,13 +314,16 @@
 
 <script setup>
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import AppMonthFilter from '../components/AppMonthFilter.vue'
 import AppSelect from '../components/AppSelect.vue'
 import TransactionModal from '../components/TransactionModal.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const showEditModal = ref(false)
 const showExpenseModal = ref(false)
@@ -392,6 +395,8 @@ const receiptUrl = (transaction) => {
 }
 
 const getTransactions = async () => {
+  if (!isAuthenticated.value) return
+
   isLoading.value = !transactions.value.length
 
   try {
@@ -403,6 +408,7 @@ const getTransactions = async () => {
       detailsTransaction.value = response.data.find(transaction => transaction.id === detailsTransaction.value.id) || null
     }
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   } finally {
     isLoading.value = false
@@ -410,6 +416,7 @@ const getTransactions = async () => {
 }
 
 const deleteTransaction = async (id) => {
+  if (!isAuthenticated.value) return
   if (!confirm('Delete this transaction?')) return
 
   try {
@@ -422,6 +429,7 @@ const deleteTransaction = async (id) => {
 
     saveDisplayCache('transactions', transactions.value)
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }
@@ -449,7 +457,9 @@ const handleTransactionSaved = () => {
   showExpenseModal.value = false
   showIncomeModal.value = false
   editingTransaction.value = null
-  getTransactions()
+  if (isAuthenticated.value) {
+    getTransactions()
+  }
 }
 
 const handleEscape = (event) => {
@@ -661,7 +671,9 @@ onMounted(() => {
     transactions.value = cachedTransactions
   }
 
-  getTransactions()
+  if (isAuthenticated.value) {
+    getTransactions()
+  }
 })
 
 onBeforeUnmount(() => {

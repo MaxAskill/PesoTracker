@@ -128,6 +128,8 @@ export const preloadAuthenticatedData = async () => {
     api.get('/savings-goals')
   ])
 
+  if (!localStorage.getItem('token')) return null
+
   const snapshot = {
     dashboard: dashboard.status === 'fulfilled' ? dashboard.value.data : null,
     analytics: analytics.status === 'fulfilled' ? analytics.value.data : null,

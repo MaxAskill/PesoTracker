@@ -104,8 +104,11 @@ import AppModal from '../components/AppModal.vue'
 import AppMoneyInput from '../components/AppMoneyInput.vue'
 import AppSelect from '../components/AppSelect.vue'
 import Sidebar from '../components/Sidebar.vue'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import { formatPeso } from '../utils/currency'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const recurringTransactions = ref([])
 const isLoading = ref(false)
@@ -149,11 +152,14 @@ const typeBadgeClass = (type) => {
 }
 
 const getRecurringTransactions = async () => {
+  if (!isAuthenticated.value) return
+
   isLoading.value = !recurringTransactions.value.length
   try {
     const response = await api.get('/recurring-transactions')
     recurringTransactions.value = response.data
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   } finally {
     isLoading.value = false
@@ -161,6 +167,8 @@ const getRecurringTransactions = async () => {
 }
 
 const saveRecurring = async () => {
+  if (!isAuthenticated.value) return
+
   try {
     await api.post('/recurring-transactions', form)
     showModal.value = false
@@ -169,22 +177,27 @@ const saveRecurring = async () => {
     })
     getRecurringTransactions()
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error.response?.data || error)
   }
 }
 
 const deleteRecurring = async (id) => {
+  if (!isAuthenticated.value) return
   if (!confirm('Delete this recurring transaction?')) return
   try {
     await api.delete(`/recurring-transactions/${id}`)
     recurringTransactions.value = recurringTransactions.value.filter(transaction => transaction.id !== id)
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }
 
 onMounted(() => {
-  getRecurringTransactions()
+  if (isAuthenticated.value) {
+    getRecurringTransactions()
+  }
 })
 </script>
 

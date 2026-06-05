@@ -129,13 +129,16 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import AppDatePicker from './AppDatePicker.vue'
 import AppMoneyInput from './AppMoneyInput.vue'
 import AppSelect from './AppSelect.vue'
 import AppModal from './AppModal.vue'
 import ReceiptScannerModal from './ReceiptScannerModal.vue'
 import ReceiptDraftForm from './ReceiptDraftForm.vue'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const saving = ref(false)
 const showReceiptScanner = ref(false)
@@ -234,7 +237,7 @@ const validateAmount = () => {
 }
 
 const submitTransaction = async () => {
-  if (saving.value) return
+  if (saving.value || !isAuthenticated.value) return
 
   error.value = ''
 
@@ -262,6 +265,7 @@ const submitTransaction = async () => {
     emit('saved')
     closeModal()
   } catch (err) {
+    if (isCanceledRequest(err)) return
     error.value =
       err.response?.data?.message ||
       'Failed to save transaction.'

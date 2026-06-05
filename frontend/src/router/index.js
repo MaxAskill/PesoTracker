@@ -14,6 +14,7 @@ import Reports from '../pages/Reports.vue'
 import RecurringTransactions from "../pages/RecurringTransactions.vue"
 import Landing from '../pages/Landing.vue'
 import Profile from '../pages/Profile.vue'
+import { isAuthenticated, setAuthRouter, syncAuthState } from '../composables/useAuth'
 
 const routes = [
  { path: '/', name: 'landing', component: Landing, meta: { keepAlive: false } },
@@ -115,17 +116,18 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+setAuthRouter(router)
 
-  const token = localStorage.getItem('token')
+router.beforeEach((to, from, next) => {
+  syncAuthState()
 
   // Protected routes
-  if (to.meta.requiresAuth && !token) {
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
     return next('/login')
   }
 
   // Guest-only routes
-  if (to.meta.guest && token) {
+  if (to.meta.guest && isAuthenticated.value) {
     return next('/dashboard')
   }
 

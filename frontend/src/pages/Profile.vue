@@ -80,14 +80,14 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '../components/Sidebar.vue'
+import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
+const { logout: logoutUser } = useAuth()
 
 const user = ref(JSON.parse(localStorage.getItem('user')) || {})
 
 const logout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  router.push('/login')
+  logoutUser(router)
 }
 </script>

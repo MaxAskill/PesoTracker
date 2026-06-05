@@ -121,13 +121,16 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import AppModal from '../components/AppModal.vue'
 import AppMoneyInput from '../components/AppMoneyInput.vue'
 import AppSelect from '../components/AppSelect.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const budgets = ref([])
 const transactions = ref([])
@@ -173,6 +176,8 @@ const budgetTone = (budget) => {
 }
 
 const getBudgets = async () => {
+  if (!isAuthenticated.value) return
+
   isLoading.value = !budgets.value.length
 
   try {
@@ -185,6 +190,7 @@ const getBudgets = async () => {
     transactions.value = transactionsResponse.data
     saveDisplayCache('budgets', budgetsResponse.data)
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   } finally {
     isLoading.value = false
@@ -192,6 +198,8 @@ const getBudgets = async () => {
 }
 
 const saveBudget = async () => {
+  if (!isAuthenticated.value) return
+
   try {
     await api.post('/budgets', form)
     showModal.value = false
@@ -200,11 +208,13 @@ const saveBudget = async () => {
     form.month = ''
     getBudgets()
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.log(error.response?.data)
   }
 }
 
 const deleteBudget = async (id) => {
+  if (!isAuthenticated.value) return
   if (!confirm('Delete this budget?')) return
 
   try {
@@ -212,6 +222,7 @@ const deleteBudget = async (id) => {
     budgets.value = budgets.value.filter(budget => budget.id !== id)
     saveDisplayCache('budgets', budgets.value)
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }
@@ -219,6 +230,8 @@ const deleteBudget = async (id) => {
 onMounted(() => {
   const cachedBudgets = loadDisplayCache('budgets')
   if (cachedBudgets) budgets.value = cachedBudgets
-  getBudgets()
+  if (isAuthenticated.value) {
+    getBudgets()
+  }
 })
 </script>

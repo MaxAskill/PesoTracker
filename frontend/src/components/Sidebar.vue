@@ -86,9 +86,11 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppLogo from './AppLogo.vue'
+import { useAuth } from '../composables/useAuth'
 
 const route = useRoute()
 const router = useRouter()
+const { logout: logoutUser } = useAuth()
 
 const isOpen = ref(false)
 
@@ -118,10 +120,7 @@ const closeDrawer = () => {
 
 const logout = () => {
   closeDrawer()
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-
-  router.push('/login')
+  logoutUser(router)
 }
 
 const handleEscape = (event) => {

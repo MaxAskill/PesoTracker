@@ -769,9 +769,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, onBeforeUnmount, nextTick, watch } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, reactive, ref, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import TransactionModal from '../components/TransactionModal.vue'
 import ExpenseCategoryChart from '../components/ExpenseCategoryChart.vue'
 import MonthlySummaryChart from '../components/MonthlySummaryChart.vue'
@@ -784,6 +784,7 @@ import {
   preloadAuthenticatedData,
   saveDashboardSnapshot
 } from '../services/preload'
+import { useAuth } from '../composables/useAuth'
 
 const insights = ref([])
 
@@ -797,6 +798,7 @@ const dashboardError = ref('')
 const showSavingsScoreModal = ref(false)
 
 let refreshInterval = null
+let dashboardEffectsAttached = false
 
 const suggestionGroups = {
   default: [
@@ -871,6 +873,7 @@ const scrollChatToBottom = async () => {
 }
 
 const router = useRouter()
+const { isAuthenticated } = useAuth()
 const user = ref(JSON.parse(localStorage.getItem('user')))
 const displayName = computed(() => {
   return [user.value?.first_name, user.value?.last_name]
@@ -937,6 +940,8 @@ const applyDashboardSnapshot = (snapshot) => {
 }
 
 const getDashboard = async () => {
+  if (!isAuthenticated.value) return
+
   try {
     const response = await api.get('/dashboard')
 
@@ -952,6 +957,7 @@ const getDashboard = async () => {
       financialHealth.value = response.data.financial_health
     }
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }
@@ -967,6 +973,8 @@ const analytics = reactive({
 
 
 const getAnalytics = async () => {
+  if (!isAuthenticated.value) return
+
   try {
     const response = await api.get('/analytics/summary')
 
@@ -974,25 +982,33 @@ const getAnalytics = async () => {
     analytics.monthly_summary = response.data.monthly_summary
     analytics.highest_expense_category = response.data.highest_expense_category
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }
 
 const getInsights = async () => {
+  if (!isAuthenticated.value) return
+
   try {
     const response = await api.get('/insights')
     insights.value = response.data
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }
 
 const getNotifications = async () => {
+  if (!isAuthenticated.value) return
+
   const response = await api.get('/notifications')
   notifications.value = response.data
 }
 
 const getUnreadCount = async () => {
+  if (!isAuthenticated.value) return
+
   const response = await api.get('/notifications/unread-count')
   unreadCount.value = response.data.count
 }
@@ -1010,6 +1026,8 @@ const toggleNotifications = () => {
 }
 
 const markAllNotificationsRead = async () => {
+  if (!isAuthenticated.value) return
+
   await api.post('/notifications/read-all')
   unreadCount.value = 0
   await getNotifications()
@@ -1115,11 +1133,14 @@ const formatContribution = (value) => {
 }
 
 const getFinancialHealth = async () => {
+  if (!isAuthenticated.value) return
+
   try {
     const response = await api.get('/financial-health')
 
     financialHealth.value = response.data
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }
@@ -1132,7 +1153,7 @@ const showAssistant = ref(false)
 
 const sendAssistantMessage = async () => {
 
-  if (!assistantInput.value.trim()) return
+  if (!assistantInput.value.trim() || !isAuthenticated.value) return
 
   const userMessage = assistantInput.value
 
@@ -1160,6 +1181,7 @@ const sendAssistantMessage = async () => {
     })
 
   } catch (error) {
+    if (isCanceledRequest(error)) return
 
     assistantMessages.value.push({
       role: 'assistant',
@@ -1175,6 +1197,8 @@ const sendAssistantMessage = async () => {
 }
 
 const refreshDashboard = () => {
+  if (!isAuthenticated.value) return
+
   dashboardError.value = ''
   isRefreshingDashboard.value = true
 
@@ -1193,6 +1217,7 @@ const refreshDashboard = () => {
       }
     })
     .catch((error) => {
+      if (isCanceledRequest(error)) return
       console.error(error)
       dashboardError.value = 'We could not load your dashboard right now. Please try again.'
     })
@@ -1238,6 +1263,60 @@ const handleModalOpen = () => {
   closeNotifications()
 }
 
+const startDashboardPolling = () => {
+  if (refreshInterval || !isAuthenticated.value) return
+
+  refreshInterval = setInterval(() => {
+    if (!isAuthenticated.value) {
+      stopDashboardPolling()
+      return
+    }
+
+    getNotifications().catch((error) => {
+      if (!isCanceledRequest(error)) console.error(error)
+    })
+    getUnreadCount().catch((error) => {
+      if (!isCanceledRequest(error)) console.error(error)
+    })
+    getInsights()
+    getFinancialHealth()
+  }, 10000)
+}
+
+const stopDashboardPolling = () => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval)
+    refreshInterval = null
+  }
+}
+
+const cleanupDashboardEffects = () => {
+  if (!dashboardEffectsAttached) {
+    stopDashboardPolling()
+    return
+  }
+
+  dashboardEffectsAttached = false
+  document.body.classList.remove('overflow-hidden')
+  document.removeEventListener('click', handleDocumentClick)
+  window.removeEventListener('keydown', handleEscape)
+  window.removeEventListener('pesotracker-sidebar-state', handleSidebarState)
+  window.removeEventListener('pesotracker-modal-open', handleModalOpen)
+  window.removeEventListener('pesotracker-auth-cleared', cleanupDashboardEffects)
+  stopDashboardPolling()
+}
+
+const attachDashboardEffects = () => {
+  if (dashboardEffectsAttached) return
+
+  dashboardEffectsAttached = true
+  document.addEventListener('click', handleDocumentClick)
+  window.addEventListener('keydown', handleEscape)
+  window.addEventListener('pesotracker-sidebar-state', handleSidebarState)
+  window.addEventListener('pesotracker-modal-open', handleModalOpen)
+  window.addEventListener('pesotracker-auth-cleared', cleanupDashboardEffects)
+}
+
 watch(showNotifications, (value) => {
   if (value) {
     document.body.classList.add('overflow-hidden')
@@ -1250,10 +1329,7 @@ watch(showNotifications, (value) => {
 })
 
 onMounted(() => {
-  document.addEventListener('click', handleDocumentClick)
-  window.addEventListener('keydown', handleEscape)
-  window.addEventListener('pesotracker-sidebar-state', handleSidebarState)
-  window.addEventListener('pesotracker-modal-open', handleModalOpen)
+  attachDashboardEffects()
 
   const snapshot = loadDashboardSnapshot()
 
@@ -1264,23 +1340,21 @@ onMounted(() => {
   }
 
   refreshDashboard()
-
-  refreshInterval = setInterval(() => {
-    getNotifications()
-    getUnreadCount()
-    getInsights()
-    getFinancialHealth()
-  }, 10000)
+  startDashboardPolling()
 })
 
-onBeforeUnmount(() => {
-  document.body.classList.remove('overflow-hidden')
-  document.removeEventListener('click', handleDocumentClick)
-  window.removeEventListener('keydown', handleEscape)
-  window.removeEventListener('pesotracker-sidebar-state', handleSidebarState)
-  window.removeEventListener('pesotracker-modal-open', handleModalOpen)
-  clearInterval(refreshInterval)
+onActivated(() => {
+  if (isAuthenticated.value) {
+    attachDashboardEffects()
+    startDashboardPolling()
+  }
 })
+
+onDeactivated(() => {
+  cleanupDashboardEffects()
+})
+
+onBeforeUnmount(cleanupDashboardEffects)
 </script>
 
 <style scoped>

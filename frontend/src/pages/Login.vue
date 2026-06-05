@@ -131,8 +131,10 @@ import api from '../services/api'
 import AuthHeader from '../components/AuthHeader.vue'
 import AppLogo from '../components/AppLogo.vue'
 import { preloadAuthenticatedData } from '../services/preload'
+import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
+const { setAuthState } = useAuth()
 const error = ref('')
 const successMessage = ref('')
 const loading = ref(false)
@@ -156,8 +158,7 @@ const handleLogin = async () => {
   try {
     const response = await api.post('/login', form)
 
-    localStorage.setItem('token', response.data.token)
-    localStorage.setItem('user', JSON.stringify(response.data.user))
+    setAuthState(response.data.token, response.data.user)
 
     preloadAuthenticatedData()
     router.push('/dashboard')

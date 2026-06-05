@@ -180,8 +180,11 @@
 
 <script setup>
 import { computed, nextTick, ref } from 'vue'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import { formatPeso } from '../utils/currency'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const isOpen = ref(false)
 const insightsLoading = ref(false)
@@ -212,6 +215,8 @@ const questionChips = computed(() => {
 })
 
 const toggleAssistant = async () => {
+  if (!isAuthenticated.value) return
+
   isOpen.value = !isOpen.value
 
   if (isOpen.value && !assistantData.value.insights.length) {
@@ -220,6 +225,8 @@ const toggleAssistant = async () => {
 }
 
 const loadInsights = async () => {
+  if (!isAuthenticated.value) return
+
   insightsLoading.value = true
   insightsError.value = ''
 
@@ -227,6 +234,7 @@ const loadInsights = async () => {
     const response = await api.get('/assistant/insights')
     assistantData.value = response.data
   } catch (error) {
+    if (isCanceledRequest(error)) return
     insightsError.value = 'I could not load your insights right now. Please try again in a moment.'
   } finally {
     insightsLoading.value = false
@@ -234,6 +242,8 @@ const loadInsights = async () => {
 }
 
 const askQuestion = async (question) => {
+  if (!isAuthenticated.value) return
+
   const text = question.trim()
 
   if (!text || askLoading.value) return
@@ -257,6 +267,7 @@ const askQuestion = async (question) => {
       text: response.data.reply
     })
   } catch (error) {
+    if (isCanceledRequest(error)) return
     messages.value.push({
       role: 'assistant',
       text: 'Sorry, I could not answer that right now. Please try again.'

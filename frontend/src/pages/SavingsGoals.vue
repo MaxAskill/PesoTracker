@@ -97,13 +97,16 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import api from '../services/api'
+import api, { isCanceledRequest } from '../services/api'
 import AppDatePicker from '../components/AppDatePicker.vue'
 import AppModal from '../components/AppModal.vue'
 import AppMoneyInput from '../components/AppMoneyInput.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { formatPeso } from '../utils/currency'
 import { loadDisplayCache, saveDisplayCache } from '../services/preload'
+import { useAuth } from '../composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 const goals = ref([])
 const isLoading = ref(false)
@@ -125,6 +128,8 @@ const progress = (goal) => {
 }
 
 const getGoals = async () => {
+  if (!isAuthenticated.value) return
+
   isLoading.value = !goals.value.length
 
   try {
@@ -132,6 +137,7 @@ const getGoals = async () => {
     goals.value = response.data
     saveDisplayCache('savings-goals', response.data)
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   } finally {
     isLoading.value = false
@@ -139,6 +145,8 @@ const getGoals = async () => {
 }
 
 const saveGoal = async () => {
+  if (!isAuthenticated.value) return
+
   try {
     await api.post('/savings-goals', form)
     showModal.value = false
@@ -148,11 +156,14 @@ const saveGoal = async () => {
     form.deadline = ''
     getGoals()
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error.response?.data || error)
   }
 }
 
 const addContribution = async (goal) => {
+  if (!isAuthenticated.value) return
+
   const amount = Number(contributions[goal.id])
   if (!amount || amount <= 0) return
 
@@ -163,17 +174,20 @@ const addContribution = async (goal) => {
     contributions[goal.id] = ''
     getGoals()
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error.response?.data || error)
   }
 }
 
 const deleteGoal = async (id) => {
+  if (!isAuthenticated.value) return
   if (!confirm('Delete this savings goal?')) return
   try {
     await api.delete(`/savings-goals/${id}`)
     goals.value = goals.value.filter(goal => goal.id !== id)
     saveDisplayCache('savings-goals', goals.value)
   } catch (error) {
+    if (isCanceledRequest(error)) return
     console.error(error)
   }
 }
@@ -181,6 +195,8 @@ const deleteGoal = async (id) => {
 onMounted(() => {
   const cachedGoals = loadDisplayCache('savings-goals')
   if (cachedGoals) goals.value = cachedGoals
-  getGoals()
+  if (isAuthenticated.value) {
+    getGoals()
+  }
 })
 </script>

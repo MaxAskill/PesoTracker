@@ -1,10 +1,16 @@
 <script setup>
 import { onMounted } from 'vue'
 import { preloadAuthenticatedData, warmBackend } from './services/preload'
+import { useAuth } from './composables/useAuth'
+
+const { isAuthenticated } = useAuth()
 
 onMounted(() => {
   warmBackend()
-  preloadAuthenticatedData()
+
+  if (isAuthenticated.value) {
+    preloadAuthenticatedData()
+  }
 })
 </script>
 

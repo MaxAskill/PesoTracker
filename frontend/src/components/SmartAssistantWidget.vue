@@ -74,22 +74,22 @@
         <div class="grid grid-cols-3 gap-2">
           <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-3">
             <p class="text-[11px] uppercase text-slate-500">Income</p>
-            <p class="mt-1 text-sm font-bold text-emerald-300">
-              {{ formatPeso(summary.total_income) }}
+            <p class="mt-1 min-h-5 text-sm font-bold text-emerald-300">
+              {{ summaryLoading ? 'Loading...' : formatPeso(summary.income) }}
             </p>
           </div>
 
           <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-3">
             <p class="text-[11px] uppercase text-slate-500">Expenses</p>
-            <p class="mt-1 text-sm font-bold text-red-300">
-              {{ formatPeso(summary.total_expenses) }}
+            <p class="mt-1 min-h-5 text-sm font-bold text-red-300">
+              {{ summaryLoading ? 'Loading...' : formatPeso(summary.expenses) }}
             </p>
           </div>
 
           <div class="rounded-2xl border border-white/10 bg-slate-950/70 p-3">
             <p class="text-[11px] uppercase text-slate-500">Balance</p>
-            <p class="mt-1 text-sm font-bold text-white">
-              {{ formatPeso(summary.balance) }}
+            <p class="mt-1 min-h-5 text-sm font-bold text-white">
+              {{ summaryLoading ? 'Loading...' : formatPeso(summary.balance) }}
             </p>
           </div>
         </div>
@@ -172,13 +172,29 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import api, { isCanceledRequest } from '../services/api'
 import { formatPeso } from '../utils/currency'
 import { useAuth } from '../composables/useAuth'
 import { assistantErrorMessage } from '../utils/apiErrors'
 
 const { isAuthenticated } = useAuth()
+
+const props = defineProps({
+  income: {
+    type: [Number, String],
+    default: null
+  },
+  expenses: {
+    type: [Number, String],
+    default: null
+  },
+  balance: {
+    type: [Number, String],
+    default: null
+  },
+  loading: Boolean
+})
 
 const isOpen = ref(false)
 const insightsLoading = ref(false)
@@ -189,17 +205,30 @@ const messages = ref([])
 const chatBody = ref(null)
 
 const assistantData = ref({
-  summary: {
-    month: '',
-    total_income: 0,
-    total_expenses: 0,
-    balance: 0
-  },
   insights: [],
   suggested_questions: []
 })
 
-const summary = computed(() => assistantData.value.summary)
+const toNumber = (value) => {
+  if (value === null || value === undefined) return 0
+
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
+
+const hasSummaryValue = computed(() => {
+  return props.income !== null ||
+    props.expenses !== null ||
+    props.balance !== null
+})
+
+const summaryLoading = computed(() => props.loading && !hasSummaryValue.value)
+
+const summary = computed(() => ({
+  income: toNumber(props.income),
+  expenses: toNumber(props.expenses),
+  balance: toNumber(props.balance)
+}))
 const insights = computed(() => assistantData.value.insights)
 const suggestedQuestions = computed(() => assistantData.value.suggested_questions)
 const questionChips = computed(() => {
@@ -224,6 +253,18 @@ const loadInsights = async () => {
   insightsLoading.value = true
   insightsError.value = ''
   insightsLoading.value = false
+}
+
+if (import.meta.env.DEV) {
+  watch(
+    () => [props.loading, props.income, props.expenses, props.balance],
+    ([loading, income, expenses, balance]) => {
+      if (!loading && income === null && expenses === null && balance === null) {
+        console.warn('SmartAssistantWidget did not receive dashboard summary props.')
+      }
+    },
+    { immediate: true }
+  )
 }
 
 const askQuestion = async (question) => {

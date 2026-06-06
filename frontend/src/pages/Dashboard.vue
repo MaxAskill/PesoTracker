@@ -655,7 +655,13 @@
       @close="showIncomeModal = false"
       @saved="refreshDashboard"
     />
-    <SmartAssistantWidget v-if="!showExpenseModal && !showIncomeModal && !showNotifications && !isMobileSidebarOpen" />
+    <SmartAssistantWidget
+      v-if="!showExpenseModal && !showIncomeModal && !showNotifications && !isMobileSidebarOpen"
+      :income="dashboard.total_income"
+      :expenses="dashboard.total_expenses"
+      :balance="dashboard.balance"
+      :loading="isDashboardLoading"
+    />
   </main>
   <!-- Floating Button -->
   <div v-if="false" class="fixed bottom-6 right-6 z-50">

@@ -306,6 +306,54 @@ class AiAssistantIntegrationTest extends TestCase
         });
     }
 
+    public function test_ai_assistant_uses_generated_savings_goal_label_when_name_is_missing(): void
+    {
+        config([
+            'ai.enabled' => true,
+            'ai.provider' => 'gemini',
+            'ai.gemini.key' => 'test-key',
+            'ai.gemini.base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+            'ai.gemini.model' => 'gemini-test',
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        DB::table('savings_goals')->insert([
+            'user_id' => $user->id,
+            'title' => null,
+            'target_amount' => 5000,
+            'saved_amount' => 1000,
+            'deadline' => now()->addMonths(3)->toDateString(),
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [[
+                    'content' => [
+                        'parts' => [
+                            ['text' => 'Your unnamed savings goal is 20% funded.'],
+                        ],
+                    ],
+                ]],
+            ]),
+        ]);
+
+        $this->postJson('/api/ai/assistant', [
+            'message' => 'How are my savings goals?',
+        ])->assertOk();
+
+        Http::assertSent(function ($request) {
+            $body = json_encode($request->data());
+
+            return str_contains($body, 'Savings Goal 1')
+                && str_contains($body, 'progress_percent');
+        });
+    }
+
     public function test_ai_assistant_refuses_prompt_injection_requests(): void
     {
         config([

@@ -91,12 +91,12 @@ class AiFinanceContextService
     {
         try {
             $table = (new SavingsGoal())->getTable();
-            $nameColumn = $this->firstExistingColumn($table, ['title', 'name', 'goal_name']);
+            $nameColumns = $this->existingColumns($table, ['title', 'name', 'goal_name', 'goal_title', 'goal']);
 
-            if (! $nameColumn || ! Schema::hasColumn($table, 'target_amount') || ! Schema::hasColumn($table, 'saved_amount')) {
+            if (! Schema::hasColumn($table, 'target_amount') || ! Schema::hasColumn($table, 'saved_amount')) {
                 Log::warning('AI savings goals summary skipped because expected columns are missing.', [
                     'table' => $table,
-                    'name_column' => $nameColumn,
+                    'name_columns' => $nameColumns,
                     'has_target_amount' => Schema::hasColumn($table, 'target_amount'),
                     'has_saved_amount' => Schema::hasColumn($table, 'saved_amount'),
                 ]);
@@ -104,7 +104,7 @@ class AiFinanceContextService
                 return collect();
             }
 
-            $columns = [$nameColumn, 'target_amount', 'saved_amount'];
+            $columns = array_values(array_unique([...$nameColumns, 'target_amount', 'saved_amount']));
 
             if (Schema::hasColumn($table, 'created_at')) {
                 $columns[] = 'created_at';
@@ -125,12 +125,13 @@ class AiFinanceContextService
             return $query
                 ->limit(5)
                 ->get()
-                ->map(function (SavingsGoal $goal) use ($nameColumn) {
+                ->map(function (SavingsGoal $goal, int $index) use ($nameColumns) {
                     $target = (float) $goal->target_amount;
                     $saved = (float) $goal->saved_amount;
+                    $title = $this->goalTitle($goal, $nameColumns, $index);
 
                     return [
-                        'title' => $goal->{$nameColumn},
+                        'title' => $title,
                         'target_amount' => $target,
                         'saved_amount' => $saved,
                         'progress_percent' => $target > 0 ? min(round(($saved / $target) * 100), 100) : 0,
@@ -149,15 +150,23 @@ class AiFinanceContextService
         }
     }
 
-    private function firstExistingColumn(string $table, array $columns): ?string
+    private function existingColumns(string $table, array $columns): array
     {
-        foreach ($columns as $column) {
-            if (Schema::hasColumn($table, $column)) {
-                return $column;
+        return array_values(array_filter(
+            $columns,
+            fn (string $column) => Schema::hasColumn($table, $column)
+        ));
+    }
+
+    private function goalTitle(SavingsGoal $goal, array $nameColumns, int $index): string
+    {
+        foreach ($nameColumns as $column) {
+            if (filled($goal->{$column})) {
+                return $goal->{$column};
             }
         }
 
-        return null;
+        return 'Savings Goal '.($index + 1);
     }
 
     private function savingsScore(int $userId, string $month): array

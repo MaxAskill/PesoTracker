@@ -35,6 +35,19 @@ class AiUsageService
             ->count() >= $limit;
     }
 
+    public function hasReachedDailyLimit(User $user): bool
+    {
+        $limit = (int) config('ai.daily_limit_per_user', 10);
+
+        if ($limit <= 0) {
+            return false;
+        }
+
+        return AiUsageLog::where('user_id', $user->id)
+            ->where('created_at', '>=', Carbon::now()->startOfDay())
+            ->count() >= $limit;
+    }
+
     public function log(User $user, string $status): void
     {
         try {

@@ -94,6 +94,15 @@ class AppServiceProvider extends ServiceProvider
                     )),
             ];
         });
+
+        RateLimiter::for('assistant', function (Request $request) {
+            return Limit::perMinute(30)
+                ->by($this->rateLimitKey($request))
+                ->response(fn (Request $request, array $headers) => $this->rateLimitResponse(
+                    'Too many assistant requests. Please slow down and try again shortly.',
+                    $headers
+                ));
+        });
     }
 
     private function rateLimitKey(Request $request): string

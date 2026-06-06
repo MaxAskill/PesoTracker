@@ -53,7 +53,7 @@ Route::middleware(['auth:sanctum', 'verified.api', 'throttle:auth-api'])->group(
 
 // Future AI integrations must stay backend-only. The Vue frontend should call
 // this Laravel route and must never receive provider API keys or secrets.
-Route::middleware(['auth:sanctum', 'verified.api', 'throttle:ai'])
+Route::middleware(['auth:sanctum', 'verified.api', 'throttle:assistant'])
     ->post('/ai/assistant', AiAssistantController::class);
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:registration');

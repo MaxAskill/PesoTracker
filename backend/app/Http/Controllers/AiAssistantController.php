@@ -94,6 +94,14 @@ class AiAssistantController extends Controller
                 ], 403);
             }
 
+            if ($usage->hasReachedDailyLimit($user)) {
+                $usage->log($user, 'daily_limit');
+
+                return response()->json([
+                    'message' => 'Daily AI Assistant limit reached. Please try again tomorrow.',
+                ], 429);
+            }
+
             if ($usage->hasReachedMonthlyLimit($user)) {
                 $usage->log($user, 'monthly_limit');
 

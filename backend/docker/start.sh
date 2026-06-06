@@ -9,7 +9,9 @@ mkdir -p storage/app/public storage/framework/cache storage/framework/sessions s
 chown -R www-data:www-data storage bootstrap/cache
 
 php artisan storage:link || true
+php artisan optimize:clear
 php artisan config:clear
+php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
 

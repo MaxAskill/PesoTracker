@@ -51,29 +51,30 @@ class AiAssistantIntegrationTest extends TestCase
             );
     }
 
-    public function test_ai_assistant_is_rate_limited(): void
+    public function test_template_assistant_uses_normal_assistant_rate_limit(): void
     {
         config(['ai.enabled' => false]);
 
         Sanctum::actingAs(User::factory()->create());
 
-        for ($index = 1; $index <= 5; $index++) {
+        for ($index = 1; $index <= 30; $index++) {
             $this->postJson('/api/ai/assistant', [
                 'message' => "Request {$index}",
             ])->assertOk();
         }
 
         $this->postJson('/api/ai/assistant', [
-            'message' => 'Request 6',
+            'message' => 'Request 31',
         ])
             ->assertStatus(429)
-            ->assertJsonPath('message', 'Too many AI Assistant requests. Please wait before trying again.');
+            ->assertJsonPath('message', 'Too many assistant requests. Please slow down and try again shortly.');
     }
 
-    public function test_ai_assistant_daily_limit_is_rate_limited(): void
+    public function test_template_assistant_does_not_use_ai_daily_limit(): void
     {
         config([
             'ai.enabled' => false,
+            'ai.assistant_mode' => 'template',
             'ai.daily_limit_per_user' => 6,
         ]);
 
@@ -100,10 +101,42 @@ class AiAssistantIntegrationTest extends TestCase
             ->postJson('/api/ai/assistant', [
                 'message' => 'Request 7',
             ])
+            ->assertOk()
+            ->assertJsonPath('mode', 'template');
+
+        Carbon::setTestNow();
+    }
+
+    public function test_ai_mode_enforces_ai_daily_usage_limit(): void
+    {
+        config([
+            'ai.enabled' => true,
+            'ai.assistant_mode' => 'ai',
+            'ai.provider' => 'gemini',
+            'ai.gemini.key' => 'test-key',
+            'ai.daily_limit_per_user' => 1,
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        AiUsageLog::create([
+            'user_id' => $user->id,
+            'provider' => 'gemini',
+            'model' => 'gemini-test',
+            'status' => 'success',
+            'created_at' => now(),
+        ]);
+
+        Http::fake();
+
+        $this->postJson('/api/ai/assistant', [
+            'message' => 'Request 2',
+        ])
             ->assertStatus(429)
             ->assertJsonPath('message', 'Daily AI Assistant limit reached. Please try again tomorrow.');
 
-        Carbon::setTestNow();
+        Http::assertNothingSent();
     }
 
     public function test_ai_assistant_reports_missing_provider_key_safely(): void

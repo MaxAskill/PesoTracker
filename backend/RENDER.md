@@ -51,6 +51,9 @@ FILESYSTEM_DISK=public
 RUN_MIGRATIONS=true
 TESSERACT_PATH=/usr/bin/tesseract
 
+AI_ENABLED=false
+ASSISTANT_MODE=template
+
 BREVO_API_KEY=your-brevo-api-key
 BREVO_SENDER_EMAIL=your-verified-brevo-sender@example.com
 BREVO_SENDER_NAME=PesoTracker

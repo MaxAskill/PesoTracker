@@ -172,7 +172,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import api, { isCanceledRequest } from '../services/api'
 import { formatPeso } from '../utils/currency'
 import { useAuth } from '../composables/useAuth'
@@ -208,6 +208,12 @@ const defaultQuickActions = [
   { label: 'Budget warning', action: 'budget_warning' },
   { label: 'Savings progress', action: 'savings_progress' },
   { label: 'Smart tips', action: 'smart_tips' }
+]
+const storedAssistantMessageKeys = [
+  'assistantMessages',
+  'smartAssistantMessages',
+  'pesoTrackerAssistantMessages',
+  'aiAssistantMessages'
 ]
 
 const assistantData = ref({
@@ -255,6 +261,13 @@ const toggleAssistant = async () => {
     await loadInsights()
   }
 }
+
+onMounted(() => {
+  storedAssistantMessageKeys.forEach((key) => {
+    localStorage.removeItem(key)
+    sessionStorage.removeItem(key)
+  })
+})
 
 const loadInsights = async () => {
   if (!isAuthenticated.value) return

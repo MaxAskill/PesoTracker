@@ -4,7 +4,7 @@
     <Sidebar />
 
     <!-- Main Content -->
-    <section class="magic-bg min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pt-24 sm:p-6 lg:h-screen lg:pt-6">
+    <section class="magic-bg min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pb-28 pt-24 sm:p-6 sm:pb-28 lg:h-screen lg:pt-6">
       <!-- Top Bar -->
       <header class="motion-fade-up relative z-10 mb-8 flex flex-col gap-5 rounded-[2rem] border border-white/10 bg-slate-950/80 p-5 shadow-2xl shadow-slate-950/30 backdrop-blur xl:flex-row xl:items-start xl:justify-between">
         <div>
@@ -900,13 +900,24 @@ const loadingClass = computed(() => {
   return isRefreshingDashboard.value ? 'opacity-80 transition-opacity' : ''
 })
 
+const firstDefined = (...values) => {
+  return values.find((value) => value !== undefined && value !== null)
+}
+
+const numericValue = (...values) => {
+  const value = firstDefined(...values)
+  const number = Number(value)
+
+  return Number.isFinite(number) ? number : 0
+}
+
 const applyDashboardSnapshot = (snapshot) => {
   if (!snapshot) return
 
   if (snapshot.dashboard) {
-    dashboard.total_income = snapshot.dashboard.total_income ?? 0
-    dashboard.total_expenses = snapshot.dashboard.total_expenses ?? 0
-    dashboard.balance = snapshot.dashboard.balance ?? 0
+    dashboard.total_income = numericValue(snapshot.dashboard.total_income, snapshot.dashboard.income)
+    dashboard.total_expenses = numericValue(snapshot.dashboard.total_expenses, snapshot.dashboard.expenses)
+    dashboard.balance = numericValue(snapshot.dashboard.balance)
     dashboard.savings_score = snapshot.dashboard.savings_score ?? snapshot.dashboard.financial_health?.score ?? 0
     dashboard.savings_status = snapshot.dashboard.savings_status ?? snapshot.dashboard.financial_health?.status ?? ''
     dashboard.score_breakdown = snapshot.dashboard.score_breakdown ?? snapshot.dashboard.financial_health?.score_breakdown ?? null
@@ -946,9 +957,9 @@ const getDashboard = async () => {
   try {
     const response = await api.get('/dashboard')
 
-    dashboard.total_income = response.data.total_income
-    dashboard.total_expenses = response.data.total_expenses
-    dashboard.balance = response.data.balance
+    dashboard.total_income = numericValue(response.data.total_income, response.data.income)
+    dashboard.total_expenses = numericValue(response.data.total_expenses, response.data.expenses)
+    dashboard.balance = numericValue(response.data.balance)
     dashboard.savings_score = response.data.savings_score ?? response.data.financial_health?.score ?? 0
     dashboard.savings_status = response.data.savings_status ?? response.data.financial_health?.status ?? ''
     dashboard.score_breakdown = response.data.score_breakdown ?? response.data.financial_health?.score_breakdown ?? null

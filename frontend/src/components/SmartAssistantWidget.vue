@@ -1,21 +1,14 @@
 <template>
-  <div
-    v-if="!isOpen"
-    class="motion-fade-in pointer-events-none fixed bottom-24 right-5 z-50 hidden max-w-64 rounded-2xl border border-emerald-400/20 bg-slate-950/90 px-4 py-3 text-sm text-slate-200 shadow-2xl shadow-slate-950/30 backdrop-blur md:block"
-  >
-    Need help understanding your spending?
-  </div>
-
-  <div class="fixed bottom-5 right-5 z-50 sm:bottom-6 sm:right-6">
+  <div class="fixed bottom-4 right-4 z-30 sm:bottom-5 sm:right-5 lg:bottom-6 lg:right-6">
     <button
       type="button"
       aria-label="Open PesoTracker Assistant"
-      class="motion-pulse-glow group relative flex h-16 w-16 items-center justify-center overflow-visible rounded-full bg-emerald-500 text-slate-950 shadow-2xl shadow-emerald-500/30 transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:bg-emerald-400 sm:h-14 sm:w-auto sm:gap-3 sm:rounded-full sm:bg-gradient-to-r sm:from-emerald-400 sm:to-teal-300 sm:px-5"
+      class="motion-pulse-glow group relative flex h-12 w-12 items-center justify-center overflow-visible rounded-full bg-emerald-500 text-slate-950 shadow-2xl shadow-emerald-500/30 transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:bg-emerald-400 sm:h-14 sm:w-auto sm:gap-3 sm:rounded-full sm:bg-gradient-to-r sm:from-emerald-400 sm:to-teal-300 sm:px-5"
       @click="toggleAssistant"
     >
       <span class="absolute inset-0 -z-10 rounded-full bg-emerald-400/30 blur-xl transition group-hover:bg-emerald-300/40"></span>
       <span class="absolute inset-0 rounded-full border border-white/30"></span>
-      <span class="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/90 text-lg font-black text-emerald-300 shadow-inner">
+      <span class="relative flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/90 text-base font-black text-emerald-300 shadow-inner sm:h-9 sm:w-9 sm:text-lg">
         ✦
       </span>
       <span class="hidden whitespace-nowrap text-sm font-black sm:inline">
@@ -38,7 +31,7 @@
   >
   <div
     v-if="isOpen"
-    class="finance-panel fixed bottom-5 left-4 right-4 z-50 flex h-[min(680px,calc(100vh-2.5rem))] flex-col overflow-hidden sm:bottom-6 sm:left-auto sm:right-6 sm:w-[410px]"
+    class="finance-panel fixed bottom-4 left-3 right-3 z-40 flex h-[min(620px,calc(100vh-2rem))] flex-col overflow-hidden sm:bottom-5 sm:left-auto sm:right-5 sm:w-[410px] lg:bottom-6 lg:right-6"
   >
     <div class="flex items-center justify-between border-b border-slate-800 p-5">
       <div>

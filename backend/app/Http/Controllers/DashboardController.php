@@ -14,13 +14,15 @@ class DashboardController extends Controller
         $financialHealth = $financialHealthService->calculate($userId, $request->query('month'));
 
         $totalIncome = Transaction::where('user_id', $userId)
-            ->where('type', 'income')
+            ->whereRaw('LOWER(type) = ?', ['income'])
             ->sum('amount');
 
         $totalExpenses = Transaction::where('user_id', $userId)
-            ->where('type', 'expense')
+            ->whereRaw('LOWER(type) = ?', ['expense'])
             ->sum('amount');
 
+        $totalIncome = (float) $totalIncome;
+        $totalExpenses = (float) $totalExpenses;
         $balance = $totalIncome - $totalExpenses;
 
         $recentTransactions = Transaction::where('user_id', $userId)
@@ -31,6 +33,8 @@ class DashboardController extends Controller
         return response()->json([
             'total_income' => $totalIncome,
             'total_expenses' => $totalExpenses,
+            'income' => $totalIncome,
+            'expenses' => $totalExpenses,
             'balance' => $balance,
             'savings_score' => $financialHealth['savings_score'],
             'savings_status' => $financialHealth['savings_status'],

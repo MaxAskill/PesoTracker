@@ -676,11 +676,11 @@
   <!-- Chatbot -->
   <div
     v-if="showAssistant"
-    class="finance-panel fixed bottom-24 left-4 right-4 z-50 flex h-[min(600px,calc(100vh-8rem))] flex-col overflow-hidden sm:bottom-28 sm:left-auto sm:right-6 sm:w-[380px]"
+    class="finance-panel fixed bottom-24 left-4 right-4 z-50 flex h-[min(600px,calc(100vh-8rem))] min-h-0 flex-col overflow-hidden sm:bottom-28 sm:left-auto sm:right-6 sm:w-[380px]"
   >
   
     <!-- Header -->
-    <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+    <div class="flex shrink-0 items-center justify-between border-b border-slate-800 p-5">
       <div>
         <p class="text-emerald-400 text-sm font-semibold">
           AI Assistant
@@ -700,7 +700,7 @@
     </div>
   
     <!-- Body -->
-    <div ref="chatBody" class="flex-1 overflow-y-auto p-5">
+    <div ref="chatBody" class="min-h-0 flex-1 overflow-y-auto p-5">
     
       <!-- Greeting -->
       <div class="finance-surface mb-4 p-4">
@@ -720,7 +720,7 @@
           :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
         >
           <div
-            class="max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed"
+            class="h-auto max-w-[80%] whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-relaxed overflow-visible [word-break:break-word]"
             :class="
               message.role === 'user'
                 ? 'bg-emerald-500 text-white'
@@ -755,7 +755,7 @@
     <!-- Input -->
     <form
       @submit.prevent="sendAssistantMessage"
-      class="p-5 border-t border-slate-800 flex gap-3"
+      class="flex shrink-0 gap-3 border-t border-slate-800 p-5"
     >
       <input
         v-model="assistantInput"
@@ -1193,9 +1193,11 @@ const sendAssistantMessage = async () => {
       message: userMessage
     })
 
+    const assistantReply = response.data.reply ?? response.data.message ?? ''
+
     assistantMessages.value.push({
       role: 'assistant',
-      text: response.data.reply || response.data.message
+      text: String(assistantReply)
     })
 
   } catch (error) {

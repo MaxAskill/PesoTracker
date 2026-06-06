@@ -31,9 +31,9 @@
   >
   <div
     v-if="isOpen"
-    class="finance-panel fixed bottom-4 left-3 right-3 z-40 flex h-[min(620px,calc(100vh-2rem))] flex-col overflow-hidden sm:bottom-5 sm:left-auto sm:right-5 sm:w-[410px] lg:bottom-6 lg:right-6"
+    class="finance-panel fixed bottom-4 left-3 right-3 z-40 flex h-[min(620px,calc(100vh-2rem))] min-h-0 flex-col overflow-hidden sm:bottom-5 sm:left-auto sm:right-5 sm:w-[410px] lg:bottom-6 lg:right-6"
   >
-    <div class="flex items-center justify-between border-b border-slate-800 p-5">
+    <div class="flex shrink-0 items-center justify-between border-b border-slate-800 p-5">
       <div>
         <div class="flex items-center gap-2 text-sm font-semibold text-emerald-400">
           <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
@@ -52,7 +52,7 @@
       </button>
     </div>
 
-    <div ref="chatBody" class="flex-1 space-y-4 overflow-y-auto p-5">
+    <div ref="chatBody" class="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
       <div class="finance-surface p-4">
         <p class="text-sm leading-relaxed text-slate-300">
           Hi, I'm your PesoTracker Assistant. I can help you understand your spending, budget, and savings.
@@ -125,7 +125,7 @@
           :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
         >
           <div
-            class="max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed"
+            class="h-auto max-w-[82%] whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm leading-relaxed overflow-visible [word-break:break-word]"
             :class="message.role === 'user' ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-200'"
           >
             {{ message.text }}
@@ -151,7 +151,7 @@
       </div>
     </div>
 
-    <form class="flex gap-3 border-t border-slate-800 p-5" @submit.prevent="askQuestion(input)">
+    <form class="flex shrink-0 gap-3 border-t border-slate-800 p-5" @submit.prevent="askQuestion(input)">
       <input
         v-model="input"
         type="text"
@@ -288,9 +288,11 @@ const askQuestion = async (question) => {
       message: text
     })
 
+    const assistantReply = response.data.reply ?? response.data.message ?? ''
+
     messages.value.push({
       role: 'assistant',
-      text: response.data.reply || response.data.message
+      text: String(assistantReply)
     })
   } catch (error) {
     if (isCanceledRequest(error)) return

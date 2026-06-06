@@ -66,24 +66,68 @@ class AiFinanceContextService
             ->values();
 
         $goals = $this->savingsGoalsSummary($userId);
+        $summary = [
+            'total_income' => round($totalIncome, 2),
+            'total_expenses' => round($totalExpenses, 2),
+            'balance' => round($totalIncome - $totalExpenses, 2),
+            'transaction_count_this_month' => $monthlyTransactions->count(),
+        ];
+        $topExpenseCategories = $categorySpending
+            ->map(fn (float $amount, string $category) => [
+                'category' => $category,
+                'amount' => $amount,
+            ])
+            ->values();
 
         return [
+            'current_month' => $now->format('F Y'),
             'period' => $now->format('F Y'),
-            'summary' => [
-                'total_income' => round($totalIncome, 2),
-                'total_expenses' => round($totalExpenses, 2),
-                'balance' => round($totalIncome - $totalExpenses, 2),
-                'transaction_count_this_month' => $monthlyTransactions->count(),
-            ],
+            'income' => $summary['total_income'],
+            'expenses' => $summary['total_expenses'],
+            'balance' => $summary['balance'],
+            'summary' => $summary,
             'savings_score' => $this->savingsScore($userId, $month),
-            'top_expense_categories' => $categorySpending
-                ->map(fn (float $amount, string $category) => [
-                    'category' => $category,
-                    'amount' => $amount,
+            'top_categories' => $topExpenseCategories,
+            'top_expense_categories' => $topExpenseCategories,
+            'budget_status' => $this->budgetStatus($budgets),
+            'budgets' => $budgets,
+            'savings_progress' => $this->savingsProgress($goals),
+            'savings_goals' => $goals,
+        ];
+    }
+
+    private function budgetStatus(Collection $budgets): array
+    {
+        $overBudget = $budgets
+            ->filter(fn (array $budget) => $budget['is_over_budget'])
+            ->values();
+
+        return [
+            'has_budgets' => $budgets->isNotEmpty(),
+            'over_budget_count' => $overBudget->count(),
+            'over_budget_categories' => $overBudget
+                ->map(fn (array $budget) => [
+                    'category' => $budget['category'],
+                    'budgeted' => $budget['budgeted'],
+                    'spent' => $budget['spent'],
+                    'over_by' => round(abs($budget['remaining']), 2),
                 ])
                 ->values(),
-            'budgets' => $budgets,
-            'savings_goals' => $goals,
+        ];
+    }
+
+    private function savingsProgress(Collection $goals): array
+    {
+        return [
+            'has_savings_goals' => $goals->isNotEmpty(),
+            'goals' => $goals
+                ->map(fn (array $goal) => [
+                    'title' => $goal['title'],
+                    'target_amount' => $goal['target_amount'],
+                    'saved_amount' => $goal['saved_amount'],
+                    'progress_percent' => $goal['progress_percent'],
+                ])
+                ->values(),
         ];
     }
 

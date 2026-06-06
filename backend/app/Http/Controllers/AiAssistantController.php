@@ -145,6 +145,7 @@ class AiAssistantController extends Controller
         return response()->json([
             'message' => $reply,
             'reply' => $reply,
+            'answer' => $reply,
         ]);
     }
 

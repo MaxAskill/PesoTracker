@@ -1193,7 +1193,11 @@ const sendAssistantMessage = async () => {
       message: userMessage
     })
 
-    const assistantReply = response.data.reply ?? response.data.message ?? ''
+    if (import.meta.env.DEV) {
+      console.log('Smart Assistant API response:', response.data)
+    }
+
+    const assistantReply = response.data.message || response.data.reply || response.data.answer || ''
 
     assistantMessages.value.push({
       role: 'assistant',

@@ -47,8 +47,8 @@ class GeminiProvider implements AiProvider
                         ],
                     ],
                     'generationConfig' => [
-                        'temperature' => 0.2,
-                        'maxOutputTokens' => 500,
+                        'temperature' => 0.4,
+                        'maxOutputTokens' => 800,
                     ],
                 ]);
         } catch (ConnectionException $exception) {

@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\AiUsageLog;
+use App\Models\Budget;
+use App\Models\SavingsGoal;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +19,13 @@ class AiAssistantIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['ai.assistant_mode' => 'ai']);
+    }
+
     public function test_ai_assistant_requires_authentication(): void
     {
         $this->postJson('/api/ai/assistant', [
@@ -24,7 +33,7 @@ class AiAssistantIntegrationTest extends TestCase
         ])->assertUnauthorized();
     }
 
-    public function test_ai_assistant_returns_disabled_message_by_default(): void
+    public function test_ai_assistant_uses_template_mode_when_ai_is_disabled(): void
     {
         config(['ai.enabled' => false]);
 
@@ -32,9 +41,14 @@ class AiAssistantIntegrationTest extends TestCase
 
         $this->postJson('/api/ai/assistant', [
             'message' => 'Summarize my spending.',
+            'action' => 'spending_summary',
         ])
-            ->assertStatus(503)
-            ->assertJsonPath('message', 'AI Assistant is currently disabled.');
+            ->assertOk()
+            ->assertJsonPath('mode', 'template')
+            ->assertJson(fn ($json) => $json
+                ->where('reply', fn (string $reply) => str_contains($reply, 'Add income and expenses first'))
+                ->etc()
+            );
     }
 
     public function test_ai_assistant_is_rate_limited(): void
@@ -46,7 +60,7 @@ class AiAssistantIntegrationTest extends TestCase
         for ($index = 1; $index <= 5; $index++) {
             $this->postJson('/api/ai/assistant', [
                 'message' => "Request {$index}",
-            ])->assertStatus(503);
+            ])->assertOk();
         }
 
         $this->postJson('/api/ai/assistant', [
@@ -70,7 +84,7 @@ class AiAssistantIntegrationTest extends TestCase
             $this->withServerVariables(['REMOTE_ADDR' => "10.10.10.{$index}"])
                 ->postJson('/api/ai/assistant', [
                     'message' => "Request {$index}",
-                ])->assertStatus(503);
+                ])->assertOk();
         }
 
         Carbon::setTestNow(now()->addMinutes(2));
@@ -78,7 +92,7 @@ class AiAssistantIntegrationTest extends TestCase
         $this->withServerVariables(['REMOTE_ADDR' => '10.10.10.6'])
             ->postJson('/api/ai/assistant', [
                 'message' => 'Request 6',
-            ])->assertStatus(503);
+            ])->assertOk();
 
         Carbon::setTestNow(now()->addMinutes(2));
 
@@ -113,6 +127,123 @@ class AiAssistantIntegrationTest extends TestCase
             'provider' => 'gemini',
             'status' => 'missing_api_key',
         ]);
+    }
+
+    public function test_template_spending_summary_uses_authenticated_user_finance_data(): void
+    {
+        config([
+            'ai.enabled' => false,
+            'ai.assistant_mode' => 'template',
+        ]);
+
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        Sanctum::actingAs($user);
+        Http::fake();
+
+        Transaction::create([
+            'user_id' => $user->id,
+            'title' => 'Salary',
+            'type' => 'income',
+            'amount' => 48500,
+            'category' => 'Salary',
+            'transaction_date' => now()->toDateString(),
+        ]);
+
+        Transaction::create([
+            'user_id' => $user->id,
+            'title' => 'Groceries',
+            'type' => 'expense',
+            'amount' => 25350,
+            'category' => 'Food',
+            'transaction_date' => now()->toDateString(),
+        ]);
+
+        Transaction::create([
+            'user_id' => $otherUser->id,
+            'title' => 'Other user expense',
+            'type' => 'expense',
+            'amount' => 999999,
+            'category' => 'Private',
+            'transaction_date' => now()->toDateString(),
+        ]);
+
+        $this->postJson('/api/ai/assistant', [
+            'message' => 'Spending summary',
+            'action' => 'spending_summary',
+        ])
+            ->assertOk()
+            ->assertJsonPath('mode', 'template')
+            ->assertJson(fn ($json) => $json
+                ->where('reply', fn (string $reply) => str_contains($reply, '₱48,500.00')
+                    && str_contains($reply, '₱25,350.00')
+                    && str_contains($reply, '₱23,150.00')
+                    && str_contains($reply, '52%')
+                    && ! str_contains($reply, '999999'))
+                ->etc()
+            );
+
+        Http::assertNothingSent();
+    }
+
+    public function test_template_budget_warning_and_savings_progress_use_local_data(): void
+    {
+        config([
+            'ai.enabled' => false,
+            'ai.assistant_mode' => 'template',
+        ]);
+
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        Budget::create([
+            'user_id' => $user->id,
+            'category' => 'Food',
+            'amount' => 1000,
+            'month' => now()->format('Y-m'),
+        ]);
+
+        Transaction::create([
+            'user_id' => $user->id,
+            'title' => 'Food spend',
+            'type' => 'expense',
+            'amount' => 1200,
+            'category' => 'Food',
+            'transaction_date' => now()->toDateString(),
+        ]);
+
+        SavingsGoal::create([
+            'user_id' => $user->id,
+            'title' => 'Emergency Fund',
+            'target_amount' => 10000,
+            'saved_amount' => 7500,
+            'deadline' => now()->addMonths(6)->toDateString(),
+            'status' => 'active',
+        ]);
+
+        $this->postJson('/api/ai/assistant', [
+            'message' => 'Budget warning',
+            'action' => 'budget_warning',
+        ])
+            ->assertOk()
+            ->assertJson(fn ($json) => $json
+                ->where('reply', fn (string $reply) => str_contains($reply, 'Food')
+                    && str_contains($reply, '120%'))
+                ->etc()
+            );
+
+        $this->postJson('/api/ai/assistant', [
+            'message' => 'Savings progress',
+            'action' => 'savings_progress',
+        ])
+            ->assertOk()
+            ->assertJson(fn ($json) => $json
+                ->where('reply', fn (string $reply) => str_contains($reply, 'Emergency Fund')
+                    && str_contains($reply, '75%')
+                    && str_contains($reply, '₱7,500.00')
+                    && str_contains($reply, '₱10,000.00'))
+                ->etc()
+            );
     }
 
     public function test_ai_assistant_monthly_usage_limit_is_enforced(): void

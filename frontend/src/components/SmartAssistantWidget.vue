@@ -140,13 +140,13 @@
       <div v-if="questionChips.length" class="flex flex-wrap gap-2 pt-1">
         <button
           v-for="question in questionChips"
-          :key="question"
+          :key="question.action || question.label"
           type="button"
           class="rounded-xl bg-slate-800 px-3 py-2 text-left text-xs font-semibold text-slate-300 transition hover:bg-emerald-500 hover:text-slate-950"
           :disabled="askLoading"
-          @click="askQuestion(question)"
+          @click="askQuestion(question.label, question.action)"
         >
-          {{ question }}
+          {{ question.label }}
         </button>
       </div>
     </div>
@@ -203,6 +203,12 @@ const insightsError = ref('')
 const input = ref('')
 const messages = ref([])
 const chatBody = ref(null)
+const defaultQuickActions = [
+  { label: 'Spending summary', action: 'spending_summary' },
+  { label: 'Budget warning', action: 'budget_warning' },
+  { label: 'Savings progress', action: 'savings_progress' },
+  { label: 'Smart tips', action: 'smart_tips' }
+]
 
 const assistantData = ref({
   insights: [],
@@ -233,8 +239,11 @@ const insights = computed(() => assistantData.value.insights)
 const suggestedQuestions = computed(() => assistantData.value.suggested_questions)
 const questionChips = computed(() => {
   return suggestedQuestions.value.length
-    ? suggestedQuestions.value
-    : ['Spending summary', 'Budget warning', 'Savings progress', 'Smart tips']
+    ? suggestedQuestions.value.map((question) => ({
+        label: question,
+        action: actionForQuestion(question)
+      }))
+    : defaultQuickActions
 })
 
 const toggleAssistant = async () => {
@@ -267,7 +276,7 @@ if (import.meta.env.DEV) {
   )
 }
 
-const askQuestion = async (question) => {
+const askQuestion = async (question, action = null) => {
   if (!isAuthenticated.value) return
 
   const text = question.trim()
@@ -284,9 +293,13 @@ const askQuestion = async (question) => {
   await scrollToBottom()
 
   try {
-    const response = await api.post('/ai/assistant', {
-      message: text
-    })
+    const payload = { message: text }
+
+    if (action) {
+      payload.action = action
+    }
+
+    const response = await api.post('/ai/assistant', payload)
 
     if (import.meta.env.DEV) {
       console.log('Smart Assistant API response:', response.data)
@@ -316,6 +329,16 @@ const scrollToBottom = async () => {
   if (chatBody.value) {
     chatBody.value.scrollTop = chatBody.value.scrollHeight
   }
+}
+
+const actionForQuestion = (question) => {
+  const normalized = question.toLowerCase()
+
+  if (normalized.includes('budget')) return 'budget_warning'
+  if (normalized.includes('saving') || normalized.includes('goal')) return 'savings_progress'
+  if (normalized.includes('tip') || normalized.includes('advice')) return 'smart_tips'
+
+  return 'spending_summary'
 }
 
 const insightTone = (type) => {

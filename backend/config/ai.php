@@ -2,6 +2,7 @@
 
 return [
     'enabled' => env('AI_ENABLED', false),
+    'assistant_mode' => env('ASSISTANT_MODE', 'template'),
     'provider' => env('AI_PROVIDER', 'gemini'),
     'timeout' => (int) env('AI_TIMEOUT_SECONDS', 20),
     'daily_limit_per_user' => (int) env('AI_DAILY_LIMIT_PER_USER', 10),

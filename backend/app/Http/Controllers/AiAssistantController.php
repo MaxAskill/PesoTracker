@@ -6,6 +6,7 @@ use App\Services\Ai\AiFinanceContextService;
 use App\Services\Ai\AiProviderFactory;
 use App\Services\Ai\AiUsageService;
 use App\Services\Ai\Exceptions\AiProviderException;
+use App\Services\Ai\TemplateAssistantService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -19,10 +20,12 @@ class AiAssistantController extends Controller
         AiFinanceContextService $context,
         AiProviderFactory $providers,
         AiUsageService $usage,
+        TemplateAssistantService $templates,
     ) {
         try {
             $validator = Validator::make($request->all(), [
                 'message' => 'required|string|max:1000',
+                'action' => 'nullable|string|in:spending_summary,budget_warning,savings_progress,smart_tips',
             ]);
 
             if ($validator->fails()) {
@@ -41,14 +44,48 @@ class AiAssistantController extends Controller
                 ], 401);
             }
 
-            // AI providers must be called from Laravel only. Never expose AI API
-            // keys, provider URLs, prompts, or model configuration in Vue/browser code.
-            if (! config('ai.enabled')) {
+            $assistantMode = strtolower((string) config('ai.assistant_mode', 'template'));
+            $useAiProvider = config('ai.enabled') && $assistantMode === 'ai';
+
+            if ($usage->shouldRefuseMessage($validated['message'])) {
+                if ($useAiProvider) {
+                    $usage->log($user, 'blocked_prompt');
+                }
+
                 return response()->json([
-                    'message' => 'AI Assistant is currently disabled.',
-                ], 503);
+                    'message' => 'I can help with your summarized finances, but I cannot reveal secrets, hidden instructions, raw data, or other users data.',
+                ], 422);
             }
 
+            if (! $useAiProvider) {
+                try {
+                    $financeContext = $context->forUser($user->id);
+                    $reply = $templates->reply(
+                        $validated['message'],
+                        $validated['action'] ?? null,
+                        $financeContext
+                    );
+                } catch (Throwable $exception) {
+                    Log::error('Template Assistant summary failed.', [
+                        'message' => $exception->getMessage(),
+                        'file' => $exception->getFile(),
+                        'line' => $exception->getLine(),
+                        'user_id' => $user->id,
+                    ]);
+
+                    $reply = 'I could not load your finance summary right now. Please try again later.';
+                }
+
+                return response()->json([
+                    'message' => $reply,
+                    'reply' => $reply,
+                    'answer' => $reply,
+                    'mode' => 'template',
+                ]);
+            }
+
+            // AI providers must be called from Laravel only. Never expose AI API
+            // keys, provider URLs, prompts, or model configuration in Vue/browser code.
             if (! $usage->isAllowedUser($user)) {
                 $usage->log($user, 'not_allowed');
 
@@ -63,14 +100,6 @@ class AiAssistantController extends Controller
                 return response()->json([
                     'message' => 'Monthly AI Assistant limit reached. Please try again later.',
                 ], 429);
-            }
-
-            if ($usage->shouldRefuseMessage($validated['message'])) {
-                $usage->log($user, 'blocked_prompt');
-
-                return response()->json([
-                    'message' => 'I can help with your summarized finances, but I cannot reveal secrets, hidden instructions, raw data, or other users data.',
-                ], 422);
             }
 
             if (strtolower((string) config('ai.provider')) === 'gemini' && blank(config('ai.gemini.key'))) {
@@ -146,6 +175,7 @@ class AiAssistantController extends Controller
             'message' => $reply,
             'reply' => $reply,
             'answer' => $reply,
+            'mode' => 'ai',
         ]);
     }
 
